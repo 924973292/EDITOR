@@ -1,19 +1,5 @@
 from yacs.config import CfgNode as CN
 
-# -----------------------------------------------------------------------------
-# Convention about Training / Test specific parameters
-# -----------------------------------------------------------------------------
-# Whenever an argument can be either used for training or for testing, the
-# corresponding name will be post-fixed by a _TRAIN for a training parameter,
-# or _TEST for a test-specific parameter.
-# For example, the number of images during training will be
-# IMAGES_PER_BATCH_TRAIN, while the number of images for testing will be
-# IMAGES_PER_BATCH_TEST
-
-# -----------------------------------------------------------------------------
-# Config definition
-# -----------------------------------------------------------------------------
-
 _C = CN()
 
 _C.MODEL = CN()
@@ -26,14 +12,12 @@ _C.MODEL.NAME = 'resnet50'
 # Last stride of backbone
 _C.MODEL.LAST_STRIDE = 1
 # Path to pretrained model of backbone
-_C.MODEL.PRETRAIN_PATH = '../pth/market_resnet50_model_120_rank1_945.pth'
 _C.MODEL.PRETRAIN_PATH_R = '../pth/resnet152-394f9c45.pth'
 _C.MODEL.PRETRAIN_PATH_T = '../pth/vit_base.pth'
 
 _C.MODEL.ID_LOSS_TYPE = 'softmax'
 _C.MODEL.ID_LOSS_WEIGHT = 1.0
 _C.MODEL.TRIPLET_LOSS_WEIGHT = 1.0
-
 
 # Use ImageNet pretrained model to initialize backbone or use self trained model to initialize the whole model
 # Options: 'imagenet' or 'self'
@@ -48,10 +32,8 @@ _C.MODEL.METRIC_LOSS_TYPE = 'triplet'
 _C.MODEL.DIST_TRAIN = False
 # For example, if loss type is cross entropy loss + triplet loss + center loss
 # the setting should be: _C.MODEL.METRIC_LOSS_TYPE = 'triplet_center' and _C.MODEL.IF_WITH_CENTER = 'yes'
-
 # If train with label smooth, options: 'on', 'off'
 _C.MODEL.IF_LABELSMOOTH = 'on'
-
 
 # -----------------------------------------------------------------------------
 # INPUT
@@ -77,13 +59,7 @@ _C.MODEL.DROP_PATH = 0.1
 _C.MODEL.DROP_OUT = 0.0
 _C.MODEL.ATT_DROP_RATE = 0.0
 _C.MODEL.TRANSFORMER_TYPE = 'vit_base_patch16_224_TransReID'
-_C.MODEL.STRIDE_SIZE = [16, 16]
-# JPM Parameter
-_C.MODEL.JPM = False
-_C.MODEL.SHIFT_NUM = 5
-_C.MODEL.SHUFFLE_GROUP = 2
-_C.MODEL.DEVIDE_LENGTH = 4
-_C.MODEL.RE_ARRANGE = False
+_C.MODEL.STRIDE_SIZE = [12, 12]
 
 # SIE Parameter
 _C.MODEL.SIE_COE = 3.0
@@ -94,7 +70,7 @@ _C.MODEL.SIE_VIEW = False
 # -----------------------------------------------------------------------------
 _C.DATASETS = CN()
 # List of the dataset names for training, as present in paths_catalog.py
-_C.DATASETS.NAMES = ('market1501')
+_C.DATASETS.NAMES = ('msmt17')
 # Root directory where datasets should be used (and downloaded if not found)
 _C.DATASETS.ROOT_DIR = ('../data')
 
@@ -103,7 +79,7 @@ _C.DATASETS.ROOT_DIR = ('../data')
 # -----------------------------------------------------------------------------
 _C.DATALOADER = CN()
 # Number of data loading threads
-_C.DATALOADER.NUM_WORKERS = 24
+_C.DATALOADER.NUM_WORKERS = 15
 # Sampler for data loading
 _C.DATALOADER.SAMPLER = 'softmax_triplet'
 # Number of instance for one batch
@@ -116,9 +92,9 @@ _C.SOLVER = CN()
 # Name of optimizer
 _C.SOLVER.OPTIMIZER_NAME = "SGD"
 # Number of max epoches
-_C.SOLVER.MAX_EPOCHS = 180
+_C.SOLVER.MAX_EPOCHS = 120
 # Base learning rate
-_C.SOLVER.BASE_LR =0.008
+_C.SOLVER.BASE_LR = 0.005
 # Factor of learning bias
 _C.SOLVER.LARGE_FC_LR = False
 _C.SOLVER.BIAS_LR_FACTOR = 2
@@ -160,7 +136,7 @@ _C.SOLVER.COSINE_SCALE = 30
 _C.SOLVER.SEED = 1234
 _C.MODEL.NO_MARGIN = True
 # epoch number of saving checkpoints
-_C.SOLVER.CHECKPOINT_PERIOD = 180
+_C.SOLVER.CHECKPOINT_PERIOD = 120
 # iteration of display training log
 _C.SOLVER.LOG_PERIOD = 100
 # epoch number of validation
@@ -189,4 +165,4 @@ _C.TEST.FEAT_NORM = 'yes'
 # Misc options
 # ---------------------------------------------------------------------------- #
 # Path to checkpoint and saved log of trained model
-_C.OUTPUT_DIR = "./msmt_self"
+_C.OUTPUT_DIR = "./msmt_4"

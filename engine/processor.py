@@ -71,12 +71,7 @@ def do_train(cfg,
                 loss_5 = loss_fn(cls_score_3, global_feat_3, target, target_cam)
                 loss_6 = loss_fn(cls_score_4, global_feat_4, target, target_cam)
                 loss = loss_1 + loss_2 + loss_3 + loss_4 + loss_5 + loss_6
-                # cls_score_r, global_feat_r= model(
-                #     img,
-                #     label=target,
-                #     cam_label=target_cam,
-                #     view_label=target_view)
-                # loss = loss_fn(cls_score_r, global_feat_r, target, target_cam)
+
             scaler.scale(loss).backward()
 
             scaler.step(optimizer)
@@ -127,7 +122,7 @@ def do_train(cfg,
                             img = img.to(device)
                             camids = camids.to(device)
                             target_view = target_view.to(device)
-                            feat = model(img,cam_label=camids, view_label=target_view)
+                            feat = model(img, cam_label=camids, view_label=target_view)
                             evaluator.update((feat, vid, camid))
                     cmc, mAP, _, _, _, _, _ = evaluator.compute()
                     logger.info("Validation Results - Epoch: {}".format(epoch))

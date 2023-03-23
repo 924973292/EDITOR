@@ -1,8 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="root@123.125.240.150:54997 password (2)" remoteFilesAllowedToDisappearOnAutoupload="false">
+  <component name="PublishConfigData" autoUpload="Always" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
+    <option name="confirmBeforeUploading" value="false" />
     <serverData>
       <paths name="root@123.125.240.150:43605 password (2)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/root/reid" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="root@123.125.240.150:43605 password (3)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/root/reid" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="root@123.125.240.150:43605 password (4)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/root/reid" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="root@123.125.240.150:43605 password (5)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/root/reid" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="root@123.125.240.150:43605 password (6)">
         <serverdata>
           <mappings>
             <mapping deploy="/root/reid" local="$PROJECT_DIR$" />
@@ -13,6 +42,69 @@
         <serverdata>
           <mappings>
             <mapping deploy="/root/reid" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="root@123.125.240.150:54997 password (3)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/root/reid" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="root@222.187.226.110:38652 password">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/root/reid" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="root@region-41.seetacloud.com:36666 password">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/root/reid" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="root@region-8.seetacloud.com:34879 password">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/root/reid" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="root@region-8.seetacloud.com:51452 password (2)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/root/reid" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="root@region-8.seetacloud.com:51452 password (3)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/root/reid" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="zpp1@32ba9619f80c8616.natapp.cc:3090 password">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/zpp1/Desktop/YHY_idea" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="zpp1@32ba9619f80c8616.natapp.cc:3090 password (2)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/zpp1/PycharmProjects/YHY" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="zpp1@32ba9619f80c8616.natapp.cc:3090 password (3)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/zpp1/PycharmProjects/YHY" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>

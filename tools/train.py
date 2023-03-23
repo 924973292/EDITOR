@@ -25,7 +25,7 @@ def set_seed(seed):
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description="ReID Baseline Training")
+    parser = argparse.ArgumentParser(description="FusionReID Training")
     parser.add_argument(
         "--config_file", default="", help="path to config file", type=str
     )
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     if output_dir and not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    logger = setup_logger("transreid", output_dir, if_train=True)
+    logger = setup_logger("FusionReID", output_dir, if_train=True)
     logger.info("Saving model in the path :{}".format(cfg.OUTPUT_DIR))
     logger.info(args)
 
@@ -73,11 +73,6 @@ if __name__ == '__main__':
     optimizer, optimizer_center = make_optimizer(cfg, model, center_criterion)
 
     scheduler = create_scheduler(cfg, optimizer)
-    # print("simple test")
-    # do_inference(cfg,
-    #              model,
-    #              val_loader,
-    #              num_query)
     do_train(
         cfg,
         model,

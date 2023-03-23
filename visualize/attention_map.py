@@ -1,33 +1,114 @@
-import cv2
-import numpy as np
-import skimage
 import os
-def resize(img):
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-    cur_ratio = img.shape[1] / float(img.shape[0])
-    target_ratio = 128 / float(32)
-    mask_h = 32
-    mask_w = 128
-    img = np.array(img)
-    if cur_ratio > target_ratio:
-        cur_h = 32
-        cur_w = 128
-    else:
-        cur_h = 32
-        cur_w = int(32 * cur_ratio)
-    img = cv2.resize(img, (cur_w, cur_h))
-    start_y = (mask_h - img.shape[0]) // 2
-    start_x = (mask_w - img.shape[1]) // 2
-    mask = np.zeros([mask_h, mask_w, 3]).astype(np.uint8)
-    mask[start_y: start_y + img.shape[0], start_x: start_x + img.shape[1], :] = img
-    return mask
+import torch
+import numpy as np
+import math
+from functools import partial
+import torch
+import torch.nn as nn
 
-img = skimage.io.imread(os.path.join(img_path, img_name))
-img_new = resize(img)
-amap = cv2.cvtColor(skimage.io.imread(os.path.join(path, att_map)), cv2.COLOR_RGB2BGR)
-new_map = cv2.resize(amap, (img_new.shape[1], img_new.shape[0]))
-normed_mask = new_map / np.max(new_map)
-normed_mask = np.uint8(255 * normed_mask)
-normed_mask = cv2.applyColorMap(normed_mask, cv2.COLORMAP_JET)
-normed_mask = cv2.addWeighted(img_new, 0.6, normed_mask, 1.0, 0)
-skimage.io.imsave(os.path.join(res_dir, m), cv2.cvtColor(normed_mask, cv2.COLOR_BGR2RGB))
+import ipywidgets as widgets
+import io
+from PIL import Image
+from torchvision import transforms
+import matplotlib.pyplot as plt
+import numpy as np
+from torch import nn
+
+
+def transform(img, img_size):
+    img = transforms.Resize(img_size)(img)
+    img = transforms.ToTensor()(img)
+    return img
+
+
+def visualize_predict(model, img, img_size, patch_size, device):
+    img_pre = transform(img, img_size)
+    attention = visualize_attention(model, img_pre, patch_size, device)
+    plot_attention(img, attention)
+
+
+def visualize_attention(model, img, patch_size, device):
+    # make the image divisible by the patch size
+    w, h = img.shape[1] - img.shape[1] % patch_size, img.shape[2] - \
+           img.shape[2] % patch_size
+    img = img[:, :w, :h].unsqueeze(0)
+
+    w_featmap = img.shape[-2] // patch_size
+    h_featmap = img.shape[-1] // patch_size
+
+    attentions = model.get_last_selfattention(img.to(device))
+
+    nh = attentions.shape[1]  # number of head
+
+    # keep only the output patch attention
+    attentions = attentions[0, :, 0, 1:].reshape(nh, -1)
+
+    attentions = attentions.reshape(nh, w_featmap, h_featmap)
+    attentions = nn.functional.interpolate(attentions.unsqueeze(
+        0), scale_factor=patch_size, mode="nearest")[0].cpu().numpy()
+
+    return attentions
+
+
+def plot_attention(img, attention):
+    n_heads = attention.shape[0]
+
+    plt.figure(figsize=(10, 10))
+    text = ["Original Image", "Head Mean"]
+    for i, fig in enumerate([img, np.mean(attention, 0)]):
+        plt.subplot(1, 2, i + 1)
+        plt.imshow(fig, cmap='inferno')
+        plt.title(text[i])
+    plt.show()
+
+    plt.figure(figsize=(10, 10))
+    for i in range(n_heads):
+        plt.subplot(n_heads // 3, 3, i + 1)
+        plt.imshow(attention[i], cmap='inferno')
+        plt.title(f"Head n: {i + 1}")
+    plt.tight_layout()
+    plt.show()
+
+
+class Loader(object):
+    def __init__(self):
+        self.uploader = widgets.FileUpload(accept='image/*', multiple=False)
+        self._start()
+
+    def _start(self):
+        display(self.uploader)
+
+    def getLastImage(self):
+        try:
+            for uploaded_filename in self.uploader.value:
+                uploaded_filename = uploaded_filename
+            img = Image.open(io.BytesIO(
+                bytes(self.uploader.value[uploaded_filename]['content'])))
+
+            return img
+        except:
+            return None
+
+    def saveImage(self, path):
+        with open(path, 'wb') as output_file:
+            for uploaded_filename in self.uploader.value:
+                content = self.uploader.value[uploaded_filename]['content']
+                output_file.write(content)
+
+
+device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+if device.type == "cuda":
+    torch.cuda.set_device(1)
+
+name_model = 'vit_small'
+patch_size = 8
+
+model = VitGenerator(name_model, patch_size,
+                     device, evaluate=True, random=False, verbose=True)
+
+# Visualizing Dog Image
+path = '/content/corgi_image.jpg'
+img = Image.open(path)
+factor_reduce = 2
+img_size = tuple(np.array(img.size[::-1]) // factor_reduce)
+visualize_predict(model, img, img_size, patch_size, device)

@@ -97,25 +97,17 @@ class Cross_item(nn.Module):
 
 class Cross_base(nn.Module):
 
-    def __init__(self, embed_dim=768, choice=True):
+    def __init__(self, embed_dim=768):
         super().__init__()
-        self.FA = choice
-        if self.FA:
-            self.sa = fea_self(embed_dim=embed_dim)
-            self.res_q = Cross_item(embed_dim=embed_dim)
-            self.former_q = Cross_item(embed_dim=embed_dim)
-        else:
-            self.sa = fea_self(embed_dim=embed_dim)
+        self.sa = fea_self(embed_dim=embed_dim)
+        self.res_q = Cross_item(embed_dim=embed_dim)
+        self.former_q = Cross_item(embed_dim=embed_dim)
 
     def forward(self, res, former):
-        if self.FA:
-            res = self.sa(res)
-            former = self.sa(former)
-            cls_q = self.res_q(res[:, 0, :], former[:, 1:, :])
-            cls_f = self.former_q(former[:, 0, :], res[:, 1:, :])
-        else:
-            res = self.sa(res)
-            former = self.sa(former)
+        res = self.sa(res)
+        former = self.sa(former)
+        cls_q = self.res_q(res[:, 0, :], former[:, 1:, :])
+        cls_f = self.former_q(former[:, 0, :], res[:, 1:, :])
         return cls_q, cls_f
 
 

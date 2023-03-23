@@ -154,7 +154,7 @@ class Attention(nn.Module):
         self.proj = nn.Linear(dim, dim)
         self.proj_drop = nn.Dropout(proj_drop)
 
-    def forward(self, x):
+    def forward(self, x, get_attn=False):
         B, N, C = x.shape
         qkv = self.qkv(x).reshape(B, N, 3, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
         q, k, v = qkv[0], qkv[1], qkv[2]  # make torchscript happy (cannot use tensor as tuple)
@@ -162,7 +162,8 @@ class Attention(nn.Module):
         attn = (q @ k.transpose(-2, -1)) * self.scale
         attn = attn.softmax(dim=-1)
         attn = self.attn_drop(attn)
-
+        # if get_attn:
+        #     return attn
         x = (attn @ v).transpose(1, 2).reshape(B, N, C)
         x = self.proj(x)
         x = self.proj_drop(x)
@@ -183,9 +184,12 @@ class Block(nn.Module):
         mlp_hidden_dim = int(dim * mlp_ratio)
         self.mlp = Mlp(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop)
 
-    def forward(self, x):
-        x = x + self.drop_path(self.attn(self.norm1(x)))
-        x = x + self.drop_path(self.mlp(self.norm2(x)))
+    def forward(self, x, get_att=False):
+        if get_att:
+            return self.attn(self.norm1(x), get_att=get_att)
+        else:
+            x = x + self.drop_path(self.attn(self.norm1(x)))
+            x = x + self.drop_path(self.mlp(self.norm2(x)))
         return x
 
 
@@ -296,7 +300,7 @@ class PatchEmbed_overlap(nn.Module):
         return x
 
 
-class TransReID(nn.Module):
+class Trans(nn.Module):
     """ Transformer-based Object Re-Identification
     """
 
@@ -357,7 +361,7 @@ class TransReID(nn.Module):
         self.norm = norm_layer(embed_dim)
 
         # Classifier head
-        # self.fc = nn.Linear(embed_dim, num_classes) if num_classes > 0 else nn.Identity()
+        self.fc = nn.Linear(embed_dim, num_classes) if num_classes > 0 else nn.Identity()
         trunc_normal_(self.cls_token, std=.02)
         trunc_normal_(self.pos_embed, std=.02)
 
@@ -465,9 +469,9 @@ def resize_pos_embed(posemb, posemb_new, hight, width):
     return posemb
 
 
-def vit_base_patch16_224_TransReID(img_size=(256, 128), stride_size=16, drop_rate=0.0, attn_drop_rate=0.0,
-                                   drop_path_rate=0.1, camera=0, view=0, local_feature=False, sie_xishu=1.5, **kwargs):
-    model = TransReID(
+def vit_base_patch16_224_Trans(img_size=(256, 128), stride_size=16, drop_rate=0.0, attn_drop_rate=0.0,
+                               drop_path_rate=0.1, camera=0, view=0, local_feature=False, sie_xishu=1.5, **kwargs):
+    model = Trans(
         img_size=img_size, patch_size=16, stride_size=stride_size, embed_dim=768, depth=12, num_heads=12, mlp_ratio=4,
         qkv_bias=True, \
         camera=camera, view=view, drop_path_rate=drop_path_rate, drop_rate=drop_rate, attn_drop_rate=attn_drop_rate,
@@ -476,10 +480,11 @@ def vit_base_patch16_224_TransReID(img_size=(256, 128), stride_size=16, drop_rat
     return model
 
 
-def vit_small_patch16_224_TransReID(img_size=(256, 128), stride_size=16, drop_rate=0., attn_drop_rate=0.,
-                                    drop_path_rate=0.1, camera=0, view=0, local_feature=False, sie_xishu=1.5, **kwargs):
+def vit_small_patch16_224_Trans(img_size=(256, 128), stride_size=16, drop_rate=0., attn_drop_rate=0.,
+                                drop_path_rate=0.1, camera=0, view=0, local_feature=False, sie_xishu=1.5,
+                                **kwargs):
     kwargs.setdefault('qk_scale', 768 ** -0.5)
-    model = TransReID(
+    model = Trans(
         img_size=img_size, patch_size=16, stride_size=stride_size, embed_dim=768, depth=8, num_heads=8, mlp_ratio=3.,
         qkv_bias=False, drop_path_rate=drop_path_rate, \
         camera=camera, view=view, drop_rate=drop_rate, attn_drop_rate=attn_drop_rate,
@@ -488,10 +493,10 @@ def vit_small_patch16_224_TransReID(img_size=(256, 128), stride_size=16, drop_ra
     return model
 
 
-def deit_small_patch16_224_TransReID(img_size=(256, 128), stride_size=16, drop_path_rate=0.1, drop_rate=0.0,
-                                     attn_drop_rate=0.0, camera=0, view=0, local_feature=False, sie_xishu=1.5,
-                                     **kwargs):
-    model = TransReID(
+def deit_small_patch16_224_Trans(img_size=(256, 128), stride_size=16, drop_path_rate=0.1, drop_rate=0.0,
+                                 attn_drop_rate=0.0, camera=0, view=0, local_feature=False, sie_xishu=1.5,
+                                 **kwargs):
+    model = Trans(
         img_size=img_size, patch_size=16, stride_size=stride_size, embed_dim=384, depth=12, num_heads=6, mlp_ratio=4,
         qkv_bias=True,
         drop_path_rate=drop_path_rate, drop_rate=drop_rate, attn_drop_rate=attn_drop_rate, camera=camera, view=view,

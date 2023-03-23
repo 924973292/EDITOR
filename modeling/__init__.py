@@ -1,1 +1,1 @@
-from .make_model_test import make_model
+from .make_model import make_model
