@@ -3,7 +3,7 @@ import torch.nn as nn
 from modeling.backbones.resnet import ResNet, Bottleneck
 from modeling.backbones.vit_pytorch import vit_base_patch16_224, vit_small_patch16_224, \
     deit_small_patch16_224
-from modeling.fusion_part.fusion import Self_Reflection_Module
+from modeling.fusion_part.fusion import Heterogenous_Transmission_Module
 import torch.nn.functional as F
 from modeling.backbones.swin import swin_base_patch4_win8
 from modeling.backbones.ResTV2 import restv2_tiny, restv2_small, restv2_base, restv2_large
@@ -267,7 +267,7 @@ class Branch_new(nn.Module):
         self.former_LRU = LocalRefinementUnits(dim=self.dim_l, out_dim=self.mix_dim)
         self.gap_f = GeM()
         self.gap_r = GeM()
-        self.mix = Self_Reflection_Module(depth=self.srm_layer, embed_dim=self.mix_dim)
+        self.mix = Heterogenous_Transmission_Module(depth=self.srm_layer, embed_dim=self.mix_dim)
         self.neck = cfg.MODEL.NECK
         self.neck_feat = cfg.TEST.NECK_FEAT
         self.ID_LOSS_TYPE = cfg.MODEL.ID_LOSS_TYPE

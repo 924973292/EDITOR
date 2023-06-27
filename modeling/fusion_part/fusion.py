@@ -140,8 +140,7 @@ class Reflection_item(nn.Module):
         return cls_q, cls_f
 
 
-class Self_Reflection_Module(nn.Module):
-
+class Heterogenous_Transmission_Module(nn.Module):
     def __init__(self, embed_dim=768, depth=6):
         super().__init__()
         self.mix_dim = embed_dim
