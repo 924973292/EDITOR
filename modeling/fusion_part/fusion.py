@@ -3,7 +3,7 @@ import torch.nn as nn
 from modeling.backbones.vit_pytorch import Block, DropPath, Mlp
 
 
-class fea_self(nn.Module):
+class Shared_Encoding_Unit(nn.Module):
     def __init__(self, embed_dim=768,
                  depth=1,
                  num_heads=12, mlp_ratio=4., qkv_bias=False, qk_scale=None, drop_rate=0., attn_drop_rate=0., camera=0,
@@ -75,7 +75,7 @@ class Block_mix(nn.Module):
         return cls
 
 
-class Cross_item(nn.Module):
+class Mutual_Fsuion_Unit(nn.Module):
 
     def __init__(self, embed_dim=768,
                  depth=1,
@@ -95,28 +95,57 @@ class Cross_item(nn.Module):
         return cls
 
 
-class Cross_base(nn.Module):
+class Reflection_item(nn.Module):
 
-    def __init__(self, embed_dim=768):
+    def __init__(self, embed_dim=768,mode=0):
         super().__init__()
-        self.sa = fea_self(embed_dim=embed_dim)
-        self.res_q = Cross_item(embed_dim=embed_dim)
-        self.former_q = Cross_item(embed_dim=embed_dim)
+        self.mode = mode
+        if self.mode == 0:
+            self.sa = Shared_Encoding_Unit(embed_dim=embed_dim)
+            self.res_q = Mutual_Fsuion_Unit(embed_dim=embed_dim)
+            self.former_q = Mutual_Fsuion_Unit(embed_dim=embed_dim)
+        elif self.mode ==1:
+            self.sa = Shared_Encoding_Unit(embed_dim=embed_dim)
+        elif self.mode ==2:
+            self.res_q = Mutual_Fsuion_Unit(embed_dim=embed_dim)
+            self.former_q = Mutual_Fsuion_Unit(embed_dim=embed_dim)
+        elif self.mode == 3:
+            self.sa = Shared_Encoding_Unit(embed_dim=embed_dim)
+            self.res_q = Mutual_Fsuion_Unit(embed_dim=embed_dim)
+            self.former_q = Mutual_Fsuion_Unit(embed_dim=embed_dim)
 
     def forward(self, res, former):
-        res = self.sa(res)
-        former = self.sa(former)
-        cls_q = self.res_q(res[:, 0, :], former[:, 1:, :])
-        cls_f = self.former_q(former[:, 0, :], res[:, 1:, :])
+        if self.mode == 0:
+            res = self.sa(res)
+            former = self.sa(former)
+            cls_q = self.res_q(res[:, 0, :], former[:, 1:, :])
+            cls_f = self.former_q(former[:, 0, :], res[:, 1:, :])
+        elif self.mode == 1:
+            res = self.sa(res)
+            former = self.sa(former)
+            cls_q = res[:, 0, :].unsqueeze(1)
+            cls_f = former[:, 0, :].unsqueeze(1)
+        elif self.mode == 2:
+            cls_q = self.res_q(res[:, 0, :], former[:, 1:, :])
+            cls_f = self.former_q(former[:, 0, :], res[:, 1:, :])
+        elif self.mode == 3:
+            cls_q = self.res_q(res[:, 0, :], former[:, 1:, :])
+            cls_f = self.former_q(former[:, 0, :], res[:, 1:, :])
+            res = torch.cat([cls_q,res[:, 1:, :]],dim=-2)
+            former = torch.cat([cls_f,former[:, 1:, :]],dim=-2)
+            res = self.sa(res)
+            former = self.sa(former)
+            cls_q = res[:, 0, :].unsqueeze(1)
+            cls_f = former[:, 0, :].unsqueeze(1)
         return cls_q, cls_f
 
 
-class Cross_simple(nn.Module):
+class Self_Reflection_Module(nn.Module):
 
     def __init__(self, embed_dim=768, depth=6):
         super().__init__()
         self.mix_dim = embed_dim
-        self.blocks = nn.ModuleList([Cross_base(embed_dim=embed_dim) for i in range(depth)])
+        self.blocks = nn.ModuleList([Reflection_item(embed_dim=embed_dim) for i in range(depth)])
 
     def forward(self, res, former, fea_1, fea_2):
         for blk in self.blocks:

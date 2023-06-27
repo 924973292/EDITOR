@@ -6,7 +6,6 @@ from modeling import make_model
 from engine.processor import do_inference
 from utils.logger import setup_logger
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="FusionReID Testing")
     parser.add_argument(
@@ -16,8 +15,6 @@ if __name__ == "__main__":
                         nargs=argparse.REMAINDER)
 
     args = parser.parse_args()
-
-
 
     if args.config_file != "":
         cfg.merge_from_file(args.config_file)
@@ -42,28 +39,7 @@ if __name__ == "__main__":
 
     train_loader, train_loader_normal, val_loader, num_query, num_classes, camera_num, view_num = make_dataloader(cfg)
 
-    model = make_model(cfg, num_class=num_classes, camera_num=camera_num, view_num = view_num)
-    model.load_param("../msmt_4/resnet50_240.pth")
+    model = make_model(cfg, num_class=num_classes, camera_num=camera_num, view_num=view_num)
+    model.load_param("/15127306268/wyh/UIS/ms_r5_vb_180(ms_layer2)/resnet50_180.pth")
 
-    if cfg.DATASETS.NAMES == 'VehicleID':
-        for trial in range(10):
-            train_loader, train_loader_normal, val_loader, num_query, num_classes, camera_num, view_num = make_dataloader(cfg)
-            rank_1, rank5 = do_inference(cfg,
-                 model,
-                 val_loader,
-                 num_query)
-            if trial == 0:
-                all_rank_1 = rank_1
-                all_rank_5 = rank5
-            else:
-                all_rank_1 = all_rank_1 + rank_1
-                all_rank_5 = all_rank_5 + rank5
-
-            logger.info("rank_1:{}, rank_5 {} : trial : {}".format(rank_1, rank5, trial))
-        logger.info("sum_rank_1:{:.1%}, sum_rank_5 {:.1%}".format(all_rank_1.sum()/10.0, all_rank_5.sum()/10.0))
-    else:
-       do_inference(cfg,
-                 model,
-                 val_loader,
-                 num_query)
-
+    do_inference(cfg,model,val_loader,num_query)

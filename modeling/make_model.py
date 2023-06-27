@@ -1,12 +1,14 @@
 import torch
 import torch.nn as nn
-from .backbones.resnet import ResNet, Bottleneck
-from .backbones.vit_pytorch import vit_base_patch16_224_Trans, vit_small_patch16_224_Trans, \
-    deit_small_patch16_224_Trans
-from fusion_part.fusion import Cross_simple
+from modeling.backbones.resnet import ResNet, Bottleneck
+from modeling.backbones.vit_pytorch import vit_base_patch16_224, vit_small_patch16_224, \
+    deit_small_patch16_224
+from modeling.fusion_part.fusion import Self_Reflection_Module
 import torch.nn.functional as F
-
-
+from modeling.backbones.swin import swin_base_patch4_win8
+from modeling.backbones.ResTV2 import restv2_tiny, restv2_small, restv2_base, restv2_large
+from modeling.backbones.edgeViT import edgevit_s
+from modeling.backbones.t2tvit import t2t_vit_t_24,t2t_vit_t_14
 def weights_init_kaiming(m):
     classname = m.__class__.__name__
     if classname.find('Linear') != -1:
@@ -49,19 +51,29 @@ class GeM(nn.Module):
 
 
 class build_resnet(nn.Module):
-    def __init__(self, num_classes, cfg, mode=1):
+    def __init__(self, num_classes, cfg):
         super(build_resnet, self).__init__()
         last_stride = cfg.MODEL.LAST_STRIDE
         model_path = cfg.MODEL.PRETRAIN_PATH_R
-        self.mode = mode
+        self.mode = cfg.MODEL.TRANS_USE
         pretrain_choice = cfg.MODEL.PRETRAIN_CHOICE
         self.neck = cfg.MODEL.NECK
         self.neck_feat = cfg.TEST.NECK_FEAT
 
         self.in_planes = 2048
-        self.base = ResNet(last_stride=last_stride,
-                           block=Bottleneck,
-                           layers=[3, 4, 6, 3])
+        self.pattern = cfg.MODEL.RES_MODE
+        if self.pattern == 1:
+            self.base = ResNet(last_stride=last_stride,
+                               block=Bottleneck,
+                               layers=[3, 4, 6, 3])
+        elif self.pattern == 2:
+            self.base = ResNet(last_stride=last_stride,
+                               block=Bottleneck,
+                               layers=[3, 4, 23, 3])
+        elif self.pattern == 3:
+            self.base = ResNet(last_stride=last_stride,
+                               block=Bottleneck,
+                               layers=[3, 8, 36, 3])
 
         if pretrain_choice == 'imagenet':
             self.base.load_param(model_path)
@@ -122,15 +134,20 @@ class build_resnet(nn.Module):
 
 
 class build_transformer(nn.Module):
-    def __init__(self, num_classes, cfg, camera_num, view_num, factory, mode=1):
+    def __init__(self, num_classes, cfg, camera_num, view_num, factory):
         super(build_transformer, self).__init__()
         model_path = cfg.MODEL.PRETRAIN_PATH_T
-        self.mode = mode
+        self.mode = cfg.MODEL.RES_USE
         pretrain_choice = cfg.MODEL.PRETRAIN_CHOICE
         self.neck = cfg.MODEL.NECK
         self.neck_feat = cfg.TEST.NECK_FEAT
         self.in_planes = 768
-
+        if 't2t' in cfg.MODEL.TRANSFORMER_TYPE:
+            self.in_planes = 512
+        if 'edge' in cfg.MODEL.TRANSFORMER_TYPE or cfg.MODEL.TRANSFORMER_TYPE == 'deit_small_patch16_224':
+            self.in_planes = 384
+        if '14' in cfg.MODEL.TRANSFORMER_TYPE:
+            self.in_planes = 384
         print('using Transformer_type: {} as a backbone'.format(cfg.MODEL.TRANSFORMER_TYPE))
 
         if cfg.MODEL.SIE_CAMERA:
@@ -143,13 +160,13 @@ class build_transformer(nn.Module):
             view_num = 0
 
         self.base = factory[cfg.MODEL.TRANSFORMER_TYPE](img_size=cfg.INPUT.SIZE_TRAIN, sie_xishu=cfg.MODEL.SIE_COE,
+                                                        num_classes=num_classes,
                                                         camera=camera_num, view=view_num,
                                                         stride_size=cfg.MODEL.STRIDE_SIZE,
                                                         drop_path_rate=cfg.MODEL.DROP_PATH,
                                                         drop_rate=cfg.MODEL.DROP_OUT,
                                                         attn_drop_rate=cfg.MODEL.ATT_DROP_RATE)
-        if cfg.MODEL.TRANSFORMER_TYPE == 'deit_small_patch16_224':
-            self.in_planes = 384
+
         if pretrain_choice == 'imagenet':
             self.base.load_param(model_path)
             print('Loading pretrained ImageNet model......from {}'.format(model_path))
@@ -164,7 +181,7 @@ class build_transformer(nn.Module):
         self.bottleneck.bias.requires_grad_(False)
         self.bottleneck.apply(weights_init_kaiming)
 
-    def forward(self, x, label=None, cam_label=None, view_label=None):
+    def forward(self, x, label=None, cam_label=0, view_label=None):
         mid_fea = self.base(x, cam_label=cam_label, view_label=view_label)
         global_feat = mid_fea[:, 0]
         mid_fea_f = mid_fea[:, 1:, :]
@@ -238,45 +255,58 @@ class Branch_new(nn.Module):
         self.camera = camera_num
         self.view = view_num
 
-        self.mix_dim = 768
-
-        self.mid = self.mix_dim
+        self.mix_dim = cfg.MODEL.MIX_DIM
+        self.srm_layer = cfg.MODEL.SRM_LAYER
         self.res_LRU = LocalRefinementUnits(dim=2048, out_dim=self.mix_dim)
-        self.former_LRU = LocalRefinementUnits(dim=768, out_dim=self.mix_dim)
+        if 'swin' in cfg.MODEL.TRANSFORMER_TYPE or 'large' in cfg.MODEL.TRANSFORMER_TYPE:
+            self.dim_l = 1024
+        elif '14' in cfg.MODEL.TRANSFORMER_TYPE:
+            self.dim_l = 384
+        else:
+            self.dim_l = 512
+        self.former_LRU = LocalRefinementUnits(dim=self.dim_l, out_dim=self.mix_dim)
         self.gap_f = GeM()
         self.gap_r = GeM()
-        self.mix = Cross_simple(depth=2, embed_dim=self.mix_dim)
+        self.mix = Self_Reflection_Module(depth=self.srm_layer, embed_dim=self.mix_dim)
         self.neck = cfg.MODEL.NECK
         self.neck_feat = cfg.TEST.NECK_FEAT
         self.ID_LOSS_TYPE = cfg.MODEL.ID_LOSS_TYPE
-
-        self.classifier_1 = nn.Linear(self.mid, self.num_classes, bias=False)
+        if 'swin' in cfg.MODEL.TRANSFORMER_TYPE or 'large' in cfg.MODEL.TRANSFORMER_TYPE or 't2t' in cfg.MODEL.TRANSFORMER_TYPE:
+            self.patch_num = (512,16,8)
+        elif 'edge' in cfg.MODEL.TRANSFORMER_TYPE:
+            self.patch_num = (384,8,8)
+        else:
+            self.patch_num = (768,21,10)
+        if '14' in cfg.MODEL.TRANSFORMER_TYPE:
+            self.patch_num = (384,16,8)
+        self.classifier_1 = nn.Linear(self.mix_dim, self.num_classes, bias=False)
         self.classifier_1.apply(weights_init_classifier)
 
-        self.bottleneck_1 = nn.BatchNorm1d(self.mid)
+        self.bottleneck_1 = nn.BatchNorm1d(self.mix_dim)
         self.bottleneck_1.bias.requires_grad_(False)
         self.bottleneck_1.apply(weights_init_kaiming)
 
-        self.classifier_2 = nn.Linear(self.mid, self.num_classes, bias=False)
+        self.classifier_2 = nn.Linear(self.mix_dim, self.num_classes, bias=False)
         self.classifier_2.apply(weights_init_classifier)
 
-        self.bottleneck_2 = nn.BatchNorm1d(self.mid)
+        self.bottleneck_2 = nn.BatchNorm1d(self.mix_dim)
         self.bottleneck_2.bias.requires_grad_(False)
         self.bottleneck_2.apply(weights_init_kaiming)
 
-        self.classifier_3 = nn.Linear(self.mid, self.num_classes, bias=False)
+        self.classifier_3 = nn.Linear(self.mix_dim, self.num_classes, bias=False)
         self.classifier_3.apply(weights_init_classifier)
 
-        self.bottleneck_3 = nn.BatchNorm1d(self.mid)
+        self.bottleneck_3 = nn.BatchNorm1d(self.mix_dim)
         self.bottleneck_3.bias.requires_grad_(False)
         self.bottleneck_3.apply(weights_init_kaiming)
 
-        self.classifier_4 = nn.Linear(self.mid, self.num_classes, bias=False)
+        self.classifier_4 = nn.Linear(self.mix_dim, self.num_classes, bias=False)
         self.classifier_4.apply(weights_init_classifier)
 
-        self.bottleneck_4 = nn.BatchNorm1d(self.mid)
+        self.bottleneck_4 = nn.BatchNorm1d(self.mix_dim)
         self.bottleneck_4.bias.requires_grad_(False)
         self.bottleneck_4.apply(weights_init_kaiming)
+        self.test_feat = cfg.TEST.FEAT
 
     def load_param(self, trained_path):
         param_dict = torch.load(trained_path)
@@ -292,18 +322,19 @@ class Branch_new(nn.Module):
             # resnet feature conv
             mid_fea_r = self.res_LRU(mid_fea_r)
             local_res = self.gap_r(mid_fea_r)
-            mid_fea_r = mid_fea_r.reshape(B, self.mid, -1).permute(0, 2, 1)
+            mid_fea_r = mid_fea_r.reshape(B, self.mix_dim, -1).permute(0, 2, 1)
             # former feature conv
-            mid_fea_f = mid_fea_f.permute(0, 2, 1).reshape(B, 768, 21, 10)
+            C,H,W = self.patch_num
+            mid_fea_f = mid_fea_f.permute(0, 2, 1).reshape(B, int(C), int(H), int(W))
             mid_fea_f = self.former_LRU(mid_fea_f)
             local_former = self.gap_f(mid_fea_f)
-            mid_fea_f = mid_fea_f.reshape(B, self.mid, -1).permute(0, 2, 1)
+            mid_fea_f = mid_fea_f.reshape(B, self.mix_dim, -1).permute(0, 2, 1)
 
             attn = self.mix.get_attn(mid_fea_r, mid_fea_f, local_res.reshape(B, 1, self.mix_dim),
                                      local_former.reshape(B, 1, self.mix_dim), k=k)
             return attn
 
-    def forward(self, x, label=None, cam_label=None, view_label=None):
+    def forward(self, x, label=None, cam_label=5, view_label=None):
         if self.training:
             B = x.shape[0]
             mid_fea_r, cls_score_r, global_feat_r = self.resnet(x)
@@ -311,12 +342,13 @@ class Branch_new(nn.Module):
             # # resnet feature conv
             mid_fea_r = self.res_LRU(mid_fea_r)
             local_res = self.gap_r(mid_fea_r)
-            mid_fea_r = mid_fea_r.reshape(B, self.mid, -1).permute(0, 2, 1)
+            mid_fea_r = mid_fea_r.reshape(B, self.mix_dim, -1).permute(0, 2, 1)
             # former feature conv
-            mid_fea_f = mid_fea_f.permute(0, 2, 1).reshape(B, 768, 21, 10)
+            C, H, W = self.patch_num
+            mid_fea_f = mid_fea_f.permute(0, 2, 1).reshape(B, int(C), int(H), int(W))
             mid_fea_f = self.former_LRU(mid_fea_f)
             local_former = self.gap_f(mid_fea_f)
-            mid_fea_f = mid_fea_f.reshape(B, self.mid, -1).permute(0, 2, 1)
+            mid_fea_f = mid_fea_f.reshape(B, self.mix_dim, -1).permute(0, 2, 1)
 
             # mix
             mix_r_q, mix_f_q = self.mix(mid_fea_r, mid_fea_f, local_res.reshape(B, 1, self.mix_dim),
@@ -345,12 +377,13 @@ class Branch_new(nn.Module):
             # resnet feature conv
             mid_fea_r = self.res_LRU(mid_fea_r)
             local_res = self.gap_r(mid_fea_r)
-            mid_fea_r = mid_fea_r.reshape(B, self.mid, -1).permute(0, 2, 1)
+            mid_fea_r = mid_fea_r.reshape(B, self.mix_dim, -1).permute(0, 2, 1)
             # former feature conv
-            mid_fea_f = mid_fea_f.permute(0, 2, 1).reshape(B, 768, 21, 10)
+            C, H, W = self.patch_num
+            mid_fea_f = mid_fea_f.permute(0, 2, 1).reshape(B, int(C), int(H), int(W))
             mid_fea_f = self.former_LRU(mid_fea_f)
             local_former = self.gap_f(mid_fea_f)
-            mid_fea_f = mid_fea_f.reshape(B, self.mid, -1).permute(0, 2, 1)
+            mid_fea_f = mid_fea_f.reshape(B, self.mix_dim, -1).permute(0, 2, 1)
 
             # mix
             mix_r_q, mix_f_q = self.mix(mid_fea_r, mid_fea_f, local_res.reshape(B, 1, self.mix_dim),
@@ -365,6 +398,7 @@ class Branch_new(nn.Module):
             feat_2 = self.bottleneck_2(global_feat_2)
             feat_3 = self.bottleneck_3(global_feat_3)
             feat_4 = self.bottleneck_4(global_feat_4)
+            # print(self.test_feat)
             if self.neck_feat == 'after':
                 pass
             else:
@@ -372,20 +406,51 @@ class Branch_new(nn.Module):
                 feat_2 = global_feat_2
                 feat_3 = global_feat_3
                 feat_4 = global_feat_4
-            return torch.cat([feat_r, feat_f, feat_1, feat_2, feat_3, feat_4], dim=-1)
+            if self.test_feat == 0:
+                return torch.cat([feat_r, feat_f, feat_1, feat_2, feat_3, feat_4], dim=-1)
+            elif self.test_feat == 1:
+                return feat_r
+            elif self.test_feat == 2:
+                return feat_f
+            elif self.test_feat == 3:
+                return feat_1
+            elif self.test_feat == 4:
+                return feat_2
+            elif self.test_feat == 5:
+                return feat_3
+            elif self.test_feat == 6:
+                return feat_4
 
 
 __factory_T_type = {
-    'vit_base_patch16_224_Trans': vit_base_patch16_224_Trans,
-    'deit_base_patch16_224_Trans': vit_base_patch16_224_Trans,
-    'vit_small_patch16_224_Trans': vit_small_patch16_224_Trans,
-    'deit_small_patch16_224_Trans': deit_small_patch16_224_Trans
+    'vit_base_patch16_224': vit_base_patch16_224,
+    'deit_base_patch16_224': vit_base_patch16_224,
+    'vit_small_patch16_224': vit_small_patch16_224,
+    'deit_small_patch16_224': deit_small_patch16_224,
+    'swin_base_patch4_win8': swin_base_patch4_win8,
+    'restv2_tiny': restv2_tiny,
+    'restv2_small': restv2_small,
+    'restv2_base': restv2_base,
+    'restv2_large': restv2_large,
+    'edgevit_s': edgevit_s,
+    't2t_vit_t_24': t2t_vit_t_24,
+'t2t_vit_t_14': t2t_vit_t_14
 }
 
 
 def make_model(cfg, num_class, camera_num, view_num=0, ):
-    model = Branch_new(num_class, cfg, camera_num, view_num, __factory_T_type)
-    # model = build_resnet(num_class, cfg)
-    # model = build_transformer(num_class, cfg, camera_num, view_num, __factory_T_type)
-    print('===========Building FusionReID===========')
-    return model
+    if cfg.MODEL.RES_USE and not cfg.MODEL.TRANS_USE:
+        model = build_resnet(num_class, cfg)
+        print('===========Building ResNet Only===========')
+        return model
+    elif cfg.MODEL.TRANS_USE and not cfg.MODEL.RES_USE:
+        model = build_transformer(num_class, cfg, camera_num, view_num, __factory_T_type)
+        print('===========Building Transformer Only===========')
+        return model
+    elif cfg.MODEL.TRANS_USE and cfg.MODEL.RES_USE:
+        model = Branch_new(num_class, cfg, camera_num, view_num, __factory_T_type)
+        print('===========Building FusionReID===========')
+        return model
+    else:
+        print("===========Fail to build model,Please check cfg.MODEL.RES_USE and cfg.MODEL.TRANS_USE===========")
+        return None

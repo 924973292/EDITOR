@@ -25,8 +25,8 @@ def do_train(cfg,
 
     device = "cuda"
     epochs = cfg.SOLVER.MAX_EPOCHS
-
-    logger = logging.getLogger("transreid.train")
+    logging.getLogger().setLevel(logging.INFO)
+    logger = logging.getLogger("FusionReID.train")
     logger.info('start training')
     _LOCAL_PROCESS_GROUP = None
     if device:
@@ -57,21 +57,28 @@ def do_train(cfg,
             target_cam = target_cam.to(device)
             target_view = target_view.to(device)
             with amp.autocast(enabled=True):
-                cls_score_r, global_feat_r, cls_score_f, global_feat_f, cls_score_1, global_feat_1, cls_score_2, \
-                    global_feat_2, cls_score_3, global_feat_3, cls_score_4, global_feat_4 = model(
-                    img,
-                    label=target,
-                    cam_label=target_cam,
-                    view_label=target_view)
+                if cfg.MODEL.RES_USE and cfg.MODEL.TRANS_USE:
+                    cls_score_r, global_feat_r, cls_score_f, global_feat_f, cls_score_1, global_feat_1, cls_score_2, \
+                        global_feat_2, cls_score_3, global_feat_3, cls_score_4, global_feat_4 = model(
+                        img,
+                        label=target,
+                        cam_label=target_cam,
+                        view_label=target_view)
 
-                loss_1 = loss_fn(cls_score_r, global_feat_r, target, target_cam)
-                loss_2 = loss_fn(cls_score_f, global_feat_f, target, target_cam)
-                loss_3 = loss_fn(cls_score_1, global_feat_1, target, target_cam)
-                loss_4 = loss_fn(cls_score_2, global_feat_2, target, target_cam)
-                loss_5 = loss_fn(cls_score_3, global_feat_3, target, target_cam)
-                loss_6 = loss_fn(cls_score_4, global_feat_4, target, target_cam)
-                loss = loss_1 + loss_2 + loss_3 + loss_4 + loss_5 + loss_6
-
+                    loss_1 = loss_fn(cls_score_r, global_feat_r, target, target_cam)
+                    loss_2 = loss_fn(cls_score_f, global_feat_f, target, target_cam)
+                    loss_3 = loss_fn(cls_score_1, global_feat_1, target, target_cam)
+                    loss_4 = loss_fn(cls_score_2, global_feat_2, target, target_cam)
+                    loss_5 = loss_fn(cls_score_3, global_feat_3, target, target_cam)
+                    loss_6 = loss_fn(cls_score_4, global_feat_4, target, target_cam)
+                    loss = loss_1 + loss_2 + loss_3 + loss_4 + loss_5 + loss_6
+                else:
+                    cls_score_r, global_feat_r = model(
+                        img,
+                        label=target,
+                        cam_label=target_cam,
+                        view_label=target_view)
+                    loss = loss_fn(cls_score_r, global_feat_r, target, target_cam)
             scaler.scale(loss).backward()
 
             scaler.step(optimizer)
@@ -92,6 +99,7 @@ def do_train(cfg,
 
             torch.cuda.synchronize()
             if (n_iter + 1) % log_period == 0:
+                # print(scheduler._get_lr(epoch))
                 logger.info("Epoch[{}] Iteration[{}/{}] Loss: {:.3f}, Acc: {:.3f}, Base Lr: {:.2e}"
                             .format(epoch, (n_iter + 1), len(train_loader),
                                     loss_meter.avg, acc_meter.avg, scheduler._get_lr(epoch)[0]))
@@ -152,7 +160,7 @@ def do_inference(cfg,
                  val_loader,
                  num_query):
     device = "cuda"
-    logger = logging.getLogger("transreid.test")
+    logger = logging.getLogger("FusionReID.test")
     logger.info("Enter inferencing")
 
     evaluator = R1_mAP_eval(num_query, max_rank=50, feat_norm=cfg.TEST.FEAT_NORM)
