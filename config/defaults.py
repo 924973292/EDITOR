@@ -88,7 +88,7 @@ _C.DATASETS.ROOT_DIR = ('./data')
 # -----------------------------------------------------------------------------
 _C.DATALOADER = CN()
 # Number of data loading threads
-_C.DATALOADER.NUM_WORKERS = 32
+_C.DATALOADER.NUM_WORKERS = 14
 # Sampler for data loading
 _C.DATALOADER.SAMPLER = 'softmax_triplet'
 # Number of instance for one batch

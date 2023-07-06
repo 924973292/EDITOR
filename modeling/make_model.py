@@ -244,7 +244,7 @@ class DTM(nn.Module):
         self.act_layer = nn.GELU()
         print('DTM UESD HERE!!!!')
     def forward(self, x):
-        x = self.act_layer(self.norm_layer(self.dconv(x)))
+        x = self.act_layer(self.norm_layer(self.dconv(x.contiguous())))
         return x
 
 
