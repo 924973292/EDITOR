@@ -97,16 +97,16 @@ class Mutual_Fsuion_Unit(nn.Module):
 
 class Reflection_item(nn.Module):
 
-    def __init__(self, embed_dim=768,mode=0):
+    def __init__(self, embed_dim=768, mode=0):
         super().__init__()
         self.mode = mode
         if self.mode == 0:
             self.sa = Shared_Encoding_Unit(embed_dim=embed_dim)
             self.res_q = Mutual_Fsuion_Unit(embed_dim=embed_dim)
             self.former_q = Mutual_Fsuion_Unit(embed_dim=embed_dim)
-        elif self.mode ==1:
+        elif self.mode == 1:
             self.sa = Shared_Encoding_Unit(embed_dim=embed_dim)
-        elif self.mode ==2:
+        elif self.mode == 2:
             self.res_q = Mutual_Fsuion_Unit(embed_dim=embed_dim)
             self.former_q = Mutual_Fsuion_Unit(embed_dim=embed_dim)
         elif self.mode == 3:
@@ -131,8 +131,8 @@ class Reflection_item(nn.Module):
         elif self.mode == 3:
             cls_q = self.res_q(res[:, 0, :], former[:, 1:, :])
             cls_f = self.former_q(former[:, 0, :], res[:, 1:, :])
-            res = torch.cat([cls_q,res[:, 1:, :]],dim=-2)
-            former = torch.cat([cls_f,former[:, 1:, :]],dim=-2)
+            res = torch.cat([cls_q, res[:, 1:, :]], dim=-2)
+            former = torch.cat([cls_f, former[:, 1:, :]], dim=-2)
             res = self.sa(res)
             former = self.sa(former)
             cls_q = res[:, 0, :].unsqueeze(1)

@@ -23,13 +23,13 @@ INPUT:
 
 DATASETS:
   NAMES: ('msmt17')
-  ROOT_DIR: './data'
+  ROOT_DIR: '/15127306268/wyh/UIS/data'
 
 TEST:
   RE_RANKING: 'no'
   WEIGHT: ''
   NECK_FEAT: 'before'
   FEAT_NORM: 'yes'
-
-OUTPUT_DIR: './msmt_vitb12_res50_layer2'
+  FEAT: 0
+OUTPUT_DIR: './msmt_vitb12_res50_layer2_DTM'
 

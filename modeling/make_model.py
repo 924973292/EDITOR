@@ -8,7 +8,11 @@ import torch.nn.functional as F
 from modeling.backbones.swin import swin_base_patch4_win8
 from modeling.backbones.ResTV2 import restv2_tiny, restv2_small, restv2_base, restv2_large
 from modeling.backbones.edgeViT import edgevit_s
-from modeling.backbones.t2tvit import t2t_vit_t_24,t2t_vit_t_14
+from modeling.backbones.t2tvit import t2t_vit_t_24, t2t_vit_t_14
+from mmcv.ops import DeformConv2dPack
+import math
+
+
 def weights_init_kaiming(m):
     classname = m.__class__.__name__
     if classname.find('Linear') != -1:
@@ -221,6 +225,29 @@ class build_transformer(nn.Module):
         print('Loading pretrained model for finetuning from {}'.format(model_path))
 
 
+class DTM(nn.Module):
+    r""" Deformable Token Merging.
+
+    Link: https://arxiv.org/abs/2105.14217
+
+    Args:
+        input_resolution (tuple[int]): Resolution of input feature.
+        dim (int): Number of input channels.
+        norm_layer (nn.Module, optional): Normalization layer.  Default: nn.LayerNorm
+    """
+
+    def __init__(self, dim,out_dim=768,):
+        super().__init__()
+
+        self.dconv = DeformConv2dPack(dim, out_dim, kernel_size=3, stride=1, padding=1)
+        self.norm_layer = nn.BatchNorm2d(out_dim)
+        self.act_layer = nn.GELU()
+        print('DTM UESD HERE!!!!')
+    def forward(self, x):
+        x = self.act_layer(self.norm_layer(self.dconv(x)))
+        return x
+
+
 class LocalRefinementUnits(nn.Module):
     def __init__(self, dim, out_dim=768, kernel=1, choice=True):
         super().__init__()
@@ -257,14 +284,14 @@ class Branch_new(nn.Module):
 
         self.mix_dim = cfg.MODEL.MIX_DIM
         self.srm_layer = cfg.MODEL.SRM_LAYER
-        self.res_LRU = LocalRefinementUnits(dim=2048, out_dim=self.mix_dim)
+        self.res_LRU = DTM(dim=2048, out_dim=self.mix_dim)
         if 'swin' in cfg.MODEL.TRANSFORMER_TYPE or 'large' in cfg.MODEL.TRANSFORMER_TYPE:
             self.dim_l = 1024
         elif '14' in cfg.MODEL.TRANSFORMER_TYPE:
             self.dim_l = 384
         else:
-            self.dim_l = 512
-        self.former_LRU = LocalRefinementUnits(dim=self.dim_l, out_dim=self.mix_dim)
+            self.dim_l = 768
+        self.former_LRU = DTM(dim=self.dim_l, out_dim=self.mix_dim)
         self.gap_f = GeM()
         self.gap_r = GeM()
         self.mix = Heterogenous_Transmission_Module(depth=self.srm_layer, embed_dim=self.mix_dim)
@@ -272,13 +299,13 @@ class Branch_new(nn.Module):
         self.neck_feat = cfg.TEST.NECK_FEAT
         self.ID_LOSS_TYPE = cfg.MODEL.ID_LOSS_TYPE
         if 'swin' in cfg.MODEL.TRANSFORMER_TYPE or 'large' in cfg.MODEL.TRANSFORMER_TYPE or 't2t' in cfg.MODEL.TRANSFORMER_TYPE:
-            self.patch_num = (512,16,8)
+            self.patch_num = (512, 16, 8)
         elif 'edge' in cfg.MODEL.TRANSFORMER_TYPE:
-            self.patch_num = (384,8,8)
+            self.patch_num = (384, 8, 8)
         else:
-            self.patch_num = (768,21,10)
+            self.patch_num = (768, 21, 10)
         if '14' in cfg.MODEL.TRANSFORMER_TYPE:
-            self.patch_num = (384,16,8)
+            self.patch_num = (384, 16, 8)
         self.classifier_1 = nn.Linear(self.mix_dim, self.num_classes, bias=False)
         self.classifier_1.apply(weights_init_classifier)
 
@@ -324,7 +351,7 @@ class Branch_new(nn.Module):
             local_res = self.gap_r(mid_fea_r)
             mid_fea_r = mid_fea_r.reshape(B, self.mix_dim, -1).permute(0, 2, 1)
             # former feature conv
-            C,H,W = self.patch_num
+            C, H, W = self.patch_num
             mid_fea_f = mid_fea_f.permute(0, 2, 1).reshape(B, int(C), int(H), int(W))
             mid_fea_f = self.former_LRU(mid_fea_f)
             local_former = self.gap_f(mid_fea_f)
@@ -434,7 +461,7 @@ __factory_T_type = {
     'restv2_large': restv2_large,
     'edgevit_s': edgevit_s,
     't2t_vit_t_24': t2t_vit_t_24,
-'t2t_vit_t_14': t2t_vit_t_14
+    't2t_vit_t_14': t2t_vit_t_14
 }
 
 
