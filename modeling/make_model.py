@@ -1,16 +1,14 @@
 import torch
 import torch.nn as nn
-from modeling.backbones.resnet import ResNet, Bottleneck
 from modeling.backbones.vit_pytorch import vit_base_patch16_224, vit_small_patch16_224, \
     deit_small_patch16_224
-from modeling.fusion_part.fusion import Heterogenous_Transmission_Module
 import torch.nn.functional as F
 from modeling.backbones.swin import swin_base_patch4_win8
 from modeling.backbones.ResTV2 import restv2_tiny, restv2_small, restv2_base, restv2_large
 from modeling.backbones.edgeViT import edgevit_s
 from modeling.backbones.t2tvit import t2t_vit_t_24, t2t_vit_t_14
-from mmcv.ops import DeformConv2dPack
-import math
+from modeling.fusion_part.MMDA import BlockFuse, Rotation
+from modeling.backbones.resnet import ResNet, Bottleneck
 
 
 def weights_init_kaiming(m):
@@ -51,7 +49,7 @@ class GeM(nn.Module):
 
     def __repr__(self):
         return self.__class__.__name__ + '(' + 'p=' + '{:.4f}'.format(self.p.data.tolist()[0]) + ', ' + 'eps=' + str(
-            self.eps) + ')'
+            self.epls) + ')'
 
 
 class build_resnet(nn.Module):
@@ -65,7 +63,7 @@ class build_resnet(nn.Module):
         self.neck_feat = cfg.TEST.NECK_FEAT
 
         self.in_planes = 2048
-        self.pattern = cfg.MODEL.RES_MODE
+        self.pattern = 1
         if self.pattern == 1:
             self.base = ResNet(last_stride=last_stride,
                                block=Bottleneck,
@@ -186,9 +184,9 @@ class build_transformer(nn.Module):
         self.bottleneck.apply(weights_init_kaiming)
 
     def forward(self, x, label=None, cam_label=0, view_label=None):
-        mid_fea = self.base(x, cam_label=cam_label, view_label=view_label)
-        global_feat = mid_fea[:, 0]
-        mid_fea_f = mid_fea[:, 1:, :]
+        cash_x = self.base(x, cam_label=cam_label, view_label=view_label)
+        global_feat = cash_x[-1][:, 0]
+        # cash_x[-1] = cash_x[-1][:, 1:, :]
         feat = self.bottleneck(global_feat)
 
         if self.training:
@@ -199,18 +197,18 @@ class build_transformer(nn.Module):
             if self.mode == 0:
                 return cls_score, global_feat
             else:
-                return mid_fea_f, cls_score, global_feat  # global feature for triplet loss
+                return cash_x, cls_score, global_feat  # global feature for triplet loss
         else:
             if self.neck_feat == 'after':
                 if self.mode == 0:
                     return feat
                 else:
-                    return mid_fea_f, feat
+                    return cash_x, feat
             else:
                 if self.mode == 0:
                     return global_feat
                 else:
-                    return mid_fea_f, global_feat
+                    return cash_x, global_feat
 
     def load_param(self, trained_path):
         param_dict = torch.load(trained_path)
@@ -225,115 +223,103 @@ class build_transformer(nn.Module):
         print('Loading pretrained model for finetuning from {}'.format(model_path))
 
 
-class DTM(nn.Module):
-    r""" Deformable Token Merging.
-
-    Link: https://arxiv.org/abs/2105.14217
-
-    Args:
-        input_resolution (tuple[int]): Resolution of input feature.
-        dim (int): Number of input channels.
-        norm_layer (nn.Module, optional): Normalization layer.  Default: nn.LayerNorm
-    """
-
-    def __init__(self, dim,out_dim=768,):
-        super().__init__()
-
-        self.dconv = DeformConv2dPack(dim, out_dim, kernel_size=3, stride=1, padding=1)
-        self.norm_layer = nn.BatchNorm2d(out_dim)
-        self.act_layer = nn.GELU()
-        print('DTM UESD HERE!!!!')
-    def forward(self, x):
-        x = self.act_layer(self.norm_layer(self.dconv(x.contiguous())))
-        return x
-
-
-class LocalRefinementUnits(nn.Module):
-    def __init__(self, dim, out_dim=768, kernel=1, choice=True):
-        super().__init__()
-        self.LRU = choice
-        self.channels = dim
-        self.out_dim = out_dim
-        self.dwconv = nn.Conv2d(self.channels, self.channels, kernel, 1, padding=0, groups=self.channels)
-        self.bn1 = nn.BatchNorm2d(self.channels)
-        self.ptconv = nn.Conv2d(self.channels, self.out_dim, 1, 1)
-        self.bn2 = nn.BatchNorm2d(self.out_dim)
-        self.act1 = nn.PReLU()
-        self.act2 = nn.PReLU()
-        self.act = nn.ReLU()
-
-    def forward(self, x):
-        if self.LRU:
-            x = self.act1(self.bn1(self.dwconv(x)))
-            x = self.act2(self.bn2(self.ptconv(x)))
-        else:
-            x = self.act2(self.bn2(self.ptconv(x)))
-        return x
-
-
 class Branch_new(nn.Module):
     def __init__(self, num_classes, cfg, camera_num, view_num, factory):
         super(Branch_new, self).__init__()
-        self.resnet = build_resnet(num_classes, cfg)
-        self.transformer = build_transformer(num_classes, cfg, camera_num, view_num, factory)
+        self.NI = build_transformer(num_classes, cfg, camera_num, view_num, factory)
+        self.TI = build_transformer(num_classes, cfg, camera_num, view_num, factory)
+        self.RGB = build_transformer(num_classes, cfg, camera_num, view_num, factory)
 
         self.num_classes = num_classes
         self.cfg = cfg
         self.camera = camera_num
         self.view = view_num
-
+        self.dim_l = 768
+        self.num_head = 12
+        self.mix_depth = cfg.MODEL.DEPTH
         self.mix_dim = cfg.MODEL.MIX_DIM
-        self.srm_layer = cfg.MODEL.SRM_LAYER
-        self.res_LRU = DTM(dim=2048, out_dim=self.mix_dim)
-        if 'swin' in cfg.MODEL.TRANSFORMER_TYPE or 'large' in cfg.MODEL.TRANSFORMER_TYPE:
-            self.dim_l = 1024
-        elif '14' in cfg.MODEL.TRANSFORMER_TYPE:
-            self.dim_l = 384
-        else:
-            self.dim_l = 768
-        self.former_LRU = DTM(dim=self.dim_l, out_dim=self.mix_dim)
-        self.gap_f = GeM()
-        self.gap_r = GeM()
-        self.mix = Heterogenous_Transmission_Module(depth=self.srm_layer, embed_dim=self.mix_dim)
+        self.mix_mode = cfg.MODEL.MIX_MODE
+        # self.cash0_fusion = BlockFuse(dim=self.dim_l, num_heads=self.num_head, depth=self.mix_depth, mode=0,
+        #                               mixdim=self.mix_dim)
+        # self.cash1_fusion = BlockFuse(dim=self.dim_l, num_heads=self.num_head, depth=self.mix_depth, mode=0,
+        #                               mixdim=self.mix_dim)
+        # self.cash2_fusion = BlockFuse(dim=self.dim_l, num_heads=self.num_head, depth=self.mix_depth, mode=0,
+        #                               mixdim=self.mix_dim)
+        # self.cash3_fusion = BlockFuse(dim=self.dim_l, num_heads=self.num_head, depth=self.mix_depth, mode=self.mix_mode,
+        #                               mixdim=self.mix_dim)
+        # self.Rotation_1 = Rotation(dim=self.dim_l, num_heads=self.num_head)
+        # self.Rotation_2 = Rotation(dim=self.dim_l, num_heads=self.num_head)
+        # self.Rotation_3 = Rotation(dim=self.dim_l, num_heads=self.num_head)
+        self.Rotation_4 = Rotation(dim=self.dim_l, num_heads=self.num_head)
         self.neck = cfg.MODEL.NECK
         self.neck_feat = cfg.TEST.NECK_FEAT
         self.ID_LOSS_TYPE = cfg.MODEL.ID_LOSS_TYPE
-        if 'swin' in cfg.MODEL.TRANSFORMER_TYPE or 'large' in cfg.MODEL.TRANSFORMER_TYPE or 't2t' in cfg.MODEL.TRANSFORMER_TYPE:
-            self.patch_num = (512, 16, 8)
-        elif 'edge' in cfg.MODEL.TRANSFORMER_TYPE:
-            self.patch_num = (384, 8, 8)
-        else:
-            self.patch_num = (768, 21, 10)
-        if '14' in cfg.MODEL.TRANSFORMER_TYPE:
-            self.patch_num = (384, 16, 8)
-        self.classifier_1 = nn.Linear(self.mix_dim, self.num_classes, bias=False)
-        self.classifier_1.apply(weights_init_classifier)
 
-        self.bottleneck_1 = nn.BatchNorm1d(self.mix_dim)
-        self.bottleneck_1.bias.requires_grad_(False)
-        self.bottleneck_1.apply(weights_init_kaiming)
+        self.patch_num = (16, 8)
+        # self.NI_RE = ReAttention(dim=self.dim_l, num_heads=self.num_head)
+        # self.TI_RE = ReAttention(dim=self.dim_l, num_heads=self.num_head)
 
-        self.classifier_2 = nn.Linear(self.mix_dim, self.num_classes, bias=False)
-        self.classifier_2.apply(weights_init_classifier)
+        # self.classifier_FEA_RGBNI = nn.Linear(self.mix_dim, self.num_classes, bias=False)
+        # self.classifier_FEA_RGBNI.apply(weights_init_classifier)
+        # self.bottleneck_FEA_RGBNI = nn.BatchNorm1d(self.mix_dim)
+        # self.bottleneck_FEA_RGBNI.bias.requires_grad_(False)
+        # self.bottleneck_FEA_RGBNI.apply(weights_init_kaiming)
+        #
+        # self.classifier_FEA_RGBTI = nn.Linear(self.mix_dim, self.num_classes, bias=False)
+        # self.classifier_FEA_RGBTI.apply(weights_init_classifier)
+        # self.bottleneck_FEA_RGBTI = nn.BatchNorm1d(self.mix_dim)
+        # self.bottleneck_FEA_RGBTI.bias.requires_grad_(False)
+        # self.bottleneck_FEA_RGBTI.apply(weights_init_kaiming)
+        # self.classifier_FUSE0 = nn.Linear(self.mix_dim, self.num_classes, bias=False)
+        # self.classifier_FUSE0.apply(weights_init_classifier)
+        # self.bottleneck_FUSE0 = nn.BatchNorm1d(self.mix_dim)
+        # self.bottleneck_FUSE0.bias.requires_grad_(False)
+        # self.bottleneck_FUSE0.apply(weights_init_kaiming)
+        #
+        # self.classifier_FUSE1 = nn.Linear(self.mix_dim, self.num_classes, bias=False)
+        # self.classifier_FUSE1.apply(weights_init_classifier)
+        # self.bottleneck_FUSE1 = nn.BatchNorm1d(self.mix_dim)
+        # self.bottleneck_FUSE1.bias.requires_grad_(False)
+        # self.bottleneck_FUSE1.apply(weights_init_kaiming)
+        #
+        # self.classifier_FUSE2 = nn.Linear(self.mix_dim, self.num_classes, bias=False)
+        # self.classifier_FUSE2.apply(weights_init_classifier)
+        # self.bottleneck_FUSE2 = nn.BatchNorm1d(self.mix_dim)
+        # self.bottleneck_FUSE2.bias.requires_grad_(False)
+        # self.bottleneck_FUSE2.apply(weights_init_kaiming)
+        #
+        # self.classifier_Rotation_1 = nn.Linear(3 * self.mix_dim, self.num_classes, bias=False)
+        # self.classifier_Rotation_1.apply(weights_init_classifier)
+        # self.bottleneck_Rotation_1 = nn.BatchNorm1d(3 * self.mix_dim)
+        # self.bottleneck_Rotation_1.bias.requires_grad_(False)
+        # self.bottleneck_Rotation_1.apply(weights_init_kaiming)
+        #
+        # self.classifier_Rotation_2 = nn.Linear(3 * self.mix_dim, self.num_classes, bias=False)
+        # self.classifier_Rotation_2.apply(weights_init_classifier)
+        # self.bottleneck_Rotation_2 = nn.BatchNorm1d(3 * self.mix_dim)
+        # self.bottleneck_Rotation_2.bias.requires_grad_(False)
+        # self.bottleneck_Rotation_2.apply(weights_init_kaiming)
+        #
+        # self.classifier_Rotation_3 = nn.Linear(3 * self.mix_dim, self.num_classes, bias=False)
+        # self.classifier_Rotation_3.apply(weights_init_classifier)
+        # self.bottleneck_Rotation_3 = nn.BatchNorm1d(3 * self.mix_dim)
+        # self.bottleneck_Rotation_3.bias.requires_grad_(False)
+        # self.bottleneck_Rotation_3.apply(weights_init_kaiming)
 
-        self.bottleneck_2 = nn.BatchNorm1d(self.mix_dim)
-        self.bottleneck_2.bias.requires_grad_(False)
-        self.bottleneck_2.apply(weights_init_kaiming)
+        self.classifier_Rotation_4 = nn.Linear(3 * self.mix_dim, self.num_classes, bias=False)
+        self.classifier_Rotation_4.apply(weights_init_classifier)
+        self.bottleneck_Rotation_4 = nn.BatchNorm1d(3 * self.mix_dim)
+        self.bottleneck_Rotation_4.bias.requires_grad_(False)
+        self.bottleneck_Rotation_4.apply(weights_init_kaiming)
 
-        self.classifier_3 = nn.Linear(self.mix_dim, self.num_classes, bias=False)
-        self.classifier_3.apply(weights_init_classifier)
+        self.classifier_PATCH4 = nn.Linear(self.mix_dim, self.num_classes, bias=False)
+        self.classifier_PATCH4.apply(weights_init_classifier)
+        self.bottleneck_PATCH4 = nn.BatchNorm1d(self.mix_dim)
+        self.bottleneck_PATCH4.bias.requires_grad_(False)
+        self.bottleneck_PATCH4.apply(weights_init_kaiming)
 
-        self.bottleneck_3 = nn.BatchNorm1d(self.mix_dim)
-        self.bottleneck_3.bias.requires_grad_(False)
-        self.bottleneck_3.apply(weights_init_kaiming)
-
-        self.classifier_4 = nn.Linear(self.mix_dim, self.num_classes, bias=False)
-        self.classifier_4.apply(weights_init_classifier)
-
-        self.bottleneck_4 = nn.BatchNorm1d(self.mix_dim)
-        self.bottleneck_4.bias.requires_grad_(False)
-        self.bottleneck_4.apply(weights_init_kaiming)
         self.test_feat = cfg.TEST.FEAT
+        self.miss_type = cfg.TEST.MISS
 
     def load_param(self, trained_path):
         param_dict = torch.load(trained_path)
@@ -341,112 +327,233 @@ class Branch_new(nn.Module):
             self.state_dict()[i.replace('module.', '')].copy_(param_dict[i])
         print('Loading pretrained model from {}'.format(trained_path))
 
-    def get_attn(self, x, k, label=None, cam_label=5, view_label=None):
-        if not self.training:
-            B = x.shape[0]
-            mid_fea_r, feat_r = self.resnet(x)
-            mid_fea_f, feat_f = self.transformer(x, cam_label=cam_label, view_label=view_label)
-            # resnet feature conv
-            mid_fea_r = self.res_LRU(mid_fea_r)
-            local_res = self.gap_r(mid_fea_r)
-            mid_fea_r = mid_fea_r.reshape(B, self.mix_dim, -1).permute(0, 2, 1)
-            # former feature conv
-            C, H, W = self.patch_num
-            mid_fea_f = mid_fea_f.permute(0, 2, 1).reshape(B, int(C), int(H), int(W))
-            mid_fea_f = self.former_LRU(mid_fea_f)
-            local_former = self.gap_f(mid_fea_f)
-            mid_fea_f = mid_fea_f.reshape(B, self.mix_dim, -1).permute(0, 2, 1)
-
-            attn = self.mix.get_attn(mid_fea_r, mid_fea_f, local_res.reshape(B, 1, self.mix_dim),
-                                     local_former.reshape(B, 1, self.mix_dim), k=k)
-            return attn
-
     def forward(self, x, label=None, cam_label=5, view_label=None):
         if self.training:
-            B = x.shape[0]
-            mid_fea_r, cls_score_r, global_feat_r = self.resnet(x)
-            mid_fea_f, cls_score_f, global_feat_f = self.transformer(x, cam_label=cam_label, view_label=view_label)
-            # # resnet feature conv
-            mid_fea_r = self.res_LRU(mid_fea_r)
-            local_res = self.gap_r(mid_fea_r)
-            mid_fea_r = mid_fea_r.reshape(B, self.mix_dim, -1).permute(0, 2, 1)
-            # former feature conv
-            C, H, W = self.patch_num
-            mid_fea_f = mid_fea_f.permute(0, 2, 1).reshape(B, int(C), int(H), int(W))
-            mid_fea_f = self.former_LRU(mid_fea_f)
-            local_former = self.gap_f(mid_fea_f)
-            mid_fea_f = mid_fea_f.reshape(B, self.mix_dim, -1).permute(0, 2, 1)
+            RGB = x['RGB']
+            NI = x['NI']
+            TI = x['TI']
+            NI_cash, NI_score, NI_global = self.NI(NI, cam_label=cam_label, view_label=view_label)
+            TI_cash, TI_score, TI_global = self.TI(TI, cam_label=cam_label, view_label=view_label)
+            RGB_cash, RGB_score, RGB_global = self.RGB(RGB, cam_label=cam_label, view_label=view_label)
 
-            # mix
-            mix_r_q, mix_f_q = self.mix(mid_fea_r, mid_fea_f, local_res.reshape(B, 1, self.mix_dim),
-                                        local_former.reshape(B, 1, self.mix_dim))
+            # RGB_NI, NI_RE = self.NI_RE(RGB_cash[-1])
+            # RGB_TI, TI_RE = self.TI_RE(RGB_cash[-1])
+            # loss_ni = nn.MSELoss()(NI_RE, NI_cash[-1])
+            # loss_ti = nn.MSELoss()(TI_RE, TI_cash[-1])
 
-            global_feat_1 = local_res.view(B, -1)
-            global_feat_2 = local_former.view(B, -1)
-            global_feat_3 = mix_r_q.squeeze()
-            global_feat_4 = mix_f_q.squeeze()
+            # RGBNI_FEA = self.bottleneck_FEA_RGBNI(torch.mean(RGB_NI, dim=-2))
+            # RGBTI_FEA = self.bottleneck_FEA_RGBTI(torch.mean(RGB_TI, dim=-2))
+            # RGBNI_SCORE = self.classifier_FEA_RGBNI(RGBNI_FEA)
+            # RGBTI_SCORE = self.classifier_FEA_RGBTI(RGBTI_FEA)
 
-            feat_1 = self.bottleneck_1(global_feat_1)
-            feat_2 = self.bottleneck_2(global_feat_2)
-            feat_3 = self.bottleneck_3(global_feat_3)
-            feat_4 = self.bottleneck_4(global_feat_4)
+            # CASH0 = self.cash0_fusion(RGB_cash[0], NI_cash[0], TI_cash[0], *self.patch_num)
+            # CASH1 = self.cash1_fusion(RGB_cash[1], NI_cash[1], TI_cash[1], *self.patch_num)
+            # CASH2 = self.cash2_fusion(RGB_cash[2], NI_cash[2], TI_cash[2], *self.patch_num)
+            # rotation_1 = self.Rotation_1(RGB_cash[0], NI_cash[0], TI_cash[0])
+            # rotation_2 = self.Rotation_2(RGB_cash[1], NI_cash[1], TI_cash[1])
+            # rotation_3 = self.Rotation_3(RGB_cash[2], NI_cash[2], TI_cash[2])
+            rotation_4, patch_4 = self.Rotation_4(RGB_cash[3], NI_cash[3], TI_cash[3])
 
-            cls_score_1 = self.classifier_1(feat_1)
-            cls_score_2 = self.classifier_2(feat_2)
-            cls_score_3 = self.classifier_3(feat_3)
-            cls_score_4 = self.classifier_4(feat_4)
-            return cls_score_r, global_feat_r, cls_score_f, global_feat_f, cls_score_1, global_feat_1, \
-                cls_score_2, global_feat_2, cls_score_3, global_feat_3, cls_score_4, global_feat_4
+            # CASH3 = self.cash3_fusion(RGB_cash[3][:, 1:, :], NI_cash[3][:, 1:, :], TI_cash[3][:, 1:, :],
+            #                           *self.patch_num)
+            # CASH3 = self.combine(torch.cat([CASH2, CASH3], dim=-1))
+            # FUSE0 = torch.mean(CASH0, dim=-2)
+            # FUSE1 = torch.mean(CASH1, dim=-2)
+            # FUSE2 = torch.mean(CASH2, dim=-2)
+            # FUSE3 = torch.mean(CASH3, dim=-2)
+            # FUSE0_global = self.bottleneck_FUSE0(FUSE0)
+            # FUSE1_global = self.bottleneck_FUSE1(FUSE1)
+            # FUSE2_global = self.bottleneck_FUSE2(FUSE2)
+            # FUSE3_global = self.bottleneck_FUSE3(FUSE3)
+            # Rotation_global_1 = self.bottleneck_Rotation_1(rotation_1)
+            # Rotation_global_2 = self.bottleneck_Rotation_2(rotation_2)
+            # Rotation_global_3 = self.bottleneck_Rotation_3(rotation_3)
+            Rotation_global_4 = self.bottleneck_Rotation_4(rotation_4)
+            Rotation_patch_4 = self.bottleneck_PATCH4(patch_4)
+            # FUSE0_score = self.classifier_FUSE0(FUSE0_global)
+            # FUSE1_score = self.classifier_FUSE1(FUSE1_global)
+            # FUSE2_score = self.classifier_FUSE2(FUSE2_global)
+            # FUSE3_score = self.classifier_FUSE3(FUSE3_global)
+            # Rotation_score_1 = self.classifier_Rotation_1(Rotation_global_1)
+            # Rotation_score_2 = self.classifier_Rotation_2(Rotation_global_2)
+            # Rotation_score_3 = self.classifier_Rotation_3(Rotation_global_3)
+            Rotation_score_4 = self.classifier_Rotation_4(Rotation_global_4)
+            Patch_score_4 = self.classifier_PATCH4(Rotation_patch_4)
+            return RGB_score, RGB_global, NI_score, NI_global, TI_score, TI_global, \
+                Rotation_score_4, Rotation_global_4, Patch_score_4, Rotation_patch_4
+
         else:
-            B = x.shape[0]
-            mid_fea_r, feat_r = self.resnet(x)
-            mid_fea_f, feat_f = self.transformer(x, cam_label=cam_label, view_label=view_label)
-            # resnet feature conv
-            mid_fea_r = self.res_LRU(mid_fea_r)
-            local_res = self.gap_r(mid_fea_r)
-            mid_fea_r = mid_fea_r.reshape(B, self.mix_dim, -1).permute(0, 2, 1)
-            # former feature conv
-            C, H, W = self.patch_num
-            mid_fea_f = mid_fea_f.permute(0, 2, 1).reshape(B, int(C), int(H), int(W))
-            mid_fea_f = self.former_LRU(mid_fea_f)
-            local_former = self.gap_f(mid_fea_f)
-            mid_fea_f = mid_fea_f.reshape(B, self.mix_dim, -1).permute(0, 2, 1)
+            RGB = x['RGB']
+            NI = x['NI']
+            TI = x['TI']
+            NI_cash, NI_global = self.NI(NI, cam_label=cam_label, view_label=view_label)
+            TI_cash, TI_global = self.TI(TI, cam_label=cam_label, view_label=view_label)
+            RGB_cash, RGB_global = self.RGB(RGB, cam_label=cam_label, view_label=view_label)
 
-            # mix
-            mix_r_q, mix_f_q = self.mix(mid_fea_r, mid_fea_f, local_res.reshape(B, 1, self.mix_dim),
-                                        local_former.reshape(B, 1, self.mix_dim))
+            # RGB_NI, NI_RE = self.NI_RE(RGB_cash[-1])
+            # RGB_TI, TI_RE = self.TI_RE(RGB_cash[-1])
+            # loss_ni = nn.MSELoss()(NI_RE, NI_cash[-1])
+            # loss_ti = nn.MSELoss()(TI_RE, TI_cash[-1])
 
-            global_feat_1 = local_res.view(B, -1)
-            global_feat_2 = local_former.view(B, -1)
-            global_feat_3 = mix_r_q.squeeze()
-            global_feat_4 = mix_f_q.squeeze()
+            # RGBNI_FEA = self.bottleneck_FEA_RGBNI(torch.mean(RGB_NI, dim=-2))
+            # RGBTI_FEA = self.bottleneck_FEA_RGBTI(torch.mean(RGB_TI, dim=-2))
+            # RGBNI_SCORE = self.classifier_FEA_RGBNI(RGBNI_FEA)
+            # RGBTI_SCORE = self.classifier_FEA_RGBTI(RGBTI_FEA)
 
-            feat_1 = self.bottleneck_1(global_feat_1)
-            feat_2 = self.bottleneck_2(global_feat_2)
-            feat_3 = self.bottleneck_3(global_feat_3)
-            feat_4 = self.bottleneck_4(global_feat_4)
-            # print(self.test_feat)
+            # CASH0 = self.cash0_fusion(RGB_cash[0], NI_cash[0], TI_cash[0], *self.patch_num)
+            # CASH1 = self.cash1_fusion(RGB_cash[1], NI_cash[1], TI_cash[1], *self.patch_num)
+            # CASH2 = self.cash2_fusion(RGB_cash[2], NI_cash[2], TI_cash[2], *self.patch_num)
+            # rotation_1 = self.Rotation_1(RGB_cash[0], NI_cash[0], TI_cash[0])
+            # rotation_2 = self.Rotation_2(RGB_cash[1], NI_cash[1], TI_cash[1])
+            # rotation_3 = self.Rotation_3(RGB_cash[2], NI_cash[2], TI_cash[2])
+            rotation_4, patch_4 = self.Rotation_4(RGB_cash[3], NI_cash[3], TI_cash[3])
+
+            # CASH3 = self.cash3_fusion(RGB_cash[3][:, 1:, :], NI_cash[3][:, 1:, :], TI_cash[3][:, 1:, :],
+            #                           *self.patch_num)
+            # CASH3 = self.combine(torch.cat([CASH2, CASH3], dim=-1))
+            # FUSE0 = torch.mean(CASH0, dim=-2)
+            # FUSE1 = torch.mean(CASH1, dim=-2)
+            # FUSE2 = torch.mean(CASH2, dim=-2)
+            # FUSE3 = torch.mean(CASH3, dim=-2)
+            # FUSE0_global = self.bottleneck_FUSE0(FUSE0)
+            # FUSE1_global = self.bottleneck_FUSE1(FUSE1)
+            # FUSE2_global = self.bottleneck_FUSE2(FUSE2)
+            Rotation_global_4 = self.bottleneck_Rotation_4(rotation_4)
+            Rotation_patch_4 = self.bottleneck_PATCH4(patch_4)
+            # FUSE0_score = self.classifier_FUSE0(FUSE0_global)
+            # FUSE1_score = self.classifier_FUSE1(FUSE1_global)
+            # FUSE2_score = self.classifier_FUSE2(FUSE2_global)
+            # FUSE3_score = self.classifier_FUSE3(FUSE3_global)
+
             if self.neck_feat == 'after':
                 pass
             else:
-                feat_1 = global_feat_1
-                feat_2 = global_feat_2
-                feat_3 = global_feat_3
-                feat_4 = global_feat_4
+                # RGBNI_FEA = torch.mean(RGB_NI, dim=-2)
+                # RGBTI_FEA = torch.mean(RGB_TI, dim=-2)
+                # FUSE2_global = FUSE2
+                # FUSE3_global = FUSE3
+                # Rotation_global_1 = rotation_1
+                # Rotation_global_2 = rotation_2
+                # Rotation_global_3 = rotation_3
+                Rotation_global_4 = rotation_4
+                Rotation_patch_4 = patch_4
             if self.test_feat == 0:
-                return torch.cat([feat_r, feat_f, feat_1, feat_2, feat_3, feat_4], dim=-1)
-            elif self.test_feat == 1:
-                return feat_r
-            elif self.test_feat == 2:
-                return feat_f
-            elif self.test_feat == 3:
-                return feat_1
-            elif self.test_feat == 4:
-                return feat_2
-            elif self.test_feat == 5:
-                return feat_3
-            elif self.test_feat == 6:
-                return feat_4
+                return torch.cat([RGB_global, NI_global, TI_global,
+                                  Rotation_global_4, Rotation_patch_4], dim=-1)
+
+
+class BaselineRes(nn.Module):
+    def __init__(self, num_classes, cfg, camera_num, view_num, factory):
+        super(BaselineRes, self).__init__()
+        self.NI = build_resnet(num_classes, cfg)
+        self.TI = build_resnet(num_classes, cfg)
+        self.RGB = build_resnet(num_classes, cfg)
+
+        self.num_classes = num_classes
+        self.cfg = cfg
+        self.camera = camera_num
+        self.view = view_num
+        self.dim_l = 768
+        self.num_head = 12
+        self.mix_depth = cfg.MODEL.DEPTH
+        self.mix_dim = cfg.MODEL.MIX_DIM
+        self.mix_mode = cfg.MODEL.MIX_MODE
+
+        self.neck = cfg.MODEL.NECK
+        self.neck_feat = cfg.TEST.NECK_FEAT
+        self.ID_LOSS_TYPE = cfg.MODEL.ID_LOSS_TYPE
+
+        self.patch_num = (16, 8)
+        self.test_feat = cfg.TEST.FEAT
+        self.miss_type = cfg.TEST.MISS
+
+    def load_param(self, trained_path):
+        param_dict = torch.load(trained_path)
+        for i in param_dict:
+            self.state_dict()[i.replace('module.', '')].copy_(param_dict[i])
+        print('Loading pretrained model from {}'.format(trained_path))
+
+    def forward(self, x, label=None, cam_label=5, view_label=None):
+        if self.training:
+            RGB = x['RGB']
+            NI = x['NI']
+            TI = x['TI']
+            NI_cash, NI_score, NI_global = self.NI(NI, cam_label=cam_label, view_label=view_label)
+            TI_cash, TI_score, TI_global = self.TI(TI, cam_label=cam_label, view_label=view_label)
+            RGB_cash, RGB_score, RGB_global = self.RGB(RGB, cam_label=cam_label, view_label=view_label)
+            return RGB_score, RGB_global, NI_score, NI_global, TI_score, TI_global
+
+        else:
+            RGB = x['RGB']
+            NI = x['NI']
+            TI = x['TI']
+            NI_cash, NI_global = self.NI(NI, cam_label=cam_label, view_label=view_label)
+            TI_cash, TI_global = self.TI(TI, cam_label=cam_label, view_label=view_label)
+            RGB_cash, RGB_global = self.RGB(RGB, cam_label=cam_label, view_label=view_label)
+
+            if self.neck_feat == 'after':
+                pass
+            else:
+                pass
+            if self.test_feat == 0:
+                return torch.cat([RGB_global, NI_global, TI_global], dim=-1)
+
+
+class BaselineTrans(nn.Module):
+    def __init__(self, num_classes, cfg, camera_num, view_num, factory):
+        super(BaselineTrans, self).__init__()
+        self.NI = build_transformer(num_classes, cfg, camera_num, view_num, factory)
+        self.TI = build_transformer(num_classes, cfg, camera_num, view_num, factory)
+        self.RGB = build_transformer(num_classes, cfg, camera_num, view_num, factory)
+
+        self.num_classes = num_classes
+        self.cfg = cfg
+        self.camera = camera_num
+        self.view = view_num
+        self.dim_l = 768
+        self.num_head = 12
+        self.mix_depth = cfg.MODEL.DEPTH
+        self.mix_dim = cfg.MODEL.MIX_DIM
+        self.mix_mode = cfg.MODEL.MIX_MODE
+
+        self.neck = cfg.MODEL.NECK
+        self.neck_feat = cfg.TEST.NECK_FEAT
+        self.ID_LOSS_TYPE = cfg.MODEL.ID_LOSS_TYPE
+
+        self.patch_num = (16, 8)
+        self.test_feat = cfg.TEST.FEAT
+        self.miss_type = cfg.TEST.MISS
+
+    def load_param(self, trained_path):
+        param_dict = torch.load(trained_path)
+        for i in param_dict:
+            self.state_dict()[i.replace('module.', '')].copy_(param_dict[i])
+        print('Loading pretrained model from {}'.format(trained_path))
+
+    def forward(self, x, label=None, cam_label=5, view_label=None):
+        if self.training:
+            RGB = x['RGB']
+            NI = x['NI']
+            TI = x['TI']
+            NI_cash, NI_score, NI_global = self.NI(NI, cam_label=cam_label, view_label=view_label)
+            TI_cash, TI_score, TI_global = self.TI(TI, cam_label=cam_label, view_label=view_label)
+            RGB_cash, RGB_score, RGB_global = self.RGB(RGB, cam_label=cam_label, view_label=view_label)
+            return RGB_score, RGB_global, NI_score, NI_global, TI_score, TI_global
+
+        else:
+            RGB = x['RGB']
+            NI = x['NI']
+            TI = x['TI']
+            NI_cash, NI_global = self.NI(NI, cam_label=cam_label, view_label=view_label)
+            TI_cash, TI_global = self.TI(TI, cam_label=cam_label, view_label=view_label)
+            RGB_cash, RGB_global = self.RGB(RGB, cam_label=cam_label, view_label=view_label)
+
+            if self.neck_feat == 'after':
+                pass
+            else:
+                pass
+            if self.test_feat == 0:
+                return torch.cat([RGB_global, NI_global, TI_global], dim=-1)
 
 
 __factory_T_type = {
@@ -466,18 +573,13 @@ __factory_T_type = {
 
 
 def make_model(cfg, num_class, camera_num, view_num=0, ):
-    if cfg.MODEL.RES_USE and not cfg.MODEL.TRANS_USE:
-        model = build_resnet(num_class, cfg)
-        print('===========Building ResNet Only===========')
-        return model
-    elif cfg.MODEL.TRANS_USE and not cfg.MODEL.RES_USE:
-        model = build_transformer(num_class, cfg, camera_num, view_num, __factory_T_type)
-        print('===========Building Transformer Only===========')
-        return model
-    elif cfg.MODEL.TRANS_USE and cfg.MODEL.RES_USE:
-        model = Branch_new(num_class, cfg, camera_num, view_num, __factory_T_type)
-        print('===========Building FusionReID===========')
-        return model
+    if cfg.MODEL.BASE == 0:
+        model = BaselineTrans(num_class, cfg, camera_num, view_num, __factory_T_type)
+        print('===========Building BaselineTrans===========')
+    elif cfg.MODEL.BASE == 1:
+        model = BaselineRes(num_class, cfg, camera_num, view_num, __factory_T_type)
+        print('===========Building BaselineRes===========')
     else:
-        print("===========Fail to build model,Please check cfg.MODEL.RES_USE and cfg.MODEL.TRANS_USE===========")
-        return None
+        model = Branch_new(num_class, cfg, camera_num, view_num, __factory_T_type)
+        print('===========Building DenseMMReID===========')
+    return model

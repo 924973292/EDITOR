@@ -10,7 +10,7 @@ _C.MODEL.DEVICE = "cuda"
 # ID number of GPU
 _C.MODEL.DEVICE_ID = '0'
 # Name of backbone
-_C.MODEL.NAME = 'FusionReID'
+_C.MODEL.NAME = 'MMReID'
 # Last stride of backbone
 _C.MODEL.LAST_STRIDE = 1
 # Path to pretrained model of backbone
@@ -25,9 +25,11 @@ _C.MODEL.PRETRAIN_CHOICE = 'imagenet'
 # Choose different resnet backbone (1->resnet50||2->resnet101||3->resnet152)
 _C.MODEL.RES_MODE = 1
 # Layer of SRM
-_C.MODEL.SRM_LAYER = 2
+_C.MODEL.DEPTH = 4
 # Fusion dim
 _C.MODEL.MIX_DIM = 768
+_C.MODEL.MIX_MODE = 0
+_C.MODEL.BASE = 2
 # If train with BNNeck, options: 'bnneck' or 'no'
 _C.MODEL.NECK = 'bnneck'
 # If train loss include center loss, options: 'yes' or 'no'. Loss with center loss has different optimizer configuration
@@ -68,9 +70,9 @@ _C.INPUT.PROB = 0.5
 # Random probability for random erasing
 _C.INPUT.RE_PROB = 0.5
 # Values to be used for image normalization
-_C.INPUT.PIXEL_MEAN = [0.5, 0.5, 0.5]
+_C.INPUT.PIXEL_MEAN = [0.485, 0.456, 0.406]
 # Values to be used for image normalization
-_C.INPUT.PIXEL_STD = [0.5, 0.5, 0.5]
+_C.INPUT.PIXEL_STD = [0.229, 0.224, 0.225]
 # Value of padding size
 _C.INPUT.PADDING = 10
 
@@ -88,7 +90,7 @@ _C.DATASETS.ROOT_DIR = ('./data')
 # -----------------------------------------------------------------------------
 _C.DATALOADER = CN()
 # Number of data loading threads
-_C.DATALOADER.NUM_WORKERS = 14
+_C.DATALOADER.NUM_WORKERS = 32
 # Sampler for data loading
 _C.DATALOADER.SAMPLER = 'softmax_triplet'
 # Number of instance for one batch
@@ -101,9 +103,9 @@ _C.SOLVER = CN()
 # Name of optimizer
 _C.SOLVER.OPTIMIZER_NAME = "SGD"
 # Number of max epoches
-_C.SOLVER.MAX_EPOCHS = 180
+_C.SOLVER.MAX_EPOCHS = 120
 # Base learning rate
-_C.SOLVER.BASE_LR = 0.005
+_C.SOLVER.BASE_LR = 0.008
 # Factor of learning bias
 _C.SOLVER.LARGE_FC_LR = False
 _C.SOLVER.BIAS_LR_FACTOR = 2
@@ -142,12 +144,12 @@ _C.SOLVER.COSINE_SCALE = 30
 _C.SOLVER.SEED = 1111
 _C.MODEL.NO_MARGIN = True
 # epoch number of saving checkpoints
-_C.SOLVER.CHECKPOINT_PERIOD = 180
+_C.SOLVER.CHECKPOINT_PERIOD = 60
 # iteration of display training log
-_C.SOLVER.LOG_PERIOD = 100
+_C.SOLVER.LOG_PERIOD = 10
 # epoch number of validation
-_C.SOLVER.EVAL_PERIOD = 30
-
+_C.SOLVER.EVAL_PERIOD = 1
+_C.SOLVER.KL = 0
 # Number of images per batch
 # This is global, so if we have 8 GPUs and IMS_PER_BATCH = 16, each GPU will
 # see 2 images per batch
@@ -166,13 +168,13 @@ _C.TEST.RE_RANKING = 'no'
 # Path to trained model
 _C.TEST.WEIGHT = ""
 # Which feature of BNNeck to be used for test, before or after BNNneck, options: 'before' or 'after'
-_C.TEST.NECK_FEAT = 'before'
+_C.TEST.NECK_FEAT = 'after'
 # Whether feature is nomalized before test, if yes, it is equivalent to cosine distance
 _C.TEST.FEAT_NORM = 'yes'
 _C.TEST.FEAT = 0
-
+_C.TEST.MISS = 'None'
 # ----------------------------------------------------------a------------------ #
 # Misc options
 # ---------------------------------------------------------------------------- #
 # Path to checkpoint and saved log of trained model
-_C.OUTPUT_DIR = "./msmt_test_mfu_seu"
+_C.OUTPUT_DIR = "./test"

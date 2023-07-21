@@ -7,6 +7,18 @@ from utils.meter import AverageMeter
 from utils.metrics import R1_mAP_eval
 from torch.cuda import amp
 import torch.distributed as dist
+import torch.nn.functional as F
+
+
+def normalize(x, axis=-1):
+    """Normalizing to unit length along the specified dimension.
+    Args:
+      x: pytorch Variable
+    Returns:
+      x: pytorch Variable, same shape as input
+    """
+    x = 1. * x / (torch.norm(x, 2, axis, keepdim=True).expand_as(x) + 1e-12)
+    return x
 
 
 def do_train(cfg,
@@ -26,7 +38,7 @@ def do_train(cfg,
     device = "cuda"
     epochs = cfg.SOLVER.MAX_EPOCHS
     logging.getLogger().setLevel(logging.INFO)
-    logger = logging.getLogger("FusionReID.train")
+    logger = logging.getLogger("MMReID.train")
     logger.info('start training')
     _LOCAL_PROCESS_GROUP = None
     if device:
@@ -42,6 +54,7 @@ def do_train(cfg,
     evaluator = R1_mAP_eval(num_query, max_rank=50, feat_norm=cfg.TEST.FEAT_NORM)
     scaler = amp.GradScaler()
     # train
+    best_index = {'mAP': 0, "Rank-1": 0, 'Rank-5': 0, 'Rank-10': 0}
     for epoch in range(1, epochs + 1):
         start_time = time.time()
         loss_meter.reset()
@@ -52,35 +65,26 @@ def do_train(cfg,
         for n_iter, (img, vid, target_cam, target_view) in enumerate(train_loader):
             optimizer.zero_grad()
             optimizer_center.zero_grad()
-            img = img.to(device)
+            img = {'RGB': img['RGB'].to(device),
+                   'NI': img['NI'].to(device),
+                   'TI': img['TI'].to(device)}
             target = vid.to(device)
             target_cam = target_cam.to(device)
             target_view = target_view.to(device)
             with amp.autocast(enabled=True):
-                if cfg.MODEL.RES_USE and cfg.MODEL.TRANS_USE:
-                    cls_score_r, global_feat_r, cls_score_f, global_feat_f, cls_score_1, global_feat_1, cls_score_2, \
-                        global_feat_2, cls_score_3, global_feat_3, cls_score_4, global_feat_4 = model(
-                        img,
-                        label=target,
-                        cam_label=target_cam,
-                        view_label=target_view)
-
-                    loss_1 = loss_fn(cls_score_r, global_feat_r, target, target_cam)
-                    loss_2 = loss_fn(cls_score_f, global_feat_f, target, target_cam)
-                    loss_3 = loss_fn(cls_score_1, global_feat_1, target, target_cam)
-                    loss_4 = loss_fn(cls_score_2, global_feat_2, target, target_cam)
-                    loss_5 = loss_fn(cls_score_3, global_feat_3, target, target_cam)
-                    loss_6 = loss_fn(cls_score_4, global_feat_4, target, target_cam)
-                    loss = loss_1 + loss_2 + loss_3 + loss_4 + loss_5 + loss_6
-                else:
-                    cls_score_r, global_feat_r = model(
-                        img,
-                        label=target,
-                        cam_label=target_cam,
-                        view_label=target_view)
-                    loss = loss_fn(cls_score_r, global_feat_r, target, target_cam)
+                output = model(img, label=target, cam_label=target_cam, view_label=target_view)
+                loss = 0
+                for i in range(0, len(output), 2):
+                    loss_tmp = loss_fn(output[i], output[i + 1], target, target_cam)
+                    loss = loss + loss_tmp
+                if cfg.SOLVER.KL:
+                    kl_rgb_ni = nn.KLDivLoss(reduction="batchmean")
+                    kl_rgb_ti = nn.KLDivLoss(reduction="batchmean")
+                    x_log = F.log_softmax(output[0], dim=1)
+                    loss_kl = kl_rgb_ni(x_log, F.softmax(output[2], dim=1)) + kl_rgb_ti(
+                        x_log, F.softmax(output[4], dim=1))
+                    loss = loss + 0.001 * loss_kl
             scaler.scale(loss).backward()
-
             scaler.step(optimizer)
             scaler.update()
 
@@ -89,12 +93,12 @@ def do_train(cfg,
                     param.grad.data *= (1. / cfg.SOLVER.CENTER_LOSS_WEIGHT)
                 scaler.step(optimizer_center)
                 scaler.update()
-            if isinstance(cls_score_r, list):
-                acc = (cls_score_r[0].max(1)[1] == target).float().mean()
+            if isinstance(output, list):
+                acc = (output[0][0].max(1)[1] == target).float().mean()
             else:
-                acc = (cls_score_r.max(1)[1] == target).float().mean()
+                acc = (output[0].max(1)[1] == target).float().mean()
 
-            loss_meter.update(loss.item(), img.shape[0])
+            loss_meter.update(loss.item(), img['RGB'].shape[0])
             acc_meter.update(acc, 1)
 
             torch.cuda.synchronize()
@@ -127,7 +131,9 @@ def do_train(cfg,
                     model.eval()
                     for n_iter, (img, vid, camid, camids, target_view, _) in enumerate(val_loader):
                         with torch.no_grad():
-                            img = img.to(device)
+                            img = {'RGB': img['RGB'].to(device),
+                                   'NI': img['NI'].to(device),
+                                   'TI': img['TI'].to(device)}
                             camids = camids.to(device)
                             target_view = target_view.to(device)
                             feat = model(img, cam_label=camids, view_label=target_view)
@@ -142,7 +148,9 @@ def do_train(cfg,
                 model.eval()
                 for n_iter, (img, vid, camid, camids, target_view, _) in enumerate(val_loader):
                     with torch.no_grad():
-                        img = img.to(device)
+                        img = {'RGB': img['RGB'].to(device),
+                               'NI': img['NI'].to(device),
+                               'TI': img['TI'].to(device)}
                         camids = camids.to(device)
                         target_view = target_view.to(device)
                         feat = model(img, cam_label=camids, view_label=target_view)
@@ -152,6 +160,17 @@ def do_train(cfg,
                 logger.info("mAP: {:.1%}".format(mAP))
                 for r in [1, 5, 10]:
                     logger.info("CMC curve, Rank-{:<3}:{:.1%}".format(r, cmc[r - 1]))
+                if mAP >= best_index['mAP']:
+                    best_index['mAP'] = mAP
+                    best_index['Rank-1'] = cmc[0]
+                    best_index['Rank-5'] = cmc[4]
+                    best_index['Rank-10'] = cmc[9]
+                    torch.save(model.state_dict(),
+                               os.path.join(cfg.OUTPUT_DIR, cfg.MODEL.NAME + 'best.pth'))
+                logger.info("Best mAP: {:.1%}".format(best_index['mAP']))
+                logger.info("Best Rank-1: {:.1%}".format(best_index['Rank-1']))
+                logger.info("Best Rank-5: {:.1%}".format(best_index['Rank-5']))
+                logger.info("Best Rank-10: {:.1%}".format(best_index['Rank-10']))
                 torch.cuda.empty_cache()
 
 
@@ -160,7 +179,7 @@ def do_inference(cfg,
                  val_loader,
                  num_query):
     device = "cuda"
-    logger = logging.getLogger("FusionReID.test")
+    logger = logging.getLogger("MMReID.test")
     logger.info("Enter inferencing")
 
     evaluator = R1_mAP_eval(num_query, max_rank=50, feat_norm=cfg.TEST.FEAT_NORM)
@@ -178,7 +197,9 @@ def do_inference(cfg,
 
     for n_iter, (img, pid, camid, camids, target_view, imgpath) in enumerate(val_loader):
         with torch.no_grad():
-            img = img.to(device)
+            img = {'RGB': img['RGB'].to(device),
+                   'NI': img['NI'].to(device),
+                   'TI': img['TI'].to(device)}
             camids = camids.to(device)
             target_view = target_view.to(device)
             feat = model(img, cam_label=camids, view_label=target_view)

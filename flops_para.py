@@ -1,6 +1,7 @@
 from thop import profile
 import os
 import sys
+
 for _ in sys.path:
     print(_)
 from utils.logger import setup_logger
@@ -26,7 +27,7 @@ def set_seed(seed):
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description="FusionReID Training")
+    parser = argparse.ArgumentParser(description="MMReID Training")
     parser.add_argument(
         "--config_file", default="", help="path to config file", type=str
     )
@@ -34,13 +35,13 @@ if __name__ == '__main__':
     parser.add_argument("opts", help="Modify config options using the command-line", default=None,
                         nargs=argparse.REMAINDER)
     parser.add_argument("--local_rank", default=0, type=int)
-    parser.add_argument("--fea_cft", default=0,help="Feature choose to be tested", type=int)
+    parser.add_argument("--fea_cft", default=0, help="Feature choose to be tested", type=int)
     args = parser.parse_args()
-
     if args.config_file != "":
         cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
     cfg.TEST.FEAT = args.fea_cft
+    cfg.MODEL.SIE_CAMERA = False
     cfg.freeze()
 
     set_seed(cfg.SOLVER.SEED)
@@ -52,7 +53,7 @@ if __name__ == '__main__':
     if output_dir and not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    logger = setup_logger("FusionReID", output_dir, if_train=True)
+    logger = setup_logger("MMReID", output_dir, if_train=True)
     logger.info("Saving model in the path :{}".format(cfg.OUTPUT_DIR))
     logger.info(args)
 
@@ -69,8 +70,13 @@ if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = cfg.MODEL.DEVICE_ID
     train_loader, train_loader_normal, val_loader, num_query, num_classes, camera_num, view_num = make_dataloader(cfg)
     print("data is ready")
+
     model = make_model(cfg, num_class=num_classes, camera_num=camera_num, view_num=view_num)
-    input_data = torch.randn(2,3,256,128)
+    input_data = {}
+    input_data['RGB'] = torch.randn(2, 3, 256, 128)
+    input_data['NI'] = torch.randn(2, 3, 256, 128)
+    input_data['TI'] = torch.randn(2, 3, 256, 128)
+
     flops, params = profile(model, inputs=(input_data,))
-    logger.info("FLOPs:{}G".format(flops/2e9))
-    logger.info("Params:{}M".format(params/1e6))
+    logger.info("FLOPs:{}G".format(flops / 2e9))
+    logger.info("Params:{}M".format(params / 1e6))

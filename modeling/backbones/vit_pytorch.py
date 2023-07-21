@@ -142,7 +142,7 @@ class Mlp(nn.Module):
 
 
 class Attention(nn.Module):
-    def __init__(self, dim, num_heads=8, qkv_bias=False, qk_scale=None, attn_drop=0., proj_drop=0.):
+    def __init__(self, dim, num_heads=12, qkv_bias=False, qk_scale=None, attn_drop=0., proj_drop=0.):
         super().__init__()
         self.num_heads = num_heads
         head_dim = dim // num_heads
@@ -185,12 +185,36 @@ class Block(nn.Module):
         self.mlp = Mlp(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop)
 
     def forward(self, x, get_att=False):
-        if get_att:
-            return self.attn(self.norm1(x), get_att=get_att)
-        else:
-            x = x + self.drop_path(self.attn(self.norm1(x)))
-            x = x + self.drop_path(self.mlp(self.norm2(x)))
+        x = x + self.drop_path(self.attn(self.norm1(x)))
+        x = x + self.drop_path(self.mlp(self.norm2(x)))
         return x
+
+
+class ReAttention(nn.Module):
+    def __init__(self, dim, num_heads=8, qkv_bias=False, qk_scale=None, attn_drop=0., proj_drop=0.):
+        super().__init__()
+        self.num_heads = num_heads
+        head_dim = dim // num_heads
+        # NOTE scale factor was wrong in my original version, can set manually to be compat with prev weights
+        self.scale = qk_scale or head_dim ** -0.5
+
+        self.qkv = nn.Linear(dim, dim * 3, bias=qkv_bias)
+        self.attn_drop = nn.Dropout(attn_drop)
+        self.proj = nn.Linear(dim, dim)
+        self.proj_drop = nn.Dropout(proj_drop)
+
+    def forward(self, x):
+        B, N, C = x.shape
+        qkv = self.qkv(x).reshape(B, N, 3, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
+        q, k, v = qkv[0], qkv[1], qkv[2]  # make torchscript happy (cannot use tensor as tuple)
+        attn = (q @ k.transpose(-2, -1)) * self.scale
+        attn = attn.softmax(dim=-1)
+        attn = self.attn_drop(attn)
+        x = (attn @ v).transpose(1, 2).reshape(B, N, C)
+        x = self.proj(x)
+        x = self.proj_drop(x)
+        v = v.permute(0, 2, 1, 3).flatten(-2)
+        return x, v
 
 
 class PatchEmbed(nn.Module):
@@ -359,7 +383,10 @@ class Trans(nn.Module):
             for i in range(depth)])
 
         self.norm = norm_layer(embed_dim)
-
+        self.norm_m1 = norm_layer(embed_dim)
+        self.norm_m2 = norm_layer(embed_dim)
+        self.norm_m3 = norm_layer(embed_dim)
+        self.norm_m = [self.norm_m1, self.norm_m2, self.norm_m3]
         # Classifier head
         self.fc = nn.Linear(embed_dim, 1000) if num_classes > 0 else nn.Identity()
         trunc_normal_(self.cls_token, std=.02)
@@ -404,19 +431,17 @@ class Trans(nn.Module):
             x = x + self.pos_embed
 
         x = self.pos_drop(x)
+        cash_x = []
+        k = 0
+        for index, blk in enumerate(self.blocks):
+            x = blk(x)
+            if index in [2, 5, 8]:
+                cash_x.append(self.norm_m[k](x))
+                k = k + 1
+            if index == 11:
+                cash_x.append(self.norm(x))
 
-        if self.local_feature:
-            for blk in self.blocks[:-1]:
-                x = blk(x)
-            return x
-
-        else:
-            for blk in self.blocks:
-                x = blk(x)
-
-            x = self.norm(x)
-
-            return x
+        return cash_x
 
     def forward(self, x, cam_label=None, view_label=None):
         x = self.forward_features(x, cam_label, view_label)
@@ -470,7 +495,7 @@ def resize_pos_embed(posemb, posemb_new, hight, width):
 
 
 def vit_base_patch16_224(img_size=(256, 128), stride_size=16, drop_rate=0.0, attn_drop_rate=0.0,
-                               drop_path_rate=0.1, camera=0, view=0, local_feature=False, sie_xishu=1.5, **kwargs):
+                         drop_path_rate=0.1, camera=0, view=0, local_feature=False, sie_xishu=1.5, **kwargs):
     model = Trans(
         img_size=img_size, patch_size=16, stride_size=stride_size, embed_dim=768, depth=12, num_heads=12, mlp_ratio=4,
         qkv_bias=True, \
@@ -481,8 +506,8 @@ def vit_base_patch16_224(img_size=(256, 128), stride_size=16, drop_rate=0.0, att
 
 
 def vit_small_patch16_224(img_size=(256, 128), stride_size=16, drop_rate=0., attn_drop_rate=0.,
-                                drop_path_rate=0.1, camera=0, view=0, local_feature=False, sie_xishu=1.5,
-                                **kwargs):
+                          drop_path_rate=0.1, camera=0, view=0, local_feature=False, sie_xishu=1.5,
+                          **kwargs):
     kwargs.setdefault('qk_scale', 768 ** -0.5)
     model = Trans(
         img_size=img_size, patch_size=16, stride_size=stride_size, embed_dim=768, depth=8, num_heads=8, mlp_ratio=3.,
@@ -494,8 +519,8 @@ def vit_small_patch16_224(img_size=(256, 128), stride_size=16, drop_rate=0., att
 
 
 def deit_small_patch16_224(img_size=(256, 128), stride_size=16, drop_path_rate=0.1, drop_rate=0.0,
-                                 attn_drop_rate=0.0, camera=0, view=0, local_feature=False, sie_xishu=1.5,
-                                 **kwargs):
+                           attn_drop_rate=0.0, camera=0, view=0, local_feature=False, sie_xishu=1.5,
+                           **kwargs):
     model = Trans(
         img_size=img_size, patch_size=16, stride_size=stride_size, embed_dim=384, depth=12, num_heads=6, mlp_ratio=4,
         qkv_bias=True,
@@ -504,10 +529,11 @@ def deit_small_patch16_224(img_size=(256, 128), stride_size=16, drop_path_rate=0
         norm_layer=partial(nn.LayerNorm, eps=1e-6), **kwargs)
 
     return model
+
 
 def swin_small_patch16_224(img_size=(256, 128), stride_size=16, drop_path_rate=0.1, drop_rate=0.0,
-                                 attn_drop_rate=0.0, camera=0, view=0, local_feature=False, sie_xishu=1.5,
-                                 **kwargs):
+                           attn_drop_rate=0.0, camera=0, view=0, local_feature=False, sie_xishu=1.5,
+                           **kwargs):
     model = Trans(
         img_size=img_size, patch_size=16, stride_size=stride_size, embed_dim=384, depth=12, num_heads=6, mlp_ratio=4,
         qkv_bias=True,
@@ -516,6 +542,8 @@ def swin_small_patch16_224(img_size=(256, 128), stride_size=16, drop_path_rate=0
         norm_layer=partial(nn.LayerNorm, eps=1e-6), **kwargs)
 
     return model
+
+
 def _no_grad_trunc_normal_(tensor, mean, std, a, b):
     # Cut & paste from PyTorch official master until it's in a few official releases - RW
     # Method based on https://people.sc.fsu.edu/~jburkardt/presentations/truncated_normal.pdf

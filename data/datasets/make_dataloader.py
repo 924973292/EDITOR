@@ -1,4 +1,3 @@
-
 import torch
 import torchvision.transforms as T
 from torch.utils.data import DataLoader
@@ -8,6 +7,8 @@ from .sampler import RandomIdentitySampler
 from .dukemtmcreid import DukeMTMCreID
 from .market1501 import Market1501
 from .msmt17 import MSMT17
+from .RGBNT201 import RGBNT201
+from .RGBNT100 import RGBNT100
 from .sampler_ddp import RandomIdentitySampler_DDP
 import torch.distributed as dist
 
@@ -15,6 +16,8 @@ __factory = {
     'market1501': Market1501,
     'dukemtmc': DukeMTMCreID,
     'msmt17': MSMT17,
+    'RGBNT201': RGBNT201,
+    'RGBNT100': RGBNT100,
 }
 """ Random Erasing (Cutout)
 
@@ -65,7 +68,7 @@ class RandomErasing:
             self,
             probability=0.5,
             min_area=0.02,
-            max_area=1/3,
+            max_area=1 / 3,
             min_aspect=0.3,
             max_aspect=None,
             mode='const',
@@ -143,14 +146,40 @@ def train_collate_fn(batch):
     pids = torch.tensor(pids, dtype=torch.int64)
     viewids = torch.tensor(viewids, dtype=torch.int64)
     camids = torch.tensor(camids, dtype=torch.int64)
-    return torch.stack(imgs, dim=0), pids, camids, viewids,
+    RGB_list = []
+    NI_list = []
+    TI_list = []
+
+    for img in imgs:
+        RGB_list.append(img[0])
+        NI_list.append(img[1])
+        TI_list.append(img[2])
+
+    RGB = torch.stack(RGB_list, dim=0)
+    NI = torch.stack(NI_list, dim=0)
+    TI = torch.stack(TI_list, dim=0)
+    imgs = {'RGB': RGB, "NI": NI, "TI": TI}
+    return imgs, pids, camids, viewids,
 
 
 def val_collate_fn(batch):
     imgs, pids, camids, viewids, img_paths = zip(*batch)
     viewids = torch.tensor(viewids, dtype=torch.int64)
     camids_batch = torch.tensor(camids, dtype=torch.int64)
-    return torch.stack(imgs, dim=0), pids, camids, camids_batch, viewids, img_paths
+    RGB_list = []
+    NI_list = []
+    TI_list = []
+
+    for img in imgs:
+        RGB_list.append(img[0])
+        NI_list.append(img[1])
+        TI_list.append(img[2])
+
+    RGB = torch.stack(RGB_list, dim=0)
+    NI = torch.stack(NI_list, dim=0)
+    TI = torch.stack(TI_list, dim=0)
+    imgs = {'RGB': RGB, "NI": NI, "TI": TI}
+    return imgs, pids, camids, camids_batch, viewids, img_paths
 
 
 def make_dataloader(cfg):

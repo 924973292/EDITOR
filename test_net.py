@@ -7,7 +7,7 @@ from engine.processor import do_inference
 from utils.logger import setup_logger
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="FusionReID Testing")
+    parser = argparse.ArgumentParser(description="MMReID Testing")
     parser.add_argument(
         "--config_file", default="", help="path to config file", type=str
     )
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     if output_dir and not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    logger = setup_logger("FusionReID", output_dir, if_train=False)
+    logger = setup_logger("MMReID", output_dir, if_train=False)
     logger.info(args)
 
     if args.config_file != "":
@@ -58,7 +58,7 @@ if __name__ == "__main__":
 
     model = make_model(cfg, num_class=num_classes, camera_num=camera_num, view_num=view_num)
     file = cfg.OUTPUT_DIR.replace('.', '')
-    model.load_param('/15127306268/wyh/UIS' + file + '/FusionReID_180.pth')
+    model.load_param('/15127306268/wyh/UIS' + file + '/MMReID_180.pth')
 
     if cfg.DATASETS.NAMES == 'VehicleID':
         for trial in range(10):

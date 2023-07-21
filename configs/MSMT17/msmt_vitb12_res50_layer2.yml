@@ -22,8 +22,8 @@ INPUT:
   PIXEL_STD: [0.5, 0.5, 0.5]
 
 DATASETS:
-  NAMES: ('msmt17')
-  ROOT_DIR: '/15127306268/wyh/UIS/data'
+  NAMES: ('RGBNT201')
+  ROOT_DIR: '/15127306268/wyh/Multi-modality/torchreid/data/data_sum/RGBNT201'
 
 TEST:
   RE_RANKING: 'no'
@@ -31,5 +31,5 @@ TEST:
   NECK_FEAT: 'before'
   FEAT_NORM: 'yes'
   FEAT: 0
-OUTPUT_DIR: './msmt_vitb12_res50_layer2_DTM'
+OUTPUT_DIR: './test'
 
