@@ -3,11 +3,7 @@ import torch.nn as nn
 from modeling.backbones.vit_pytorch import vit_base_patch16_224, vit_small_patch16_224, \
     deit_small_patch16_224
 import torch.nn.functional as F
-from modeling.backbones.swin import swin_base_patch4_win8
-from modeling.backbones.ResTV2 import restv2_tiny, restv2_small, restv2_base, restv2_large
-from modeling.backbones.edgeViT import edgevit_s
-from modeling.backbones.t2tvit import t2t_vit_t_24, t2t_vit_t_14
-from modeling.fusion_part.MMDA import BlockFuse, Rotation
+from modeling.fusion_part.RotationLSE import BlockFuse, Rotation
 from modeling.backbones.resnet import ResNet, Bottleneck
 
 
@@ -561,14 +557,6 @@ __factory_T_type = {
     'deit_base_patch16_224': vit_base_patch16_224,
     'vit_small_patch16_224': vit_small_patch16_224,
     'deit_small_patch16_224': deit_small_patch16_224,
-    'swin_base_patch4_win8': swin_base_patch4_win8,
-    'restv2_tiny': restv2_tiny,
-    'restv2_small': restv2_small,
-    'restv2_base': restv2_base,
-    'restv2_large': restv2_large,
-    'edgevit_s': edgevit_s,
-    't2t_vit_t_24': t2t_vit_t_24,
-    't2t_vit_t_14': t2t_vit_t_14
 }
 
 

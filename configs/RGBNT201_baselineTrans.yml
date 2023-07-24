@@ -20,12 +20,14 @@ INPUT:
   PIXEL_MEAN: [ 0.5, 0.5, 0.5 ]
   PIXEL_STD: [ 0.5, 0.5, 0.5 ]
 
+#DATASETS:
+#  NAMES: ('RGBNT201')
+#  ROOT_DIR: '/15127306268/wyh/Multi-modality/torchreid/data/data_sum/'
 DATASETS:
-  NAMES: ('RGBNT201')
-  ROOT_DIR: '/15127306268/wyh/Multi-modality/torchreid/data/data_sum/'
-
+  NAMES: ('RGBNT100')
+  ROOT_DIR: '/15127306268/wyh/MM/data/'
 SOLVER:
-  BASE_LR: 0.008
+  BASE_LR: 0.001
   WARMUP_ITERS: 10
   KL: 0
 
@@ -36,5 +38,5 @@ TEST:
   FEAT_NORM: 'yes'
   FEAT: 0
   MISS: "None"
-OUTPUT_DIR: './RGBNT201/baselineTrans'
+OUTPUT_DIR: './RGBNT100/baselineTrans'
 

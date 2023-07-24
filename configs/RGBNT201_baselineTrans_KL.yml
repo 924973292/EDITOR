@@ -25,7 +25,7 @@ DATASETS:
   ROOT_DIR: '/15127306268/wyh/Multi-modality/torchreid/data/data_sum/'
 
 SOLVER:
-  BASE_LR: 0.008
+  BASE_LR: 0.001
   WARMUP_ITERS: 10
   KL: 1
 

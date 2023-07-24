@@ -40,6 +40,6 @@ if __name__ == "__main__":
     train_loader, train_loader_normal, val_loader, num_query, num_classes, camera_num, view_num = make_dataloader(cfg)
 
     model = make_model(cfg, num_class=num_classes, camera_num=camera_num, view_num=view_num)
-    model.load_param("/15127306268/wyh/MM/RGBNT_3simple_FFN_12_0_wohsc/MMReID_180.pth")
+    model.load_param("/15127306268/wyh/MM/RGBNT100/rotation/MMReIDbest.pth")
 
     do_inference(cfg,model,val_loader,num_query)

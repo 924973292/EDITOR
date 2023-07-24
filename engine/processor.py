@@ -83,7 +83,7 @@ def do_train(cfg,
                     x_log = F.log_softmax(output[0], dim=1)
                     loss_kl = kl_rgb_ni(x_log, F.softmax(output[2], dim=1)) + kl_rgb_ti(
                         x_log, F.softmax(output[4], dim=1))
-                    loss = loss + 0.001 * loss_kl
+                    loss = loss + loss_kl
             scaler.scale(loss).backward()
             scaler.step(optimizer)
             scaler.update()

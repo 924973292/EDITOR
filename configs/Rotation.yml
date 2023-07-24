@@ -35,5 +35,5 @@ TEST:
   FEAT_NORM: 'yes'
   FEAT: 0
   MISS: "None"
-OUTPUT_DIR: './RGBNT201/rotation'
+OUTPUT_DIR: './RGBNT201/rotation_local'
 
