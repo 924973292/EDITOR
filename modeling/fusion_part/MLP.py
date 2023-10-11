@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
-from MultiScaleCE import ChannelUnite
+from ..fusion_part.MultiScaleCE import ChannelUnite
+
 
 def _make_divisible(v, divisor, min_value=None):
     """
@@ -36,10 +37,13 @@ class SE(nn.Module):
 
     def forward(self, x, weight, height):
         b, l, c = x.shape
+        cls = x[:, 0, :]
+        x = x[:, 1:, :]
         x = x.reshape(b, weight, height, c).permute(0, 3, 1, 2).contiguous()
         b, c, _, _ = x.size()
-        y = self.avg_pool(x).view(b, c)
+        y = self.avg_pool(x).view(b, c, 1, 1)
         out = (x * y).flatten(2).transpose(1, 2)
+        out = torch.cat([cls.unsqueeze(1), out], dim=-2)
         return out
 
 
@@ -52,7 +56,6 @@ class Mlp(nn.Module):
         self.act = act_layer()
         self.fc2 = nn.Linear(hidden_features, out_features)
         self.drop = nn.Dropout(drop)
-        print('Normal FFN HERE!!!')
 
     def forward(self, x, height=16, weight=8):
         x = self.fc1(x)
@@ -61,6 +64,7 @@ class Mlp(nn.Module):
         x = self.fc2(x)
         x = self.drop(x)
         return x
+
 
 class MSCE(nn.Module):
     def __init__(self, channel, reduction=4):

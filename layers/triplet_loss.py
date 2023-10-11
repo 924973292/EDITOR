@@ -43,7 +43,7 @@ def cosine_dist(x, y):
     x_norm = torch.pow(x, 2).sum(1, keepdim=True).sqrt().expand(m, n)
     y_norm = torch.pow(y, 2).sum(1, keepdim=True).sqrt().expand(n, m).t()
     xy_intersection = torch.mm(x, y.t())
-    dist = xy_intersection/(x_norm * y_norm)
+    dist = xy_intersection / (x_norm * y_norm)
     dist = (1. - dist) / 2
     return dist
 
@@ -75,9 +75,10 @@ def hard_example_mining(dist_mat, labels, return_inds=False):
 
     # `dist_ap` means distance(anchor, positive)
     # both `dist_ap` and `relative_p_inds` with shape [N, 1]
+    # test = dist_mat[is_pos].shape
     dist_ap, relative_p_inds = torch.max(
         dist_mat[is_pos].contiguous().view(N, -1), 1, keepdim=True)
-    # print(dist_mat[is_pos].shape)
+
     # `dist_an` means distance(anchor, negative)
     # both `dist_an` and `relative_n_inds` with shape [N, 1]
     dist_an, relative_n_inds = torch.min(
@@ -135,3 +136,59 @@ class TripletLoss(object):
         return loss, dist_ap, dist_an
 
 
+def pdist_torch(emb1, emb2):
+    '''
+    compute the eucilidean distance matrix between embeddings1 and embeddings2
+    using gpu
+    '''
+    m, n = emb1.shape[0], emb2.shape[0]
+    emb1_pow = torch.pow(emb1, 2).sum(dim=1, keepdim=True).expand(m, n)
+    emb2_pow = torch.pow(emb2, 2).sum(dim=1, keepdim=True).expand(n, m).t()
+    dist_mtx = emb1_pow + emb2_pow
+    dist_mtx = dist_mtx.addmm_(1, -2, emb1, emb2.t())
+    # dist_mtx = dist_mtx.clamp(min = 1e-12)
+    dist_mtx = dist_mtx.clamp(min=1e-12).sqrt()
+    return dist_mtx
+
+
+def softmax_weights(dist, mask):
+    max_v = torch.max(dist * mask, dim=1, keepdim=True)[0]
+    diff = dist - max_v
+    Z = torch.sum(torch.exp(diff) * mask, dim=1, keepdim=True) + 1e-6  # avoid division by zero
+    W = torch.exp(diff) * mask / Z
+    return W
+
+
+class TripletLoss_WRT(nn.Module):
+    """Weighted Regularized Triplet'."""
+
+    def __init__(self):
+        super(TripletLoss_WRT, self).__init__()
+        self.ranking_loss = nn.SoftMarginLoss()
+
+    def forward(self, inputs, targets, normalize_feature=False):
+        if normalize_feature:
+            inputs = normalize(inputs, axis=-1)
+        dist_mat = euclidean_dist(inputs, inputs)
+
+        N = dist_mat.size(0)
+        # shape [N, N]
+        is_pos = targets.expand(N, N).eq(targets.expand(N, N).t()).float()
+        is_neg = targets.expand(N, N).ne(targets.expand(N, N).t()).float()
+
+        # `dist_ap` means distance(anchor, positive)
+        # both `dist_ap` and `relative_p_inds` with shape [N, 1]
+        dist_ap = dist_mat * is_pos
+        dist_an = dist_mat * is_neg
+
+        weights_ap = softmax_weights(dist_ap, is_pos)
+        weights_an = softmax_weights(-dist_an, is_neg)
+        furthest_positive = torch.sum(dist_ap * weights_ap, dim=1)
+        closest_negative = torch.sum(dist_an * weights_an, dim=1)
+
+        y = furthest_positive.new().resize_as_(furthest_positive).fill_(1)
+        loss = self.ranking_loss(closest_negative - furthest_positive, y)
+
+        # compute accuracy
+        correct = torch.ge(closest_negative, furthest_positive).sum().item()
+        return loss, correct

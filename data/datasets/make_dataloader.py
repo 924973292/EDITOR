@@ -1,16 +1,26 @@
 import torch
 import torchvision.transforms as T
 from torch.utils.data import DataLoader
-
+import numpy as np
+from .ChannelAug import ChannelAdap, ChannelAdapGray, ChannelRandomErasing
 from .bases import ImageDataset
-from .sampler import RandomIdentitySampler
+from .sampler import RandomIdentitySampler, IdentitySampler
 from .dukemtmcreid import DukeMTMCreID
 from .market1501 import Market1501
 from .msmt17 import MSMT17
+from .msvr310 import MSVR310
 from .RGBNT201 import RGBNT201
 from .RGBNT100 import RGBNT100
+from .RegDB import RegDB
+from .SYSU import SYSU
 from .sampler_ddp import RandomIdentitySampler_DDP
 import torch.distributed as dist
+import torch.utils.data as data
+from data.cross.data_loader import SYSUData, RegDBData, TestData
+from data.cross.data_manager import process_query_sysu, process_gallery_sysu, process_test_regdb
+import time
+import torchvision.transforms as transforms
+from itertools import product
 
 __factory = {
     'market1501': Market1501,
@@ -18,6 +28,9 @@ __factory = {
     'msmt17': MSMT17,
     'RGBNT201': RGBNT201,
     'RGBNT100': RGBNT100,
+    'MSVR310': MSVR310,
+    'RegDB': RegDB,
+    'SYSU': SYSU,
 }
 """ Random Erasing (Cutout)
 
@@ -138,11 +151,92 @@ class RandomErasing:
         return fs
 
 
+def train_collate_fn_Cross(batch):
+    # Group images by pids and camid
+    imgs, pids, camids, viewids, _ = zip(*batch)
+    imgs = list(imgs)
+    pids = list(pids)
+    camids = list(camids)
+    viewids = list(viewids)
+    grouped_data = {}
+    for img, pid, camid, viewid, _ in batch:
+        key = pid
+        if key not in grouped_data:
+            grouped_data[key] = {'RGB': [], 'NI': [], 'TI': []}
+        grouped_data[key]['RGB'].append(img[0])
+        grouped_data[key]['NI'].append(img[1])
+        grouped_data[key]['TI'].append(img[2])
+
+    # Randomly shuffle the modality sequences within each pid
+    for key, modality_data in grouped_data.items():
+        rgb_data = modality_data['RGB']
+        ni_data = modality_data['NI']
+        ti_data = modality_data['TI']
+        combinations = product(rgb_data, ni_data, ti_data)
+        imgs.extend(combinations)
+        pids.extend([key] * len(rgb_data) * len(ni_data) * len(ti_data))
+
+    RGB_list = []
+    NI_list = []
+    TI_list = []
+
+    for img in imgs:
+        RGB_list.append(img[0])
+        NI_list.append(img[1])
+        TI_list.append(img[2])
+
+    RGB = torch.stack(RGB_list, dim=0)
+    NI = torch.stack(NI_list, dim=0)
+    TI = torch.stack(TI_list, dim=0)
+    imgs = {'RGB': RGB, "NI": NI, "TI": TI}
+    return imgs, torch.tensor(pids), torch.tensor(camids), torch.tensor(viewids), _
+
+
+def train_collate_fn_RegDB(batch):
+    # Group images by pids and camid
+    imgs, pids, camids, viewids, imgpath = zip(*batch)
+    imgs = list(imgs)
+    pids = list(pids)
+    camids = list(camids)
+    viewids = list(viewids)
+    grouped_data = {}
+    for img, pid, camid, viewid, _ in batch:
+        key = (pid, camid)
+        if key not in grouped_data:
+            grouped_data[key] = {'RGB': [], 'NI': []}
+        grouped_data[key]['RGB'].append(img[0])
+        grouped_data[key]['NI'].append(img[1])
+
+    # Randomly shuffle the modality sequences within each pid
+    for key, modality_data in grouped_data.items():
+        length = len(modality_data['RGB'])
+        for i in range(length):
+            for j in range(length):
+                if j != i:
+                    imgs.append(
+                        [modality_data['RGB'][i], modality_data['NI'][j]])
+                    pids.append(key[0])
+                    camids.append(key[1])
+
+    RGB_list = []
+    NI_list = []
+
+    for img in imgs:
+        RGB_list.append(img[0])
+        NI_list.append(img[1])
+
+    RGB = torch.stack(RGB_list, dim=0)
+    NI = torch.stack(NI_list, dim=0)
+
+    imgs = {'RGB': RGB, "NI": NI}
+    return imgs, torch.tensor(pids), torch.tensor(camids), torch.tensor(viewids), imgpath
+
+
 def train_collate_fn(batch):
     """
     # collate_fn这个函数的输入就是一个list，list的长度是一个batch size，list中的每个元素都是__getitem__得到的结果
     """
-    imgs, pids, camids, viewids, _ = zip(*batch)
+    imgs, pids, camids, viewids, imgpath = zip(*batch)
     pids = torch.tensor(pids, dtype=torch.int64)
     viewids = torch.tensor(viewids, dtype=torch.int64)
     camids = torch.tensor(camids, dtype=torch.int64)
@@ -159,7 +253,25 @@ def train_collate_fn(batch):
     NI = torch.stack(NI_list, dim=0)
     TI = torch.stack(TI_list, dim=0)
     imgs = {'RGB': RGB, "NI": NI, "TI": TI}
-    return imgs, pids, camids, viewids,
+    return imgs, pids, camids, viewids, imgpath
+
+
+def val_collate_fn_RegDB(batch):
+    imgs, pids, camids, viewids, img_paths = zip(*batch)
+    viewids = torch.tensor(viewids, dtype=torch.int64)
+    camids_batch = torch.tensor(camids, dtype=torch.int64)
+    RGB_list = []
+    NI_list = []
+
+    for img in imgs:
+        RGB_list.append(img[0])
+        NI_list.append(img[1])
+
+    RGB = torch.stack(RGB_list, dim=0)
+    NI = torch.stack(NI_list, dim=0)
+
+    imgs = {'RGB': RGB, "NI": NI}
+    return imgs, pids, camids, camids_batch, viewids, img_paths
 
 
 def val_collate_fn(batch):
@@ -200,9 +312,7 @@ def make_dataloader(cfg):
     ])
 
     num_workers = cfg.DATALOADER.NUM_WORKERS
-
     dataset = __factory[cfg.DATASETS.NAMES](root=cfg.DATASETS.ROOT_DIR)
-
     train_set = ImageDataset(dataset.train, train_transforms)
     train_set_normal = ImageDataset(dataset.train, val_transforms)
     num_classes = dataset.num_train_pids
@@ -220,14 +330,15 @@ def make_dataloader(cfg):
                 train_set,
                 num_workers=num_workers,
                 batch_sampler=batch_sampler,
-                collate_fn=train_collate_fn,
+                collate_fn=train_collate_fn_Cross,
                 pin_memory=True,
             )
         else:
             train_loader = DataLoader(
                 train_set, batch_size=cfg.SOLVER.IMS_PER_BATCH,
                 sampler=RandomIdentitySampler(dataset.train, cfg.SOLVER.IMS_PER_BATCH, cfg.DATALOADER.NUM_INSTANCE),
-                num_workers=num_workers, collate_fn=train_collate_fn
+                num_workers=num_workers,
+                collate_fn=train_collate_fn
             )
     elif cfg.DATALOADER.SAMPLER == 'softmax':
         print('using softmax sampler')
@@ -237,8 +348,10 @@ def make_dataloader(cfg):
         )
     else:
         print('unsupported sampler! expected softmax or triplet but got {}'.format(cfg.SAMPLER))
-
-    val_set = ImageDataset(dataset.query + dataset.gallery, val_transforms)
+    if cfg.DATASETS.NAMES == 'RegDB' or cfg.DATASETS.NAMES == 'SYSU':
+        val_set = ImageDataset(dataset.query, val_transforms)
+    else:
+        val_set = ImageDataset(dataset.query + dataset.gallery, val_transforms)
 
     val_loader = DataLoader(
         val_set, batch_size=cfg.TEST.IMS_PER_BATCH, shuffle=False, num_workers=num_workers,

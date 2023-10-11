@@ -7,7 +7,7 @@ from engine.processor import do_inference
 from utils.logger import setup_logger
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="MMReID Testing")
+    parser = argparse.ArgumentParser(description="UniSReID Testing")
     parser.add_argument(
         "--config_file", default="", help="path to config file", type=str
     )
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     if output_dir and not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    logger = setup_logger("MMReID", output_dir, if_train=False)
+    logger = setup_logger("UniSReID", output_dir, if_train=False)
     logger.info(args)
 
     if args.config_file != "":
@@ -40,6 +40,5 @@ if __name__ == "__main__":
     train_loader, train_loader_normal, val_loader, num_query, num_classes, camera_num, view_num = make_dataloader(cfg)
 
     model = make_model(cfg, num_class=num_classes, camera_num=camera_num, view_num=view_num)
-    model.load_param("/15127306268/wyh/MM/RGBNT100/rotation/MMReIDbest.pth")
-
+    model.load_param("/15127306268/wyh/MM/RegDB/Baseline_T/UniSReIDbest_cross.pth")
     do_inference(cfg,model,val_loader,num_query)

@@ -34,7 +34,7 @@ def read_image(img_list):
                 raise IOError("{} does not exist".format(img_path))
             while not got_img:
                 try:
-                    img = Image.open(img_path).convert('RGB')
+                    img = Image.open(img_path)
                     img3.append(img)
                     got_img = True
                 except IOError:

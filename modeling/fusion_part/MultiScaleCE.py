@@ -29,8 +29,8 @@ class LocalRefinementUnits(nn.Module):
         self.bn1 = nn.BatchNorm2d(self.channels)
         self.ptconv = nn.Conv2d(self.channels, self.out_dim, 1, 1)
         self.bn2 = nn.BatchNorm2d(self.out_dim)
-        self.act1 = nn.PReLU()
-        self.act2 = nn.PReLU()
+        self.act1 = nn.GELU()
+        self.act2 = nn.GELU()
 
     def forward(self, x):
         x = self.act1(self.bn1(self.dwconv(x)))

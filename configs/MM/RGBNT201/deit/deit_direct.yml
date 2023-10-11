@@ -1,0 +1,42 @@
+MODEL:
+  PRETRAIN_CHOICE: 'imagenet'
+  RES_USE: 1
+  TRANS_USE: 1
+  DEPTH: 1
+  MIX_DIM: 384
+  PRETRAIN_PATH_R: '/15127306268/wyh/UIS/pth/r50.pth'
+  PRETRAIN_PATH_T: '/15127306268/wyh/UIS/pth/deit_small_distilled_patch16_224-649709d9.pth'
+  TRANSFORMER_TYPE: 'deit_small_patch16_224'
+  STRIDE_SIZE: [ 16, 16 ]
+  SIE_CAMERA: True
+  MIX_MODE: 0
+  BASE: 0
+  DIRECT: 1
+INPUT:
+  SIZE_TRAIN: [ 256, 128 ]
+  SIZE_TEST: [ 256, 128 ]
+  PROB: 0.5 # random horizontal flip
+  RE_PROB: 0.5 # random erasing
+  PADDING: 10
+
+
+DATASETS:
+  NAMES: ('RGBNT201')
+  ROOT_DIR: '/15127306268/wyh/MM/data/'
+DATALOADER:
+  SAMPLER: 'softmax_triplet'
+SOLVER:
+  BASE_LR: 0.005
+  WARMUP_ITERS: 10
+
+TEST:
+  RE_RANKING: 'no'
+  WEIGHT: ''
+  NECK_FEAT: 'before'
+  FEAT_NORM: 'yes'
+  FEAT: 0
+  MISS: "None"
+OUTPUT_DIR: './RGBNT201/deit_direct'
+
+
+

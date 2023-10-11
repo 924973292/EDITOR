@@ -1,9 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="root@10.8.131.51:30362 password" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
+  <component name="PublishConfigData" autoUpload="Always" serverName="root@10.8.131.51:30285 password" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
     <option name="confirmBeforeUploading" value="false" />
     <serverData>
+      <paths name="root@10.8.131.51:30041 password">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/15127306268/wyh/MM" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="root@10.8.131.51:30285 password">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/15127306268/wyh/MM" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="root@10.8.131.51:30362 password">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/15127306268/wyh/MM" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="root@10.8.131.51:30666 password">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/15127306268/wyh/MM" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="root@10.8.131.51:30730 password">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/15127306268/wyh/MM" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="root@10.8.131.51:30730 password (2)">
         <serverdata>
           <mappings>
             <mapping deploy="/15127306268/wyh/MM" local="$PROJECT_DIR$" />

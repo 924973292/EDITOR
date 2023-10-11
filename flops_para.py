@@ -27,7 +27,7 @@ def set_seed(seed):
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description="MMReID Training")
+    parser = argparse.ArgumentParser(description="UniSReID Training")
     parser.add_argument(
         "--config_file", default="", help="path to config file", type=str
     )
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     if output_dir and not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    logger = setup_logger("MMReID", output_dir, if_train=True)
+    logger = setup_logger("UniSReID", output_dir, if_train=True)
     logger.info("Saving model in the path :{}".format(cfg.OUTPUT_DIR))
     logger.info(args)
 
