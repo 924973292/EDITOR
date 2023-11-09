@@ -153,7 +153,7 @@ class RandomErasing:
 
 def train_collate_fn_Cross(batch):
     # Group images by pids and camid
-    imgs, pids, camids, viewids, _ = zip(*batch)
+    imgs, pids, camids, viewids, img_path = zip(*batch)
     imgs = list(imgs)
     pids = list(pids)
     camids = list(camids)
@@ -189,7 +189,7 @@ def train_collate_fn_Cross(batch):
     NI = torch.stack(NI_list, dim=0)
     TI = torch.stack(TI_list, dim=0)
     imgs = {'RGB': RGB, "NI": NI, "TI": TI}
-    return imgs, torch.tensor(pids), torch.tensor(camids), torch.tensor(viewids), _
+    return imgs, torch.tensor(pids), torch.tensor(camids), torch.tensor(viewids), img_path
 
 
 def train_collate_fn_RegDB(batch):
@@ -220,15 +220,17 @@ def train_collate_fn_RegDB(batch):
 
     RGB_list = []
     NI_list = []
-
+    TI_list = []
     for img in imgs:
         RGB_list.append(img[0])
         NI_list.append(img[1])
+        TI_list.append(img[1])
 
     RGB = torch.stack(RGB_list, dim=0)
     NI = torch.stack(NI_list, dim=0)
+    TI = torch.stack(TI_list, dim=0)
 
-    imgs = {'RGB': RGB, "NI": NI}
+    imgs = {'RGB': RGB, "NI": NI, "TI": TI}
     return imgs, torch.tensor(pids), torch.tensor(camids), torch.tensor(viewids), imgpath
 
 
@@ -245,9 +247,14 @@ def train_collate_fn(batch):
     TI_list = []
 
     for img in imgs:
-        RGB_list.append(img[0])
-        NI_list.append(img[1])
-        TI_list.append(img[2])
+        if len(img) == 2:
+            RGB_list.append(img[0])
+            NI_list.append(img[1])
+            TI_list.append(img[1])
+        else:
+            RGB_list.append(img[0])
+            NI_list.append(img[1])
+            TI_list.append(img[2])
 
     RGB = torch.stack(RGB_list, dim=0)
     NI = torch.stack(NI_list, dim=0)
@@ -283,9 +290,14 @@ def val_collate_fn(batch):
     TI_list = []
 
     for img in imgs:
-        RGB_list.append(img[0])
-        NI_list.append(img[1])
-        TI_list.append(img[2])
+        if len(img) == 2:
+            RGB_list.append(img[0])
+            NI_list.append(img[1])
+            TI_list.append(img[1])
+        else:
+            RGB_list.append(img[0])
+            NI_list.append(img[1])
+            TI_list.append(img[2])
 
     RGB = torch.stack(RGB_list, dim=0)
     NI = torch.stack(NI_list, dim=0)
@@ -303,6 +315,7 @@ def make_dataloader(cfg):
         T.ToTensor(),
         T.Normalize(mean=cfg.INPUT.PIXEL_MEAN, std=cfg.INPUT.PIXEL_STD),
         RandomErasing(probability=cfg.INPUT.RE_PROB, mode='pixel', max_count=1, device='cpu'),
+        # T.ColorJitter(brightness=[0.8, 1.2],contrast=[0.85, 1.15])
     ])
 
     val_transforms = T.Compose([
@@ -330,7 +343,7 @@ def make_dataloader(cfg):
                 train_set,
                 num_workers=num_workers,
                 batch_sampler=batch_sampler,
-                collate_fn=train_collate_fn_Cross,
+                collate_fn=train_collate_fn,
                 pin_memory=True,
             )
         else:

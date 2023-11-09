@@ -75,7 +75,7 @@ if __name__ == "__main__":
     device = "cuda"
     # 1.加载模型
     model = make_model(cfg, num_class=num_classes, camera_num= camera_num, view_num=view_num)
-    model.load_param("/15127306268/wyh/MM/RGBNT100/vit_top_re_bt/UniSReIDbest.pth")
+    model.load_param("/13559197192/wyh/UNIReID/RGBNT100/vit_top_re_bt/UniSReIDbest.pth")
     model.eval()
     # 2.选择目标层
     # target_layer = model.layer4
@@ -94,7 +94,7 @@ if __name__ == "__main__":
 
         def show_cam(index, imgpath, grayscale_cam):
             index = int(index)
-            imgpath = '/15127306268/wyh/MM/data/RGBNT100/rgbir/bounding_box_train/' + imgpath[index]
+            imgpath = '/13559197192/wyh/UNIReID/data/RGBNT100/rgbir/bounding_box_train/' + imgpath[index]
             grayscale_cam = grayscale_cam[index]
             if cfg.DATASETS.NAMES == 'RGBNT100':
                 img = cv2.imread(imgpath, 1)

@@ -22,7 +22,7 @@ INPUT:
 
 DATASETS:
   NAMES: ('RGBNT201')
-  ROOT_DIR: '/15127306268/wyh/MM/data/'
+  ROOT_DIR: '/13559197192/wyh/UNIReID/data/'
 DATALOADER:
   SAMPLER: 'softmax_triplet'
 SOLVER:

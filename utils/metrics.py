@@ -3,6 +3,8 @@ import numpy as np
 import os
 from utils.reranking import re_ranking
 import numpy as np
+
+
 # from sklearn import manifold
 
 
@@ -205,69 +207,57 @@ def eval_func_msrv(distmat, q_pids, g_pids, q_camids, g_camids, q_sceneids, g_sc
     return all_cmc, mAP
 
 
-def eval_func(distmat, q_pids, g_pids, q_camids, g_camids, max_rank=20):
+def eval_func(distmat, q_pids, g_pids, q_camids, g_camids, max_rank=50):
     """Evaluation with market1501 metric
-    Key: for each query identity, its gallery images from the same camera view are discarded.
-    """
-    # print(max_rank)
+        Key: for each query identity, its gallery images from the same camera view are discarded.
+        """
     num_q, num_g = distmat.shape
-
     if num_g < max_rank:
         max_rank = num_g
-        print(
-            'Note: number of gallery samples is quite small, got {}'.
-            format(num_g)
-        )
-
+        print("Note: number of gallery samples is quite small, got {}".format(num_g))
     indices = np.argsort(distmat, axis=1)
     matches = (g_pids[indices] == q_pids[:, np.newaxis]).astype(np.int32)
 
     # compute cmc curve for each query
     all_cmc = []
     all_AP = []
+    all_INP = []
     num_valid_q = 0.  # number of valid query
-    # txt_file_path = r"E:\reidCode\AAAI 2022-master\log\txt\1.txt"
-    # txt_file = open(txt_file_path, 'a')
     for q_idx in range(num_q):
         # get query pid and camid
         q_pid = q_pids[q_idx]
         q_camid = q_camids[q_idx]
 
-        # print(q_pid, q_camid)
-        # txt_file.write(str(q_pid) + '\n')
-
         # remove gallery samples that have the same pid and camid with query
         order = indices[q_idx]
-        remove = ((g_pids[order] == q_pid) & (g_camids[order] == q_camid))
+        remove = (g_pids[order] == q_pid) & (g_camids[order] == q_camid)
         keep = np.invert(remove)
 
         # compute cmc curve
-        raw_cmc = matches[q_idx][
-            keep]  # binary vector, positions with value 1 are correct matches
-        if not np.any(raw_cmc):
+        # binary vector, positions with value 1 are correct matches
+        orig_cmc = matches[q_idx][keep]
+        if not np.any(orig_cmc):
             # this condition is true when query identity does not appear in gallery
             continue
-        cmc = raw_cmc.cumsum()
-        # print(raw_cmc, cmc[:max_rank])
-        # txt_file.write(str(cmc[0]) + ' ' + str(cmc[4]) + ' ' + str(cmc[9]))
-        # txt_file.write('\n')
+
+        cmc = orig_cmc.cumsum()
         cmc[cmc > 1] = 1
+
         all_cmc.append(cmc[:max_rank])
         num_valid_q += 1.
 
         # compute average precision
         # reference: https://en.wikipedia.org/wiki/Evaluation_measures_(information_retrieval)#Average_precision
-        num_rel = raw_cmc.sum()
-        tmp_cmc = raw_cmc.cumsum()
-        tmp_cmc = [x / (i + 1.) for i, x in enumerate(tmp_cmc)]
-        tmp_cmc = np.asarray(tmp_cmc) * raw_cmc
+        num_rel = orig_cmc.sum()
+        tmp_cmc = orig_cmc.cumsum()
+        # tmp_cmc = [x / (i + 1.) for i, x in enumerate(tmp_cmc)]
+        y = np.arange(1, tmp_cmc.shape[0] + 1) * 1.0
+        tmp_cmc = tmp_cmc / y
+        tmp_cmc = np.asarray(tmp_cmc) * orig_cmc
         AP = tmp_cmc.sum() / num_rel
         all_AP.append(AP)
-        # print(num_rel, raw_cmc)
 
-    # raise RuntimeError
-
-    assert num_valid_q > 0, 'Error: all query identities do not appear in gallery'
+    assert num_valid_q > 0, "Error: all query identities do not appear in gallery"
 
     all_cmc = np.asarray(all_cmc).astype(np.float32)
     all_cmc = all_cmc.sum(0) / num_valid_q
@@ -295,10 +285,10 @@ class R1_mAP():
         self.feats.append(feat)
         self.pids.extend(np.asarray(pid))
         self.camids.extend(np.asarray(camid))
-        self.sceneids.extend(np.asarray(sceneid))
+        self.sceneids.extend(np.asarray(sceneid.cpu()))
         self.img_path.extend(img_path)
 
-    def compute(self):
+    def compute(self,cfg):
         feats = torch.cat(self.feats, dim=0)
         if self.feat_norm == 'yes':
             print("The test feature is normalized")
@@ -379,7 +369,7 @@ def eval_func_regdb(distmat, q_pids, g_pids, qu_path, ga_path, epoch, max_rank=1
     if rank_vis:
         end_index = 10
         for index in range(0, 10):
-            output_file_path = f"/15127306268/wyh/MM/RegDB/n2r_{epoch}.txt"  # 指定输出文件路径
+            output_file_path = f"/13559197192/wyh/UNIReID/RegDB/n2r_{epoch}.txt"  # 指定输出文件路径
             rank_show = indices[index, :end_index]
             with open(output_file_path, "a") as output_file:
                 output_file.write('query:' + qu_path[index].replace("_v_", "_t_") + "\n")
@@ -387,7 +377,7 @@ def eval_func_regdb(distmat, q_pids, g_pids, qu_path, ga_path, epoch, max_rank=1
                     image_name = ga_path[idx]
                     output_file.write(image_name + "\n")  # 写入文件名并换行
         # for index in range(0, 10, 2):
-        #     output_file_path = f"/15127306268/wyh/MM/RegDB/r2n.txt"  # 指定输出文件路径
+        #     output_file_path = f"/13559197192/wyh/UNIReID/RegDB/r2n.txt"  # 指定输出文件路径
         #     rank_show = indices[index, :max_rank]
         #     with open(output_file_path, "a") as output_file:
         #         output_file.write('query:' + qu_path[index] + "\n")
@@ -526,22 +516,29 @@ class Cross_R1_mAP_eval():
             print('=> Enter reranking')
             # distmat = re_ranking(qf, gf, k1=20, k2=6, lambda_value=0.3)
             distmat = re_ranking(qf, gf, k1=50, k2=15, lambda_value=0.3)
-
+            distmat2 = re_ranking(gf, qf, k1=50, k2=15, lambda_value=0.3)
         else:
             print('=> Computing DistMat with euclidean_distance')
             distmat = euclidean_distance(qf, gf)
+            distmat2 = euclidean_distance(gf, qf)
         if cfg.DATASETS.NAMES == 'RegDB':
             cmc, mAP = eval_func_regdb(distmat, q_pids, g_pids, qu_path=self.query_imgpath,
                                        ga_path=self.gallery_imgpath, epoch=epoch)
+            cmc2, mAP2 = eval_func_regdb(distmat2, g_pids, q_pids, qu_path=self.gallery_imgpath,
+                                         ga_path=self.query_imgpath, epoch=epoch)
             # visualize_tsne(qf, gf, q_pids, cfg.OUTPUT_DIR, epoch=epoch)
         elif cfg.DATASETS.NAMES == 'SYSU':
             cmc, mAP = eval_func_sysu(distmat, q_pids, g_pids, q_camids, g_camids)
         else:
-            cmc, mAP = eval_func_regdb(distmat, q_pids, g_pids, qu_path=self.query_imgpath,
-                                       ga_path=self.gallery_imgpath, epoch=epoch)
+            # cmc, mAP = eval_func_regdb(distmat, q_pids, g_pids, qu_path=self.query_imgpath,
+            #                            ga_path=self.gallery_imgpath, epoch=epoch)
+            # cmc2, mAP2 = eval_func_regdb(distmat2, g_pids, q_pids, qu_path=self.gallery_imgpath,  # gallery as query
+            #                              ga_path=self.query_imgpath, epoch=epoch)
             # visualize_tsne(qf, gf, q_pids, cfg.OUTPUT_DIR, epoch=epoch)
+            cmc, mAP = eval_func(distmat, q_pids, g_pids, q_camids, g_camids)
+            cmc2, mAP2 = eval_func(distmat2, g_pids, q_pids, g_camids, q_camids)
 
-        return cmc, mAP, distmat, self.query_pids, self.query_camids, qf, gf
+        return cmc, mAP, cmc2, mAP2
 
 
 def find_label_indices(label_list, target_labels, max_indices_per_label=1):

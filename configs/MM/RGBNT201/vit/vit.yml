@@ -5,15 +5,17 @@ MODEL:
   DEPTH: 1
   MIX_DIM: 768
   PRETRAIN_PATH_R: '/15127306268/wyh/UIS/pth/r50.pth'
-  PRETRAIN_PATH_T: '/15127306268/wyh/UIS/pth/vitb_16_224_21k.pth'
+  PRETRAIN_PATH_T: '/13559197192/wyh/UNIReID/pth/vitb_16_224_21k.pth'
   TRANSFORMER_TYPE: 'vit_base_patch16_224'
   STRIDE_SIZE: [ 16, 16 ]
-  SIE_CAMERA: False
+  SIE_CAMERA: True
   MIX_MODE: 0
   BASE: 0
+  DIST_TRAIN: False
+  FREQUENCY_KEEP: 10
 INPUT:
   SIZE_TRAIN: [ 256, 128 ]
-  SIZE_TEST: [ 256, 128 ]
+  SIZE_TEST: [256, 128 ]
   PROB: 0.5 # random horizontal flip
   RE_PROB: 0.5 # random erasing
   PADDING: 10
@@ -21,18 +23,18 @@ INPUT:
 
 DATASETS:
   NAMES: ('RGBNT201')
-  ROOT_DIR: '/15127306268/wyh/MM/data/'
+  ROOT_DIR: '/13559197192/wyh/UNIReID/data/'
+  TRIAL: 1
 DATALOADER:
   SAMPLER: 'softmax_triplet'
   NUM_INSTANCE: 16
   NUM_WORKERS : 28
 SOLVER:
   OPTIMIZER_NAME: 'SGD'
-  BASE_LR: 0.005
+  BASE_LR: 0.001
   WARMUP_ITERS: 10
   IMS_PER_BATCH: 128
-  MAX_EPOCHS: 120
-  STEPS: ( 40, 70 )
+  MAX_EPOCHS: 70
 
 TEST:
   RE_RANKING: 'no'
@@ -41,8 +43,8 @@ TEST:
   FEAT_NORM: 'yes'
   FEAT: 0
   CROSS: 0
-  MISS: 'r2n'
-OUTPUT_DIR: './RGBNT201/B_0005_75_channel'
+  MISS: 'nothing'
+OUTPUT_DIR: './RGBNT201/test'
 
 
 

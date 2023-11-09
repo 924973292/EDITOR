@@ -36,7 +36,7 @@ class SYSUData(data.Dataset):
 class RegDBData(data.Dataset):
     def __init__(self, data_dir, transform=None, colorIndex=None, thermalIndex=None):
         # Load training images (path) and labels
-        data_dir = '/15127306268/wyh/MM/data/RGBNT201-C/'
+        data_dir = '/13559197192/wyh/UNIReID/data/RGBNT201-C/'
         train_color_list = data_dir + 'idx/train_R' + '.txt'
         train_thermal_list = data_dir + 'idx/train_N' + '.txt'
 

@@ -79,7 +79,8 @@ class CA(nn.Module):
         self.v_y = nn.Linear(dim, dim, bias=qkv_bias)
         self.k_z = nn.Linear(dim, dim, bias=qkv_bias)
         self.v_z = nn.Linear(dim, dim, bias=qkv_bias)
-        self.reduction = nn.Linear(3 * dim, dim)
+        self.reduction3 = nn.Linear(3 * dim, dim)
+        self.reduction2 = nn.Linear(2 * dim, dim)
         self.attn_drop = nn.Dropout(attn_drop)
         self.proj = nn.Linear(dim, dim)
         self.proj_drop = nn.Dropout(proj_drop)
@@ -93,46 +94,76 @@ class CA(nn.Module):
         cls = x[:, 0, :]
         x = x[:, 1:, :]
         y = self.normy(y)
-        z = self.normz(z)
+        if z != None:
+            z = self.normz(z)
+            y_gate = torch.tanh(self.y_gate_linear(torch.mean(y, dim=1)))
+            z_gate = torch.tanh(self.z_gate_linear(torch.mean(z, dim=1)))
 
-        y_gate = torch.sigmoid(self.y_gate_linear(torch.mean(y, dim=1)))
-        z_gate = torch.sigmoid(self.z_gate_linear(torch.mean(z, dim=1)))
+            q = self.q_(cls).reshape(B, 1, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
 
-        q = self.q_(cls).reshape(B, 1, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
+            k_x = self.k_x(x).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
+            v_x = self.v_x(x).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
+            k_y = self.k_y(y).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
+            v_y = self.v_y(y).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
+            k_z = self.k_z(z).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
+            v_z = self.v_z(z).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
 
-        k_x = self.k_x(x).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
-        v_x = self.v_x(x).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
-        k_y = self.k_y(y).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
-        v_y = self.v_y(y).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
-        k_z = self.k_z(z).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
-        v_z = self.v_z(z).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
+            attn_x = (q @ k_x.transpose(-2, -1)) * self.scale
+            attn_x = attn_x.softmax(dim=-1)
+            attn_x = self.attn_drop(attn_x)
 
-        attn_x = (q @ k_x.transpose(-2, -1)) * self.scale
-        attn_x = attn_x.softmax(dim=-1)
-        attn_x = self.attn_drop(attn_x)
+            attn_y = (q @ k_y.transpose(-2, -1)) * self.scale
+            attn_y = attn_y.softmax(dim=-1)
+            attn_y = self.attn_drop(attn_y)
 
-        attn_y = (q @ k_y.transpose(-2, -1)) * self.scale
-        attn_y = attn_y.softmax(dim=-1)
-        attn_y = self.attn_drop(attn_y)
+            attn_z = (q @ k_z.transpose(-2, -1)) * self.scale
+            attn_z = attn_z.softmax(dim=-1)
+            attn_z = self.attn_drop(attn_z)
 
-        attn_z = (q @ k_z.transpose(-2, -1)) * self.scale
-        attn_z = attn_z.softmax(dim=-1)
-        attn_z = self.attn_drop(attn_z)
+            x_x = (attn_x @ v_x).transpose(1, 2)
+            x_x = x_x.reshape(B, C)
 
-        x_x = (attn_x @ v_x).transpose(1, 2)
-        x_x = x_x.reshape(B, C)
+            x_y = (attn_y @ v_y).transpose(1, 2)
+            x_y = x_y.reshape(B, C)
 
-        x_y = (attn_y @ v_y).transpose(1, 2)
-        x_y = x_y.reshape(B, C)
+            x_z = (attn_z @ v_z).transpose(1, 2)
+            x_z = x_z.reshape(B, C)
 
-        x_z = (attn_z @ v_z).transpose(1, 2)
-        x_z = x_z.reshape(B, C)
+            x = torch.cat([x_x, x_y * y_gate, x_z * z_gate], dim=1)
 
-        x = torch.cat([x_x, x_y * y_gate, x_z * z_gate], dim=1)
-        x = self.reduction(x)
-        x = self.proj(x)
-        x = self.proj_drop(x)
-        return x
+            x = self.reduction3(x)
+            x = self.proj(x)
+            x = self.proj_drop(x)
+            return x
+        else:
+            y_gate = torch.tanh(self.y_gate_linear(torch.mean(y, dim=1)))
+            q = self.q_(cls).reshape(B, 1, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
+
+            k_x = self.k_x(x).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
+            v_x = self.v_x(x).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
+            k_y = self.k_y(y).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
+            v_y = self.v_y(y).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
+
+            attn_x = (q @ k_x.transpose(-2, -1)) * self.scale
+            attn_x = attn_x.softmax(dim=-1)
+            attn_x = self.attn_drop(attn_x)
+
+            attn_y = (q @ k_y.transpose(-2, -1)) * self.scale
+            attn_y = attn_y.softmax(dim=-1)
+            attn_y = self.attn_drop(attn_y)
+
+            x_x = (attn_x @ v_x).transpose(1, 2)
+            x_x = x_x.reshape(B, C)
+
+            x_y = (attn_y @ v_y).transpose(1, 2)
+            x_y = x_y.reshape(B, C)
+
+            x = torch.cat([x_x, x_y * y_gate], dim=1)
+            # x = torch.cat([x_x, x_y, x_z], dim=1)
+            x = self.reduction2(x)
+            x = self.proj(x)
+            x = self.proj_drop(x)
+            return x
 
 
 class CAC(nn.Module):
@@ -271,7 +302,8 @@ class FUSEAll(nn.Module):
         self.TICA = CAModality(dim, num_heads, mlp_ratio=mlp_ratio, qkv_bias=qkv_bias, qk_scale=qk_scale, drop=drop,
                                attn_drop=attn_drop,
                                drop_path=drop_path, act_layer=act_layer, norm_layer=norm_layer)
-        self.reduction = nn.Linear(3 * dim, dim)
+        self.reduction3 = nn.Linear(3 * dim, dim)
+        self.reduction2 = nn.Linear(2 * dim, dim)
         self.apply(self._init_weights)
 
     def _init_weights(self, m):
@@ -283,12 +315,15 @@ class FUSEAll(nn.Module):
             nn.init.constant_(m.bias, 0)
             nn.init.constant_(m.weight, 1.0)
 
-    def forward(self, RGB_cls4tri, NIR_cls4tri, TIR_cls4tri, RGB_patch, NIR_patch, TIR_patch):
+    def forward(self, RGB_cls4tri, RGB_patch, NIR_cls4tri, NIR_patch, TIR_cls4tri=None, TIR_patch=None):
         x = self.RGBCA(torch.cat([RGB_cls4tri.unsqueeze(1), RGB_patch], dim=1), NIR_patch, TIR_patch)
         y = self.NICA(torch.cat([NIR_cls4tri.unsqueeze(1), NIR_patch], dim=1), RGB_patch, TIR_patch)
-        z = self.TICA(torch.cat([TIR_cls4tri.unsqueeze(1), TIR_patch], dim=1), RGB_patch, NIR_patch)
-        x = self.reduction(torch.cat([x, y, z], dim=1))
-        return x
+        if TIR_cls4tri != None:
+            z = self.TICA(torch.cat([TIR_cls4tri.unsqueeze(1), TIR_patch], dim=1), RGB_patch, NIR_patch)
+            x = self.reduction3(torch.cat([x, y, z], dim=1))
+        else:
+            # x = self.reduction2(torch.cat([x, y], dim=1))
+            return x,y
 
 
 class FUSEAllC(nn.Module):

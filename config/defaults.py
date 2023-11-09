@@ -65,6 +65,7 @@ _C.MODEL.SIE_VIEW = False
 _C.MODEL.ROTATION = 3
 _C.MODEL.DEPTH = 1
 _C.MODEL.TEMPERATURE = 0.07
+_C.MODEL.FREQUENCY_KEEP=10
 # -----------------------------------------------------------------------------
 # INPUT
 # -----------------------------------------------------------------------------
@@ -92,7 +93,7 @@ _C.DATASETS = CN()
 _C.DATASETS.NAMES = ('msmt17')
 # Root directory where datasets should be used (and downloaded if not found)
 _C.DATASETS.ROOT_DIR = ('./data')
-
+_C.DATASETS.TRIAL = 1
 # -----------------------------------------------------------------------------
 # DataLoader
 # -----------------------------------------------------------------------------
@@ -170,7 +171,7 @@ _C.SOLVER.IMS_PER_BATCH = 16
 # see 2 images per batch
 _C.TEST = CN()
 # Number of images per batch during test
-_C.TEST.IMS_PER_BATCH = 256
+_C.TEST.IMS_PER_BATCH = 64
 # If test with re-ranking, options: 'yes','no'
 _C.TEST.RE_RANKING = 'no'
 # Path to trained model

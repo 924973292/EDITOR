@@ -6,12 +6,10 @@ from .bases import BaseImageDataset
 
 
 class RegDB(BaseImageDataset):
-    dataset_dir = 'RegDB'
 
     def __init__(self, root='', verbose=True, **kwargs):
         super(RegDB, self).__init__()
-        self.root = osp.abspath(osp.expanduser(root))
-        self.dataset_dir = osp.join(self.root, self.dataset_dir)
+        self.dataset_dir = osp.abspath(osp.expanduser(root))
 
         # allow alternative directory structure
         self.data_dir = self.dataset_dir

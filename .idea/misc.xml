@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="ProjectRootManager" version="2" project-jdk-name="Remote Python 3.7.12 (sftp://root@10.8.131.51:30285/opt/conda/envs/unilite/bin/python3.7)" project-jdk-type="Python SDK" />
+  <component name="Black">
+    <option name="sdkName" value="Remote Python 3.7.12 (sftp://root@10.8.131.51:30285/opt/conda/envs/unilite/bin/python3.7)" />
+  </component>
+  <component name="ProjectRootManager" version="2" project-jdk-name="Remote Python 3.8.12 (sftp://root@10.8.131.51:30089/opt/conda/bin/python3.8) (7)" project-jdk-type="Python SDK" />
   <component name="PythonCompatibilityInspectionAdvertiser">
     <option name="version" value="3" />
   </component>
