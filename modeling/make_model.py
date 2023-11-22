@@ -18,6 +18,7 @@ import torch.nn.functional as F
 from modeling.backbones.vit_pytorch import Block, BlockBatch, BlockMask
 from modeling.fusion_part.Frequency import FrequencyIndex
 
+
 def weights_init_kaiming(m):
     classname = m.__class__.__name__
     if classname.find('Linear') != -1:
@@ -156,31 +157,6 @@ class build_transformer(nn.Module):
         print('Loading pretrained model for finetuning from {}'.format(model_path))
 
 
-def IOU(set1, set2):
-    """
-    Compute average Jaccard similarity between corresponding sets in a batch.
-
-    Parameters:
-    - set1 (torch.Tensor): Tensor representing set 1 (binary tensor).
-    - set2 (torch.Tensor): Tensor representing set 2 (binary tensor).
-
-    Returns:
-    - torch.Tensor: Average Jaccard similarity score for the batch.
-    """
-    # Compute intersection and union for each pair of sets
-
-    intersection = torch.sum(set1 & set2, dim=1)  # Bitwise AND and sum along N dimension
-    union = torch.sum(set1 | set2, dim=1)  # Bitwise OR and sum along N dimension
-
-    # Jaccard similarity for each pair
-    similarity = intersection.float() / union.float()
-    similarity.requires_grad = True
-    # Average Jaccard similarity for the batch
-    average_similarity = torch.mean(similarity)
-
-    return -average_similarity  # Return negative to get similarity (optional)
-
-
 def symmetric_kl_divergence(matrix1, matrix2):
     # 计算两个方向的 KL 散度
     kl1 = F.kl_div(matrix1.log(), matrix2, reduction='batchmean')
@@ -212,11 +188,12 @@ class UniSReID(nn.Module):
         super(UniSReID, self).__init__()
 
         self.BACKBONE = build_transformer(num_classes, cfg, camera_num, view_num, factory)
-        self.FRE_BACKBONE = build_transformer(num_classes, cfg, camera_num, view_num, factory)
-        self.ratio = 0.008 * 2
+        # self.FRE_BACKBONE = build_transformer(num_classes, cfg, camera_num, view_num, factory)
+        self.ratio = (1 / 128) * int(cfg.MODEL.HEAD_KEEP)
         self.PERSON_TOKEN_SELECT = Person_Token_Select(dim=self.BACKBONE.token_dim, ratio=self.ratio)
         self.FREQ_INDEX = FrequencyIndex(keep=cfg.MODEL.FREQUENCY_KEEP)
-        self.FUSE_block = BlockMask(num_class=num_classes,dim=self.BACKBONE.token_dim, num_heads=12, mlp_ratio=4., qkv_bias=False,momentum=0.8)
+        self.FUSE_block = BlockMask(num_class=num_classes, dim=self.BACKBONE.token_dim, num_heads=12, mlp_ratio=4.,
+                                    qkv_bias=False, momentum=0.8)
 
         self.CLS_REDUCE = nn.Linear(3 * self.BACKBONE.token_dim, self.BACKBONE.token_dim)
         self.CLS_REDUCE.apply(weights_init_kaiming)
@@ -264,89 +241,64 @@ class UniSReID(nn.Module):
             RGB = x['RGB']
             NIR = x['NI']
             TIR = x['TI']
-            mask_fre = self.FREQ_INDEX(x = RGB, y = NIR, z = TIR, img_path=img_path, mode=mode, writer=writer, step=epoch)
-            # 判断NIR和TIR的第一张图像是否不一样
-            if not torch.equal(NIR[0], TIR[0]):
-                RGB_feat, RGB_attn = self.BACKBONE(RGB, cam_label=cam_label, view_label=view_label, img_path=img_path,
-                                                   epoch=epoch, modes=1, writer=writer)
-                NIR_feat, NIR_attn = self.BACKBONE(NIR, cam_label=cam_label, view_label=view_label, img_path=img_path,
-                                                   epoch=epoch, modes=2, writer=writer)
-                TIR_feat, TIR_attn = self.BACKBONE(TIR, cam_label=cam_label, view_label=view_label, img_path=img_path,
-                                                   epoch=epoch, modes=3, writer=writer)
+            mask_fre = self.FREQ_INDEX(x=RGB, y=NIR, z=TIR, img_path=img_path, mode=mode, writer=writer,
+                                       step=epoch)
+            RGB_feat, RGB_attn = self.BACKBONE(RGB, cam_label=cam_label, view_label=view_label, img_path=img_path,
+                                               epoch=epoch, modes=1, writer=writer)
+            NIR_feat, NIR_attn = self.BACKBONE(NIR, cam_label=cam_label, view_label=view_label, img_path=img_path,
+                                               epoch=epoch, modes=2, writer=writer)
+            TIR_feat, TIR_attn = self.BACKBONE(TIR, cam_label=cam_label, view_label=view_label, img_path=img_path,
+                                               epoch=epoch, modes=3, writer=writer)
 
-                RGB_cls4tri = RGB_feat[:, 0, :]
-                NIR_cls4tri = NIR_feat[:, 0, :]
-                TIR_cls4tri = TIR_feat[:, 0, :]
-                RGB_cls_score = self.RGB_HEAD(self.RGB_BN(RGB_cls4tri))
-                NIR_cls_score = self.RGB_HEAD(self.RGB_BN(NIR_cls4tri))
-                TIR_cls_score = self.RGB_HEAD(self.RGB_BN(TIR_cls4tri))
+            RGB_cls4tri = RGB_feat[:, 0, :]
+            NIR_cls4tri = NIR_feat[:, 0, :]
+            TIR_cls4tri = TIR_feat[:, 0, :]
+            RGB_cls_score = self.RGB_HEAD(self.RGB_BN(RGB_cls4tri))
+            NIR_cls_score = self.RGB_HEAD(self.RGB_BN(NIR_cls4tri))
+            TIR_cls_score = self.RGB_HEAD(self.RGB_BN(TIR_cls4tri))
 
-                RGB_feat_s, NIR_feat_s, TIR_feat_s, mask, loss_bg = self.PERSON_TOKEN_SELECT(RGB_feat=RGB_feat,
-                                                                                             RGB_attn=RGB_attn,
-                                                                                             NIR_feat=NIR_feat,
-                                                                                             NIR_attn=NIR_attn,
-                                                                                             TIR_feat=TIR_feat,
-                                                                                             TIR_attn=TIR_attn,
-                                                                                             img_path=img_path,
-                                                                                             epoch=epoch, writer=writer,mask_fre=mask_fre)
-                # RGB_feat_s = RGB_feat
-                # NIR_feat_s = NIR_feat
-                # TIR_feat_s = TIR_feat
-                # mask = None
+            RGB_feat_s, NIR_feat_s, TIR_feat_s, mask, loss_bg = self.PERSON_TOKEN_SELECT(RGB_feat=RGB_feat,
+                                                                                         RGB_attn=RGB_attn,
+                                                                                         NIR_feat=NIR_feat,
+                                                                                         NIR_attn=NIR_attn,
+                                                                                         TIR_feat=TIR_feat,
+                                                                                         TIR_attn=TIR_attn,
+                                                                                         img_path=img_path,
+                                                                                         epoch=epoch, writer=writer,
+                                                                                         mask_fre=mask_fre)
 
-                feat_s, loss_double = self.FUSE_block(RGB_feat_s, NIR_feat_s, TIR_feat_s, mask=mask, label=label,epoch=epoch)
-                RGB_feat_s = feat_s[:, :RGB_feat_s.shape[1]]
-                NIR_feat_s = feat_s[:, RGB_feat_s.shape[1]:RGB_feat_s.shape[1] + NIR_feat_s.shape[1]]
-                TIR_feat_s = feat_s[:, RGB_feat_s.shape[1] + NIR_feat_s.shape[1]:]
-                RGB_cls = RGB_feat_s[:, 0, :]
-                NIR_cls = NIR_feat_s[:, 0, :]
-                TIR_cls = TIR_feat_s[:, 0, :]
+            feat_s, loss_double = self.FUSE_block(RGB_feat_s, NIR_feat_s, TIR_feat_s, mask=mask, label=label,
+                                                  epoch=epoch)
 
-                RGB_patch = RGB_feat_s[:, 1:, :]
-                NIR_patch = NIR_feat_s[:, 1:, :]
-                TIR_patch = TIR_feat_s[:, 1:, :]
-                # RGB_patch = torch.mean(RGB_patch, dim=1)
-                # NIR_patch = torch.mean(NIR_patch, dim=1)
-                # TIR_patch = torch.mean(TIR_patch, dim=1)
-                # R_plist = []
-                # N_plist = []
-                # T_plist = []
-                # for i in range(RGB_patch.shape[0]):
-                #     rgb = RGB_patch[i]
-                #     R_plist.append(rgb[~torch.isnan(rgb).any(dim=1)].mean(dim=0))
-                #     nir = NIR_patch[i]
-                #     N_plist.append(nir[~torch.isnan(nir).any(dim=1)].mean(dim=0))
-                #     tir = TIR_patch[i]
-                #     T_plist.append(tir[~torch.isnan(tir).any(dim=1)].mean(dim=0))
-                # RGB_patch = torch.stack(R_plist)
-                # NIR_patch = torch.stack(N_plist)
-                # TIR_patch = torch.stack(T_plist)
-                # 计算每行的和
-                row_sum = torch.sum(RGB_patch, dim=2)
-                # 创建掩码来标记包含全零向量的行
-                num = (row_sum != 0).sum(dim=1).unsqueeze(-1)
-                RGB_patch = torch.sum(RGB_patch, dim=1) / num
-                NIR_patch = torch.sum(NIR_patch, dim=1) / num
-                TIR_patch = torch.sum(TIR_patch, dim=1) / num
+            RGB_feat_s = feat_s[:, :RGB_feat_s.shape[1]]
+            NIR_feat_s = feat_s[:, RGB_feat_s.shape[1]:RGB_feat_s.shape[1] + NIR_feat_s.shape[1]]
+            TIR_feat_s = feat_s[:, RGB_feat_s.shape[1] + NIR_feat_s.shape[1]:]
+            RGB_cls = RGB_feat_s[:, 0, :]
+            NIR_cls = NIR_feat_s[:, 0, :]
+            TIR_cls = TIR_feat_s[:, 0, :]
 
-                # cls3 = torch.cat([RGB_cls, NIR_cls, TIR_cls], dim=-1)
-                # cls = self.CLS_REDUCE(cls3)
-                # patch3 = torch.cat([RGB_patch, NIR_patch, TIR_patch], dim=-1)
-                # patch = self.PATCH_REDUCE(patch3)
-                # cls4t = torch.cat([cls, patch], dim=1)
-                # score = self.FUSE_HEAD(self.FUSE_BN(cls4t))
-                rgb = self.RGB_REDUCE(torch.cat([RGB_cls, RGB_patch], dim=-1))
-                nir = self.NIR_REDUCE(torch.cat([NIR_cls, NIR_patch], dim=-1))
-                tir = self.TIR_REDUCE(torch.cat([TIR_cls, TIR_patch], dim=-1))
-                cls4t = torch.cat([rgb, nir, tir], dim=-1)
-                score = self.FUSE_HEAD(self.FUSE_BN(cls4t))
+            RGB_patch = RGB_feat_s[:, 1:, :]
+            NIR_patch = NIR_feat_s[:, 1:, :]
+            TIR_patch = TIR_feat_s[:, 1:, :]
 
-                return score, cls4t, RGB_cls_score, RGB_cls4tri, NIR_cls_score, NIR_cls4tri, TIR_cls_score, TIR_cls4tri, loss_bg + loss_double
-            else:
-                RGB_feat, RGB_attn = self.BACKBONE(RGB, cam_label=cam_label, view_label=view_label, img_path=img_path,
-                                                   epoch=epoch, modes=1, writer=writer)
-                NIR_feat, NIR_attn = self.BACKBONE(NIR, cam_label=cam_label, view_label=view_label, img_path=img_path,
-                                                   epoch=epoch, modes=2, writer=writer)
+            row_sum = torch.sum(RGB_patch, dim=2)
+            # 创建掩码来标记包含全零向量的行
+            num = (row_sum != 0).sum(dim=1).unsqueeze(-1)
+            num_count = torch.mean(num.float())
+            writer.add_scalar('num_count', num_count, epoch)
+            # print('num_count', num_count)
+            RGB_patch = torch.sum(RGB_patch, dim=1) / num
+            NIR_patch = torch.sum(NIR_patch, dim=1) / num
+            TIR_patch = torch.sum(TIR_patch, dim=1) / num
+
+            rgb = self.RGB_REDUCE(torch.cat([RGB_cls, RGB_patch], dim=-1))
+            nir = self.NIR_REDUCE(torch.cat([NIR_cls, NIR_patch], dim=-1))
+            tir = self.TIR_REDUCE(torch.cat([TIR_cls, TIR_patch], dim=-1))
+            cls4t = torch.cat([rgb, nir, tir], dim=-1)
+            score = self.FUSE_HEAD(self.FUSE_BN(cls4t))
+
+            return score, cls4t, RGB_cls_score, RGB_cls4tri, NIR_cls_score, NIR_cls4tri, TIR_cls_score, TIR_cls4tri, loss_bg + loss_double, mask
+
         else:
             if mode == 1:
                 self.cross = 0
@@ -356,81 +308,156 @@ class UniSReID(nn.Module):
             RGB = x['RGB']
             NIR = x['NI']
             TIR = x['TI']
-            mask_fre = self.FREQ_INDEX(x=RGB, y=NIR, z=TIR, img_path=img_path, mode=mode, writer=writer, step=epoch)
-            if not torch.equal(NIR[0], TIR[0]):
-                RGB_feat, RGB_attn = self.BACKBONE(RGB, cam_label=cam_label, view_label=view_label, img_path=img_path,
-                                                   epoch=epoch, modes=1, writer=writer)
-                NIR_feat, NIR_attn = self.BACKBONE(NIR, cam_label=cam_label, view_label=view_label, img_path=img_path,
-                                                   epoch=epoch, modes=2, writer=writer)
-                TIR_feat, TIR_attn = self.BACKBONE(TIR, cam_label=cam_label, view_label=view_label, img_path=img_path,
-                                                   epoch=epoch, modes=3, writer=writer)
+            mask_fre = self.FREQ_INDEX(x=RGB, y=NIR, z=TIR, img_path=img_path, mode=mode, writer=writer,
+                                       step=epoch)
+            RGB_feat, RGB_attn = self.BACKBONE(RGB, cam_label=cam_label, view_label=view_label, img_path=img_path,
+                                               epoch=epoch, modes=1, writer=writer)
+            NIR_feat, NIR_attn = self.BACKBONE(NIR, cam_label=cam_label, view_label=view_label, img_path=img_path,
+                                               epoch=epoch, modes=2, writer=writer)
+            TIR_feat, TIR_attn = self.BACKBONE(TIR, cam_label=cam_label, view_label=view_label, img_path=img_path,
+                                               epoch=epoch, modes=3, writer=writer)
 
-                RGB_feat_s, NIR_feat_s, TIR_feat_s, mask = self.PERSON_TOKEN_SELECT(RGB_feat=RGB_feat,
-                                                                                    RGB_attn=RGB_attn,
-                                                                                    NIR_feat=NIR_feat,
-                                                                                    NIR_attn=NIR_attn,
-                                                                                    TIR_feat=TIR_feat,
-                                                                                    TIR_attn=TIR_attn,mask_fre=mask_fre)
-                # RGB_feat_s = RGB_feat
-                # NIR_feat_s = NIR_feat
-                # TIR_feat_s = TIR_feat
-                # mask = None
+            RGB_feat_s, NIR_feat_s, TIR_feat_s, mask = self.PERSON_TOKEN_SELECT(RGB_feat=RGB_feat,
+                                                                                RGB_attn=RGB_attn,
+                                                                                NIR_feat=NIR_feat,
+                                                                                NIR_attn=NIR_attn,
+                                                                                TIR_feat=TIR_feat,
+                                                                                TIR_attn=TIR_attn,
+                                                                                img_path=img_path,
+                                                                                epoch=epoch, writer=writer,
+                                                                                mask_fre=mask_fre)
 
-                feat_s = self.FUSE_block(RGB_feat_s, NIR_feat_s, TIR_feat_s, mask=mask)
-                RGB_feat_s = feat_s[:, :RGB_feat_s.shape[1]]
-                NIR_feat_s = feat_s[:, RGB_feat_s.shape[1]:RGB_feat_s.shape[1] + NIR_feat_s.shape[1]]
-                TIR_feat_s = feat_s[:, RGB_feat_s.shape[1] + NIR_feat_s.shape[1]:]
-                RGB_cls = RGB_feat_s[:, 0, :]
-                NIR_cls = NIR_feat_s[:, 0, :]
-                TIR_cls = TIR_feat_s[:, 0, :]
+            feat_s = self.FUSE_block(RGB_feat_s, NIR_feat_s, TIR_feat_s, mask=mask, label=label,
+                                     epoch=epoch)
 
-                RGB_patch = RGB_feat_s[:, 1:, :]
-                NIR_patch = NIR_feat_s[:, 1:, :]
-                TIR_patch = TIR_feat_s[:, 1:, :]
-                # RGB_patch = torch.mean(RGB_patch, dim=1)
-                # NIR_patch = torch.mean(NIR_patch, dim=1)
-                # TIR_patch = torch.mean(TIR_patch, dim=1)
-                # R_plist = []
-                # N_plist = []
-                # T_plist = []
-                # for i in range(RGB_patch.shape[0]):
-                #     rgb = RGB_patch[i]
-                #     R_plist.append(rgb[~torch.isnan(rgb).any(dim=1)].mean(dim=0))
-                #     nir = NIR_patch[i]
-                #     N_plist.append(nir[~torch.isnan(nir).any(dim=1)].mean(dim=0))
-                #     tir = TIR_patch[i]
-                #     T_plist.append(tir[~torch.isnan(tir).any(dim=1)].mean(dim=0))
-                # RGB_patch = torch.stack(R_plist)
-                # NIR_patch = torch.stack(N_plist)
-                # TIR_patch = torch.stack(T_plist)
-                # 计算每行的和
-                row_sum = torch.sum(RGB_patch, dim=2)
-                # 创建掩码来标记包含全零向量的行
-                num = (row_sum != 0).sum(dim=1).unsqueeze(-1)
-                RGB_patch = torch.sum(RGB_patch, dim=1) / num
-                NIR_patch = torch.sum(NIR_patch, dim=1) / num
-                TIR_patch = torch.sum(TIR_patch, dim=1) / num
+            RGB_feat_s = feat_s[:, :RGB_feat_s.shape[1]]
+            NIR_feat_s = feat_s[:, RGB_feat_s.shape[1]:RGB_feat_s.shape[1] + NIR_feat_s.shape[1]]
+            TIR_feat_s = feat_s[:, RGB_feat_s.shape[1] + NIR_feat_s.shape[1]:]
+            RGB_cls = RGB_feat_s[:, 0, :]
+            NIR_cls = NIR_feat_s[:, 0, :]
+            TIR_cls = TIR_feat_s[:, 0, :]
 
-                # cls3 = torch.cat([RGB_cls, NIR_cls, TIR_cls], dim=-1)
-                # cls = self.CLS_REDUCE(cls3)
-                # patch3 = torch.cat([RGB_patch, NIR_patch, TIR_patch], dim=-1)
-                # patch = self.PATCH_REDUCE(patch3)
-                # cls4t = torch.cat([cls, patch], dim=1)
-                # score = self.FUSE_HEAD(self.FUSE_BN(cls4t))
-                rgb = self.RGB_REDUCE(torch.cat([RGB_cls, RGB_patch], dim=-1))
-                nir = self.NIR_REDUCE(torch.cat([NIR_cls, NIR_patch], dim=-1))
-                tir = self.TIR_REDUCE(torch.cat([TIR_cls, TIR_patch], dim=-1))
-                cls4t = torch.cat([rgb, nir, tir], dim=-1)
+            RGB_patch = RGB_feat_s[:, 1:, :]
+            NIR_patch = NIR_feat_s[:, 1:, :]
+            TIR_patch = TIR_feat_s[:, 1:, :]
 
-                if self.cross:
-                    return RGB_feat[:, 0], NIR_feat[:, 0], RGB_feat[:, 0], TIR_feat[:, 0]
-                else:
-                    return cls4t
+            row_sum = torch.sum(RGB_patch, dim=2)
+            # 创建掩码来标记包含全零向量的行
+            num = (row_sum != 0).sum(dim=1).unsqueeze(-1)
+            RGB_patch = torch.sum(RGB_patch, dim=1) / num
+            NIR_patch = torch.sum(NIR_patch, dim=1) / num
+            TIR_patch = torch.sum(TIR_patch, dim=1) / num
+
+            rgb = self.RGB_REDUCE(torch.cat([RGB_cls, RGB_patch], dim=-1))
+            nir = self.NIR_REDUCE(torch.cat([NIR_cls, NIR_patch], dim=-1))
+            tir = self.TIR_REDUCE(torch.cat([TIR_cls, TIR_patch], dim=-1))
+            cls4t = torch.cat([rgb, nir, tir], dim=-1)
+            if self.cross:
+                return RGB_feat[:, 0], NIR_feat[:, 0], RGB_feat[:, 0], TIR_feat[:, 0]
             else:
-                RGB_feat, RGB_attn = self.BACKBONE(RGB, cam_label=cam_label, view_label=view_label, img_path=img_path,
-                                                   epoch=epoch, modes=1, writer=writer)
-                NIR_feat, NIR_attn = self.BACKBONE(NIR, cam_label=cam_label, view_label=view_label, img_path=img_path,
-                                                   epoch=epoch, modes=2, writer=writer)
+                return cls4t
+
+    def forward2(self, x, cam_label=None, label=None, view_label=None, cross_type=None, img_path=None, mode=1,
+                 writer=None, epoch=None):
+        if self.training:
+            RGB = x['RGB']
+            NIR = x['NI']
+            mask_fre = self.FREQ_INDEX(x=RGB, y=NIR, z=None, img_path=img_path, mode=mode, writer=writer,
+                                       step=epoch)
+            RGB_feat, RGB_attn = self.BACKBONE(RGB, cam_label=cam_label, view_label=view_label, img_path=img_path,
+                                               epoch=epoch, modes=1, writer=writer)
+            NIR_feat, NIR_attn = self.BACKBONE(NIR, cam_label=cam_label, view_label=view_label, img_path=img_path,
+                                               epoch=epoch, modes=2, writer=writer)
+
+            RGB_cls4tri = RGB_feat[:, 0, :]
+            NIR_cls4tri = NIR_feat[:, 0, :]
+            RGB_cls_score = self.RGB_HEAD(self.RGB_BN(RGB_cls4tri))
+            NIR_cls_score = self.RGB_HEAD(self.RGB_BN(NIR_cls4tri))
+
+            RGB_feat_s, NIR_feat_s, mask, loss_bg = self.PERSON_TOKEN_SELECT(RGB_feat=RGB_feat,
+                                                                             RGB_attn=RGB_attn,
+                                                                             NIR_feat=NIR_feat,
+                                                                             NIR_attn=NIR_attn,
+                                                                             TIR_feat=None,
+                                                                             TIR_attn=None,
+                                                                             img_path=img_path,
+                                                                             epoch=epoch, writer=writer,
+                                                                             mask_fre=mask_fre)
+
+            feat_s, loss_double = self.FUSE_block(RGB_feat_s, NIR_feat_s, TIR=None, mask=mask, label=label,
+                                                  epoch=epoch)
+
+            RGB_feat_s = feat_s[:, :RGB_feat_s.shape[1]]
+            NIR_feat_s = feat_s[:, RGB_feat_s.shape[1]:RGB_feat_s.shape[1] + NIR_feat_s.shape[1]]
+            RGB_cls = RGB_feat_s[:, 0, :]
+            NIR_cls = NIR_feat_s[:, 0, :]
+
+            RGB_patch = RGB_feat_s[:, 1:, :]
+            NIR_patch = NIR_feat_s[:, 1:, :]
+
+            row_sum = torch.sum(RGB_patch, dim=2)
+            # 创建掩码来标记包含全零向量的行
+            num = (row_sum != 0).sum(dim=1).unsqueeze(-1)
+            RGB_patch = torch.sum(RGB_patch, dim=1) / num
+            NIR_patch = torch.sum(NIR_patch, dim=1) / num
+
+            rgb = self.RGB_REDUCE(torch.cat([RGB_cls, RGB_patch], dim=-1))
+            nir = self.NIR_REDUCE(torch.cat([NIR_cls, NIR_patch], dim=-1))
+            cls4t = torch.cat([rgb, nir], dim=-1)
+            score = self.FUSE_HEAD(self.FUSE_BN(cls4t))
+
+            return score, cls4t, RGB_cls_score, RGB_cls4tri, NIR_cls_score, NIR_cls4tri, loss_bg + loss_double
+
+        else:
+            if mode == 1:
+                self.cross = 0
+            else:
+                self.cross = 1
+
+            RGB = x['RGB']
+            NIR = x['NI']
+            mask_fre = self.FREQ_INDEX(x=RGB, y=NIR, z=None, img_path=img_path, mode=mode, writer=writer,
+                                       step=epoch)
+            RGB_feat, RGB_attn = self.BACKBONE(RGB, cam_label=cam_label, view_label=view_label, img_path=img_path,
+                                               epoch=epoch, modes=1, writer=writer)
+            NIR_feat, NIR_attn = self.BACKBONE(NIR, cam_label=cam_label, view_label=view_label, img_path=img_path,
+                                               epoch=epoch, modes=2, writer=writer)
+
+            RGB_feat_s, NIR_feat_s, mask = self.PERSON_TOKEN_SELECT(RGB_feat=RGB_feat,
+                                                                    RGB_attn=RGB_attn,
+                                                                    NIR_feat=NIR_feat,
+                                                                    NIR_attn=NIR_attn,
+                                                                    TIR_feat=None,
+                                                                    TIR_attn=None,
+                                                                    img_path=img_path,
+                                                                    epoch=epoch, writer=writer,
+                                                                    mask_fre=mask_fre)
+
+            feat_s = self.FUSE_block(RGB_feat_s, NIR_feat_s, TIR=None, mask=mask, label=label,
+                                     epoch=epoch)
+
+            RGB_feat_s = feat_s[:, :RGB_feat_s.shape[1]]
+            NIR_feat_s = feat_s[:, RGB_feat_s.shape[1]:RGB_feat_s.shape[1] + NIR_feat_s.shape[1]]
+            RGB_cls = RGB_feat_s[:, 0, :]
+            NIR_cls = NIR_feat_s[:, 0, :]
+
+            RGB_patch = RGB_feat_s[:, 1:, :]
+            NIR_patch = NIR_feat_s[:, 1:, :]
+
+            row_sum = torch.sum(RGB_patch, dim=2)
+            # 创建掩码来标记包含全零向量的行
+            num = (row_sum != 0).sum(dim=1).unsqueeze(-1)
+            RGB_patch = torch.sum(RGB_patch, dim=1) / num
+            NIR_patch = torch.sum(NIR_patch, dim=1) / num
+
+            rgb = self.RGB_REDUCE(torch.cat([RGB_cls, RGB_patch], dim=-1))
+            nir = self.NIR_REDUCE(torch.cat([NIR_cls, NIR_patch], dim=-1))
+            cls4t = torch.cat([rgb, nir], dim=-1)
+
+            if self.cross:
+                return RGB_feat[:, 0], NIR_feat[:, 0], NIR_feat[:, 0], RGB_feat[:, 0]
+            else:
+                return cls4t
 
 
 __factory_T_type = {

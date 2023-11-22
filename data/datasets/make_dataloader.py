@@ -11,6 +11,7 @@ from .msmt17 import MSMT17
 from .msvr310 import MSVR310
 from .RGBNT201 import RGBNT201
 from .RGBNT100 import RGBNT100
+from .RGBNT300 import RGBNT300
 from .RegDB import RegDB
 from .SYSU import SYSU
 from .sampler_ddp import RandomIdentitySampler_DDP
@@ -31,6 +32,7 @@ __factory = {
     'MSVR310': MSVR310,
     'RegDB': RegDB,
     'SYSU': SYSU,
+    'RGBNT300':RGBNT300,
 }
 """ Random Erasing (Cutout)
 

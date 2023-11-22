@@ -102,9 +102,9 @@ def visualize_multiple_masks(images, masks, mode, pre_fix, writer=None, epoch=No
         # Append the appropriate mode prefix
         if mode == 1 or mode == 0 or mode == 4 or mode == 5:
             prefix = pre_fix + 'RGB/'
-        elif mode == 2:
+        elif mode == 2 or mode == 10:
             prefix = pre_fix + 'NI/'
-        elif mode == 3:
+        elif mode == 3 or mode == 11:
             prefix = pre_fix + 'TI/'
 
         # Load the original image
@@ -117,7 +117,7 @@ def visualize_multiple_masks(images, masks, mode, pre_fix, writer=None, epoch=No
         # Apply a color to the mask (e.g., yellow)
         mask_color = np.array([0, 0, 0])  # Black color for the mask
         masked_image = np.where(mask_upscaled[..., None], original_np, mask_color)
-        if mode == 0:
+        if mode == 0 or mode == 10 or mode == 11:
             masked_image = original_np
         row = i // num_cols
         col = i % num_cols
@@ -126,7 +126,7 @@ def visualize_multiple_masks(images, masks, mode, pre_fix, writer=None, epoch=No
         axes[row, col].imshow(masked_image)
         axes[row, col].axis('off')
     plt.tight_layout()
-    # plt.show()
+    plt.show()
     if writer is not None:
         if mode == 0:
             sign = 'Original'
@@ -141,8 +141,6 @@ def visualize_multiple_masks(images, masks, mode, pre_fix, writer=None, epoch=No
         elif mode == 5:
             sign = 'ATTN'
         writer.add_figure('Person_Token_Select_' + sign, fig, global_step=epoch)
-    # plt.close(fig)
-    # plt.show()
 
 
 class Part_Attention(nn.Module):
@@ -202,53 +200,55 @@ class Person_Token_Select(nn.Module):
         parts = feat_patch * part_inx.unsqueeze(-1)
         return parts
 
-    def forward(self, RGB_feat, RGB_attn, NIR_feat=None, NIR_attn=None, TIR_feat=None, TIR_attn=None, img_path=None,
+    def forward(self, RGB_feat, RGB_attn, NIR_feat=None, NIR_attn=None, TIR_feat=None, TIR_attn=None, FRE_feat=None,
+                FRE_attn=None, img_path=None,
                 writer=None, epoch=None, mask_fre=None):
         _, RGB_index = self.part_select(RGB_attn)
         _, NIR_index = self.part_select(NIR_attn)
-        _, TIR_index = self.part_select(TIR_attn)
-        original_index = RGB_index | NIR_index | TIR_index
+        if TIR_attn is not None:
+            _, TIR_index = self.part_select(TIR_attn)
+            original_index = RGB_index | NIR_index | TIR_index
+        else:
+            original_index = RGB_index | NIR_index
         index = (original_index | mask_fre).unsqueeze(-1)
         if self.training:
             pre_fix = '/13559197192/wyh/UNIReID/data/RGBNT201/train_171/'
-            # #判断batch中是否有000186存在，若存在，得到对应的索引original_index
-            # search_value = '000186'
-            # # 使用 PyTorch 的功能来查找索引
-            # matching_indices = [i for i, value in enumerate(img_path) if value.split('_')[0] == search_value]
-            # #如果matching_indices非空，就可视化，否则不可视化，matching_indices需要变成适合当tensor索引的格式
-            # if len(matching_indices) != 0:
-            #     visualize_multiple_masks(img_path[int(matching_indices[0]):], index[int(matching_indices[0]):], mode=0, pre_fix=pre_fix, writer=writer, epoch=epoch)
-            #     visualize_multiple_masks(img_path[int(matching_indices[0]):], mask_fre[int(matching_indices[0]):].unsqueeze(-1), mode=4, pre_fix=pre_fix, writer=writer,
-            #                              epoch=epoch)
-            #     visualize_multiple_masks(img_path[int(matching_indices[0]):], original_index[int(matching_indices[0]):].unsqueeze(-1), mode=5, pre_fix=pre_fix, writer=writer,
-            #                              epoch=epoch)
-            #     visualize_multiple_masks(img_path[int(matching_indices[0]):], index[int(matching_indices[0]):], mode=1, pre_fix=pre_fix, writer=writer, epoch=epoch)
-            #     visualize_multiple_masks(img_path[int(matching_indices[0]):], index[int(matching_indices[0]):], mode=2, pre_fix=pre_fix, writer=writer, epoch=epoch)
-            #     visualize_multiple_masks(img_path[int(matching_indices[0]):], index[int(matching_indices[0]):], mode=3, pre_fix=pre_fix, writer=writer, epoch=epoch)
-            # 判断batch中是否有000186存在，若存在，得到对应的索引original_index
-            # visualize_multiple_masks(img_path, index, mode=0,pre_fix=pre_fix, writer=writer, epoch=epoch)
-            # visualize_multiple_masks(img_path,mask_fre.unsqueeze(-1), mode=4, pre_fix=pre_fix,writer=writer,epoch=epoch)
-            # visualize_multiple_masks(img_path,original_index.unsqueeze(-1), mode=5,pre_fix=pre_fix, writer=writer,epoch=epoch)
-            # visualize_multiple_masks(img_path, index, mode=1,pre_fix=pre_fix, writer=writer, epoch=epoch)
-            # visualize_multiple_masks(img_path, index, mode=2,pre_fix=pre_fix, writer=writer, epoch=epoch)
-            # visualize_multiple_masks(img_path, index, mode=3,pre_fix=pre_fix, writer=writer, epoch=epoch)
-        # count = torch.count_nonzero(index)//RGB_index.shape[0]
-        # print(f'Count_ALL:{count}')
+        else:
+            pre_fix = '/13559197192/wyh/UNIReID/data/RGBNT201/test/'
+        # visualize_multiple_masks(img_path, index, mode=0,pre_fix=pre_fix, writer=writer, epoch=epoch)
+        # visualize_multiple_masks(img_path, index, mode=10, pre_fix=pre_fix, writer=writer, epoch=epoch)
+        # visualize_multiple_masks(img_path, index, mode=11, pre_fix=pre_fix, writer=writer, epoch=epoch)
+        # visualize_multiple_masks(img_path,mask_fre.unsqueeze(-1), mode=4, pre_fix=pre_fix,writer=writer,epoch=epoch)
+        # visualize_multiple_masks(img_path,original_index.unsqueeze(-1), mode=5,pre_fix=pre_fix, writer=writer,epoch=epoch)
+        # visualize_multiple_masks(img_path, RGB_index, mode=1, pre_fix=pre_fix, writer=writer, epoch=epoch)
+        # visualize_multiple_masks(img_path, NIR_index, mode=2, pre_fix=pre_fix, writer=writer, epoch=epoch)
+        # visualize_multiple_masks(img_path, TIR_index, mode=3, pre_fix=pre_fix, writer=writer, epoch=epoch)
+        # visualize_multiple_masks(img_path, index, mode=1,pre_fix=pre_fix, writer=writer, epoch=epoch)
+        # visualize_multiple_masks(img_path, index, mode=2,pre_fix=pre_fix, writer=writer, epoch=epoch)
+        # visualize_multiple_masks(img_path, index, mode=3,pre_fix=pre_fix, writer=writer, epoch=epoch)
         RGB_parts = RGB_feat[:, 1:, :] * index
         NIR_parts = NIR_feat[:, 1:, :] * index
-        TIR_parts = TIR_feat[:, 1:, :] * index
         RGB_feats = torch.cat([RGB_feat[:, 0].unsqueeze(1), RGB_parts], dim=1)
         NIR_feats = torch.cat([NIR_feat[:, 0].unsqueeze(1), NIR_parts], dim=1)
-        TIR_feats = torch.cat([TIR_feat[:, 0].unsqueeze(1), TIR_parts], dim=1)
+        if TIR_attn is not None:
+            TIR_parts = TIR_feat[:, 1:, :] * index
+            TIR_feats = torch.cat([TIR_feat[:, 0].unsqueeze(1), TIR_parts], dim=1)
         if self.training:
             bgindex = ~index
             RGB_bg = RGB_feat[:, 1:, :] * bgindex
             NIR_bg = NIR_feat[:, 1:, :] * bgindex
-            TIR_bg = TIR_feat[:, 1:, :] * bgindex
-            loss_bg = nn.MSELoss()(RGB_bg, NIR_bg) + nn.MSELoss()(RGB_bg, TIR_bg) + nn.MSELoss()(NIR_bg, TIR_bg)
-            return RGB_feats, NIR_feats, TIR_feats, index, loss_bg
+            if TIR_attn is not None:
+                TIR_bg = TIR_feat[:, 1:, :] * bgindex
+                loss_bg = nn.MSELoss()(RGB_bg, NIR_bg) + nn.MSELoss()(RGB_bg, TIR_bg) + nn.MSELoss()(NIR_bg, TIR_bg)
+                return RGB_feats, NIR_feats, TIR_feats, index, loss_bg
+            else:
+                loss_bg = nn.MSELoss()(RGB_bg, NIR_bg)
+                return RGB_feats, NIR_feats, index, loss_bg
         else:
-            return RGB_feats, NIR_feats, TIR_feats, index
+            if TIR_attn is not None:
+                return RGB_feats, NIR_feats, TIR_feats, index
+            else:
+                return RGB_feats, NIR_feats, index
 
 
 class Person_Token_SelectC(nn.Module):

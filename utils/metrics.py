@@ -3,8 +3,9 @@ import numpy as np
 import os
 from utils.reranking import re_ranking
 import numpy as np
-
-
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn import manifold
 # from sklearn import manifold
 
 
@@ -334,6 +335,54 @@ class R1_mAP_eval():
         self.pids.extend(np.asarray(pid))
         self.camids.extend(np.asarray(camid))
 
+    def showPointMultiModal(self,features, real_label, draw_label, save_path='/13559197192/wyh/UNIReID/pic'):
+        id_show = 25
+        num_ids = len(np.unique(real_label))
+        save_path = os.path.join(save_path, str(draw_label) + ".pdf")
+        print("Draw points of features to {}".format(save_path))
+        indices = find_label_indices(real_label, draw_label, max_indices_per_label=id_show)
+        feat = features[indices]
+        tsne = manifold.TSNE(n_components=2, init='pca', random_state=1,learning_rate=100, perplexity=60)
+        features_tsne = tsne.fit_transform(feat)
+        colors =  ['#1f78b4', '#33a02c', '#e31a1c', '#ff7f00', '#6a3d9a', '#b15928', '#a6cee3', '#b2df8a', '#fb9a99', '#fdbf6f', '#cab2d6', '#ffff99']
+        MARKS = ['*']
+        plt.figure(figsize=(10, 10))
+        for i in range(features_tsne.shape[0]):
+            plt.scatter(features_tsne[i, 0], features_tsne[i, 1], s=300,color=colors[i//id_show],marker=MARKS[0],
+                        alpha=0.4)
+        plt.title("t-SNE Visualization of Different IDs")
+        plt.xlabel("t-SNE Dimension 1")
+        plt.ylabel("t-SNE Dimension 2")
+        # plt.legend()
+        plt.savefig(save_path)
+        plt.show()
+        plt.close()
+        # f_R = features[indices, 0:768]
+        # f_N = features[indices, 768:1536]
+        # f_T = features[indices, 1536:2304]
+        #
+        # tsne = manifold.TSNE(n_components=2, init='pca', random_state=501,learning_rate=0.001,perplexity=30)
+        # features_R_tsne = tsne.fit_transform(f_R)
+        # features_N_tsne = tsne.fit_transform(f_N)
+        # features_T_tsne = tsne.fit_transform(f_T)
+        # COLORS = ['darkorange', 'limegreen', 'royalblue', 'red', 'darkviolet', 'black']
+        # MARKS = ['*', 'o', '^']
+        # features_R_min, features_R_max = features_R_tsne.min(0), features_R_tsne.max(0)
+        # features_R_norm = (features_R_tsne - features_R_min) / (features_R_max - features_R_min)
+        # features_N_min, features_N_max = features_N_tsne.min(0), features_N_tsne.max(0)
+        # features_N_norm = (features_N_tsne - features_N_min) / (features_N_max - features_N_min)
+        # features_T_min, features_T_max = features_T_tsne.min(0), features_T_tsne.max(0)
+        # features_T_norm = (features_T_tsne - features_T_min) / (features_T_max - features_T_min)
+        # plt.figure(figsize=(20, 20))
+        # for i in range(features_R_norm.shape[0]):
+        #     plt.scatter(features_R_norm[i, 0], features_R_norm[i, 1], s=300,color=COLORS[i//id_show],marker=MARKS[0],
+        #                 alpha=0.4, label='RGB')
+        #     plt.scatter(features_N_norm[i, 0], features_N_norm[i, 1], s=300, color=COLORS[i//id_show], marker=MARKS[1],
+        #                 alpha=0.4, label='NIR')
+        #     plt.scatter(features_T_norm[i, 0], features_T_norm[i, 1], s=400, color=COLORS[i//id_show], marker=MARKS[2],
+        #                 alpha=0.4, label='TIR')
+
+
     def compute(self, vis=0):  # called after each epoch
         feats = torch.cat(self.feats, dim=0)
         if self.feat_norm:
@@ -357,6 +406,8 @@ class R1_mAP_eval():
             print('=> Computing DistMat with euclidean_distance')
             distmat = euclidean_distance(qf, gf)
         cmc, mAP = eval_func(distmat, q_pids, g_pids, q_camids, g_camids)
+        # if vis:
+        #     self.showPointMultiModal(feats, real_label= self.pids, draw_label=[258,260,269,271,273,280,282,284,285,286,287,289])
         return cmc, mAP, distmat, self.pids, self.camids, qf, gf
 
 

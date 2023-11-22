@@ -72,11 +72,9 @@ if __name__ == '__main__':
     print("data is ready")
 
     model = make_model(cfg, num_class=num_classes, camera_num=camera_num, view_num=view_num)
-    input_data = {}
-    input_data['RGB'] = torch.randn(2, 3, 256, 128)
-    input_data['NI'] = torch.randn(2, 3, 256, 128)
-    input_data['TI'] = torch.randn(2, 3, 256, 128)
-
-    flops, params = profile(model, inputs=(input_data,))
+    model.cuda()
+    input_data = torch.randn(2, 3, 256, 128).cuda()
+    input_dict = {'RGB': input_data, 'NI': input_data, 'TI': input_data}
+    flops, params = profile(model, inputs=(input_dict,))
     logger.info("FLOPs:{}G".format(flops / 2e9))
     logger.info("Params:{}M".format(params / 1e6))

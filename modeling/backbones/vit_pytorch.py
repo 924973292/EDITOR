@@ -31,6 +31,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 import collections.abc as container_abcs
 from modeling.fusion_part.memory import ModalityMemory
+import matplotlib.pyplot as plt
+import seaborn as sns  # 使用Seaborn库绘制KDE图
+
 # From PyTorch internals
 def _ntuple(n):
     def parse(x):
@@ -154,7 +157,8 @@ class MlpMasked(nn.Module):
 
     def forward(self, x, mask):
         if x.shape[1] != mask.shape[1]:
-            mask = mask.repeat(1, 3, 1)
+            scale = x.shape[1] // mask.shape[1]
+            mask = mask.repeat(1, scale, 1)
         x = x * mask
         x = self.fc1(x)
         x = self.act(x)
@@ -236,7 +240,8 @@ class AttentionMask(nn.Module):
     def forward(self, x, mask):
         B, N, C = x.shape
         if x.shape[1] != mask.shape[1]:
-            mask = mask.repeat(1, 3, 1)
+            scale = x.shape[1] // mask.shape[1]
+            mask = mask.repeat(1, scale, 1)
         x = x * mask
         qkv = self.qkv(x).reshape(B, N, 3, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
         q, k, v = qkv[0], qkv[1], qkv[2]  # make torchscript happy (cannot use tensor as tuple)
@@ -252,10 +257,12 @@ class AttentionMask(nn.Module):
         x = self.proj_drop(x)
         return x
 
+
 class BlockMask(nn.Module):
 
-    def __init__(self, dim, num_heads, mlp_ratio=4.,num_class=171, qkv_bias=False, qk_scale=None, drop=0., attn_drop=0.,
-                 drop_path=0., act_layer=nn.GELU, norm_layer=nn.LayerNorm,momentum=0.9):
+    def __init__(self, dim, num_heads, mlp_ratio=4., num_class=171, qkv_bias=False, qk_scale=None, drop=0.,
+                 attn_drop=0.,
+                 drop_path=0., act_layer=nn.GELU, norm_layer=nn.LayerNorm, momentum=0.9):
         super().__init__()
         mlp_hidden_dim = int(dim * mlp_ratio)
         self.normR = norm_layer(dim)
@@ -292,6 +299,42 @@ class BlockMask(nn.Module):
 
         self.memory_cls = ModalityMemory(dim=dim, num_class=num_class, momentum=momentum)
 
+    def visualize_similarity(self,a_ori_cls_token, a_cls_token, b_before_patch_tokens,b_after_patch_tokens, epoch, mode=1, pattern=None):
+        a_ori_cls_token = a_ori_cls_token.unsqueeze(1)
+        similarities_ori = torch.nn.functional.cosine_similarity(a_ori_cls_token, b_before_patch_tokens, dim=-1)
+        similarities_ori = torch.mean(similarities_ori, dim=1).squeeze().cpu().detach().numpy()
+
+        a_cls_token = a_cls_token.unsqueeze(1)
+        similarities = torch.nn.functional.cosine_similarity(a_cls_token, b_after_patch_tokens, dim=-1)
+        similarities = torch.mean(similarities, dim=1).squeeze().cpu().detach().numpy()
+        # Set Seaborn style
+        sns.set(style="whitegrid")
+
+        # Create a figure and axis
+        fig, ax = plt.subplots()
+
+        # Plot KDE curves for "before" and "after" fusion
+        sns.kdeplot(similarities, color='b', label='After HMA', ax=ax, multiple="stack")
+        sns.kdeplot(similarities_ori, color='g', label='Before HMA', ax=ax, multiple="stack")
+        if pattern == 'r2t':
+            sign = 'R2T'
+        elif pattern == 'r2n':
+            sign = 'R2N'
+        elif pattern == 'n2t':
+            sign = 'N2T'
+        elif pattern == 'n2r':
+            sign = 'N2R'
+        elif pattern == 't2r':
+            sign = 'T2R'
+        elif pattern == 't2n':
+            sign = 'T2N'
+        plt.title("Similarity Distribution (cls2patch) of " + sign, fontsize=18, fontweight='bold')
+        plt.xlabel("Cosine Similarity", fontsize=16, fontweight='bold')
+        plt.ylabel("Density", fontsize=16, fontweight='bold')
+
+        # Add a legend to distinguish "before" and "after" fusion
+        plt.legend(loc='upper right', fontsize=17)
+        plt.show()
     def _init_weights(self, m):
         if isinstance(m, nn.Linear):
             trunc_normal_(m.weight, std=.02)
@@ -301,44 +344,60 @@ class BlockMask(nn.Module):
             nn.init.constant_(m.bias, 0)
             nn.init.constant_(m.weight, 1.0)
 
-    def forward(self, RGB, NIR, TIR, mask, label=None,epoch=1):
+    def forward(self, RGB, NIR, TIR, mask, label, epoch=1):
         mask = torch.cat([torch.ones((RGB.shape[0], 1, 1)).cuda(), mask], dim=1)
         RGB = RGB + self.drop_path(self.attnR(self.normR(RGB), mask=mask))
         RGB = RGB + self.drop_path(self.mlpR(self.normR_(RGB), mask=mask))
         NIR = NIR + self.drop_path(self.attnN(self.normN(NIR), mask=mask))
         NIR = NIR + self.drop_path(self.mlpN(self.normN_(NIR), mask=mask))
-        TIR = TIR + self.drop_path(self.attnT(self.normT(TIR), mask=mask))
-        TIR = TIR + self.drop_path(self.mlpT(self.normT_(TIR), mask=mask))
+        if TIR is not None:
+            TIR = TIR + self.drop_path(self.attnT(self.normT(TIR), mask=mask))
+            TIR = TIR + self.drop_path(self.mlpT(self.normT_(TIR), mask=mask))
         if self.training:
-            # # 计算每个patch的平均值
-            # RGB_patch = RGB[:, 1:, :]
-            # NIR_patch = NIR[:, 1:, :]
-            # TIR_patch = TIR[:, 1:, :]
-            # # 计算每行的和
-            # row_sum = torch.sum(RGB_patch, dim=2)
-            # # 创建掩码来标记包含全零向量的行
-            # num = (row_sum != 0).sum(dim=1).unsqueeze(-1)
-            # RGB_patch = torch.sum(RGB_patch, dim=1) / num
-            # NIR_patch = torch.sum(NIR_patch, dim=1) / num
-            # TIR_patch = torch.sum(TIR_patch, dim=1) / num
             RGB_cls = RGB[:, 0, :]
             NIR_cls = NIR[:, 0, :]
-            TIR_cls = TIR[:, 0, :]
-            loss = self.memory_cls(RGB_cls, NIR_cls, TIR_cls, label,epoch=epoch)
-            x = torch.cat([RGB, NIR, TIR], dim=1)
+            if TIR is not None:
+                TIR_cls = TIR[:, 0, :]
+                loss = self.memory_cls(RGB_cls, NIR_cls, TIR_cls, label, epoch=epoch)
+                x = torch.cat([RGB, NIR, TIR], dim=1)
+            else:
+                loss = self.memory_cls(RGB_cls, NIR_cls, TIR_feat = None, label_=label, epoch=epoch)
+                x = torch.cat([RGB, NIR], dim=1)
             x = x + self.drop_path(self.attn1(self.norm1(x), mask=mask))
             x = x + self.drop_path(self.mlp(self.norm2(x), mask=mask))
             x = self.out_norm(x)
-            mask3 = mask.repeat(1, 3, 1)
-            x = x * mask3
+            if TIR is not None:
+                mask3 = mask.repeat(1, 3, 1)
+                x = x * mask3
+            else:
+                mask2 = mask.repeat(1, 2, 1)
+                x = x * mask2
             return x, loss
         else:
-            x = torch.cat([RGB, NIR, TIR], dim=1)
+            if TIR is not None:
+                x = torch.cat([RGB, NIR, TIR], dim=1)
+            else:
+                x = torch.cat([RGB, NIR], dim=1)
             x = x + self.drop_path(self.attn1(self.norm1(x), mask=mask))
             x = x + self.drop_path(self.mlp(self.norm2(x), mask=mask))
             x = self.out_norm(x)
-            mask3 = mask.repeat(1, 3, 1)
-            x = x * mask3
+            # RGB_show = x[:,:RGB.shape[1], :]
+            # NIR_show = x[:,RGB.shape[1]:RGB.shape[1]+NIR.shape[1], :]
+            # if TIR is not None:
+            #     TIR_show = x[:,RGB.shape[1]+NIR.shape[1]:, :]
+
+            # self.visualize_similarity(RGB[:, 0, :], RGB_show[:,0,:], NIR[:,1:,:],NIR_show[:,1:,:], pattern='r2n',epoch=0)
+            # self.visualize_similarity(RGB[:, 0, :], RGB_show[:,0,:], TIR[:,1:,:],TIR_show[:,1:,:], pattern='r2t',epoch=0)
+            # self.visualize_similarity(NIR[:, 0, :], NIR_show[:,0,:], RGB[:,1:,:],RGB_show[:,1:,:], pattern='n2r',epoch=0)
+            # self.visualize_similarity(NIR[:, 0, :], NIR_show[:,0,:], TIR[:,1:,:],TIR_show[:,1:,:], pattern='n2t',epoch=0)
+            # self.visualize_similarity(TIR[:, 0, :], TIR_show[:,0,:], RGB[:,1:,:],RGB_show[:,1:,:], pattern='t2r',epoch=0)
+            # self.visualize_similarity(TIR[:, 0, :], TIR_show[:,0,:], NIR[:,1:,:],NIR_show[:,1:,:], pattern='t2n',epoch=0)
+            if TIR is not None:
+                mask3 = mask.repeat(1, 3, 1)
+                x = x * mask3
+            else:
+                mask2 = mask.repeat(1, 2, 1)
+                x = x * mask2
             return x
 
 

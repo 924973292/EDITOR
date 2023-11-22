@@ -8,7 +8,8 @@ import math
 import torch.nn.functional as F
 from modeling.backbones.vit_pytorch import PatchEmbed_overlap
 from pytorch_wavelets import DWTForward, DWTInverse
-
+from torchvision import transforms
+from modeling.fusion_part.scale_channel import ScaleChannel
 
 def display_image(image_path, mode=1):
     pre_fix = '/13559197192/wyh/UNIReID/data/RGBNT201/train_171/'
@@ -66,19 +67,20 @@ def visualize_multiple_masks(images, masks, mode, pre_fix, writer=None, epoch=No
 
 
 class FrequencyIndex(nn.Module):
-    def __init__(self,keep):
+    def __init__(self, keep):
         super().__init__()
         self.DWT = DWTForward(J=4, wave='haar', mode='zero').cuda()
         self.IDWT = DWTInverse(wave='haar', mode='zero').cuda()
+        self.gassian = transforms.GaussianBlur(kernel_size=5, sigma=0.1).cuda()
+        self.laplace = torch.FloatTensor([[0, 1, 0], [1, -4, 1], [0, 1, 0]]).cuda()
         self.keep = keep
         self.window_size = 16
-
-    def show(self, x,writer=None, epoch=None,img_path=None):
+    def show(self, x, writer=None, epoch=None, img_path=None, mode=1):
         x = x[:12]
         num_rows = 2  # Number of rows in the display grid
         num_cols = 6  # Number of columns in the display grid
         fig, axes = plt.subplots(num_rows, num_cols, figsize=(15, 6))
-        if x[0].shape[0]==3:
+        if x[0].shape[0] == 3:
             x = x.permute(0, 2, 3, 1)
         # 循环遍历12个张量并可视化它们
         for i in range(12):
@@ -99,62 +101,70 @@ class FrequencyIndex(nn.Module):
         plt.tight_layout()
         plt.show()
         if writer is not None:
-            writer.add_figure('FREQUENCY', fig, global_step=epoch)
+            if mode == 1:
+                writer.add_figure('FREQUENCY_After', fig, global_step=epoch)
+            elif mode == 2:
+                writer.add_figure('FREQUENCY_Before', fig, global_step=epoch)
 
-    def forward(self, x, y, z, img_path,pattern='a', mode=None, writer=None, step=None):
-        batch_size, height, width = x.size(0), x.size(2), x.size(3)
-        Ylx, Yhx = self.DWT(x)
-        Yly, Yhy = self.DWT(y)
-        Ylz, Yhz = self.DWT(z)
-        low = (Ylx + Yly + Ylz) / 3
-        high = [(Yhx[0] + Yhy[0] + Yhz[0]) / 3, (Yhx[1] + Yhy[1] + Yhz[1]) / 3, (Yhx[2] + Yhy[2] + Yhz[2]) / 3,
-                (Yhx[3] + Yhy[3] + Yhz[3]) / 3]
-        if pattern == 'low':
-            low_ = torch.mean(low,dim=1)
-            if self.training:
-                self.show(low_, writer=writer, epoch=step)
-            count_tensor = low_
+    def mask_single_stage(self, Inverse,window_size=16,mode='high'):
+        batch_size, height, width = Inverse.size(0), Inverse.size(-2), Inverse.size(-1)
+        if mode=='high':
+            Inverse = Inverse[:,:,0]+Inverse[:,:,1]+Inverse[:,:,2]
+        Inverse = torch.mean(Inverse, dim=1)
+        # 创建一个用于存储统计结果的空张量，初始值都为0
+        count_tensor = torch.zeros((batch_size, height // window_size, width // window_size),
+                                   dtype=torch.int).cuda()
 
-        else:
-            Inverse = self.IDWT((low, high))
-            # 为Inverse统计每个16*16窗口内大于0的个数
-            Inverse = torch.mean(Inverse, dim=1)
-            if not self.training:
-                # #找到000258_cam1_0_00这张图像在img_path中的索引,然后可视化它
-                # search_value = '000258_cam1_0_00'
-                # # 使用 PyTorch 的功能来查找索引
-                # matching_indices = [i for i, value in enumerate(img_path) if value.split('.')[0] == search_value]
-                # # 如果matching_indices非空，就可视化，否则不可视化，matching_indices需要变成适合当tensor索引的格式
-                # if len(matching_indices) != 0:
-                #     self.show(Inverse[int(matching_indices[0]):],writer=writer, epoch=step)
-                pass
-
-
-
-            # 创建一个用于存储统计结果的空张量，初始值都为0
-            count_tensor = torch.zeros((batch_size, height // self.window_size, width // self.window_size), dtype=torch.int).cuda()
-
-            # 循环遍历每个图像
-            for batch_idx in range(batch_size):
-                image = Inverse[batch_idx]  # 获取当前图像
-                # 使用 unfold 函数来获取窗口视图
-                unfolded = F.unfold(image.unsqueeze(0).unsqueeze(0), self.window_size, stride=self.window_size)
-                # 将大于0的元素变成二进制，然后求和以统计大于0的元素数量
-                count = unfolded.gt(0).sum(1)
-                count = count.view(height // self.window_size, width // self.window_size)
-                count_tensor[batch_idx] = count
-                #获取每个图像的最大值的索引
+        # 循环遍历每个图像
+        for batch_idx in range(batch_size):
+            image = Inverse[batch_idx]  # 获取当前图像
+            # 使用 unfold 函数来获取窗口视图
+            unfolded = F.unfold(image.unsqueeze(0).unsqueeze(0), window_size, stride=window_size)
+            # 将大于0的元素变成二进制，然后求和以统计大于0的元素数量
+            count = unfolded.gt(0).sum(1)
+            count = count.view(height // window_size, width // window_size)
+            count_tensor[batch_idx] = count
+            # 获取每个图像的最大值的索引
         _, topk_indices = torch.topk(count_tensor.flatten(1), int(self.keep), dim=1)
         topk_indices = torch.sort(topk_indices, dim=1).values
-        selected_tokens_mask = torch.zeros((batch_size, (height // self.window_size)  * (width // self.window_size)), dtype=torch.bool).cuda()
+        selected_tokens_mask = torch.zeros((batch_size, (height // window_size) * (width // window_size)),
+                                           dtype=torch.bool).cuda()
         selected_tokens_mask.scatter_(1, topk_indices, 1)
-        # if self.training:
-            # 判断batch中是否有000186存在，若存在，得到对应的索引original_index
-            # search_value = '000186'
-            # # 使用 PyTorch 的功能来查找索引
-            # matching_indices = [i for i, value in enumerate(img_path) if value.split('_')[0] == search_value]
-            # # 如果matching_indices非空，就可视化，否则不可视化，matching_indices需要变成适合当tensor索引的格式
-            # if len(matching_indices) != 0:
-            #     self.show(Inverse[int(matching_indices[0]):],writer=writer, epoch=step)
-            # self.show(Inverse, writer=writer, epoch=step)
+        return selected_tokens_mask
+
+    def forward(self, x, y, z, img_path, pattern='a', mode=None, writer=None, step=None):
+        Ylx, Yhx = self.DWT(x)
+        # self.show(torch.mean(Ylx,dim=1), writer=writer, epoch=step, img_path=img_path, mode=mode)
+        # self.show(torch.mean(Yhx[0][:,:,0],dim=1), writer=writer, epoch=step, img_path=img_path, mode=mode)
+        # self.show(torch.mean(Yhx[0][:,:,1],dim=1), writer=writer, epoch=step, img_path=img_path, mode=mode)
+        # self.show(torch.mean(Yhx[0][:,:,2],dim=1), writer=writer, epoch=step, img_path=img_path, mode=mode)
+        Yly, Yhy = self.DWT(y)
+        # self.show(torch.mean(Yly,dim=1), writer=writer, epoch=step, img_path=img_path, mode=mode)
+        # self.show(torch.mean(Yhy[0][:,:,0],dim=1), writer=writer, epoch=step, img_path=img_path, mode=mode)
+        # self.show(torch.mean(Yhy[0][:,:,1],dim=1), writer=writer, epoch=step, img_path=img_path, mode=mode)
+        # self.show(torch.mean(Yhy[0][:,:,2],dim=1), writer=writer, epoch=step, img_path=img_path, mode=mode)
+        if z!=None:
+            Ylz, Yhz = self.DWT(z)
+            # self.show(torch.mean(Ylz,dim=1), writer=writer, epoch=step, img_path=img_path, mode=mode)
+            # self.show(torch.mean(Yhz[0][:,:,0],dim=1), writer=writer, epoch=step, img_path=img_path, mode=mode)
+            # self.show(torch.mean(Yhz[0][:,:,1],dim=1), writer=writer, epoch=step, img_path=img_path, mode=mode)
+            # self.show(torch.mean(Yhz[0][:,:,2],dim=1), writer=writer, epoch=step, img_path=img_path, mode=mode)
+            low = (Ylx+Yly+Ylz)/3
+            high = []
+            for i in range(len(Yhx)):
+                high.append((Yhx[i]+Yhy[i]+Yhz[i])/3)
+        else:
+            low = (Ylx + Yly) / 2
+            high = []
+            for i in range(len(Yhx)):
+                high.append((Yhx[i] + Yhy[i]) / 2)
+        # self.show(torch.mean(low,dim=1), writer=writer, epoch=step, img_path=img_path, mode=mode)
+        # self.show(torch.mean(high[0][:,:,0],dim=1), writer=writer, epoch=step, img_path=img_path, mode=mode)
+        # self.show(torch.mean(high[0][:,:,1],dim=1), writer=writer, epoch=step, img_path=img_path, mode=mode)
+        # self.show(torch.mean(high[0][:,:,2],dim=1), writer=writer, epoch=step, img_path=img_path, mode=mode)
+        Inverse = self.IDWT((low, high))
+        # self.show(torch.mean(Inverse,dim=1), writer=writer, epoch=step, img_path=img_path, mode=mode)
+        selected_tokens_mask = self.mask_single_stage(Inverse=Inverse, window_size=16, mode='low')
+        #统计selected_tokens_mask非0的个数
+        # print(selected_tokens_mask.sum()//x.shape[0])
         return selected_tokens_mask

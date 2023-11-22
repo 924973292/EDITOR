@@ -10,6 +10,27 @@ from torch.utils.tensorboard import SummaryWriter
 import torch.distributed as dist
 from modeling.fusion_part.memory import ModalityMemory
 
+def IOU(set1, set2):
+    """
+    Compute average Jaccard similarity between corresponding sets in a batch.
+
+    Parameters:
+    - set1 (torch.Tensor): Tensor representing set 1 (binary tensor).
+    - set2 (torch.Tensor): Tensor representing set 2 (binary tensor).
+
+    Returns:
+    - torch.Tensor: Average Jaccard similarity score for the batch.
+    """
+    # Compute intersection and union for each pair of sets
+
+    intersection = torch.sum(set1 & set2, dim=1)  # Bitwise AND and sum along N dimension
+    union = torch.sum(set1 | set2, dim=1)  # Bitwise OR and sum along N dimension
+
+    # Jaccard similarity for each pair
+    similarity = intersection.float() / union.float()
+    similarity = torch.mean(similarity)  # Average similarity for the batch
+    return similarity  # Return negative to get similarity (optional)
+
 
 def normalize(x, axis=-1):
     """Normalizing to unit length along the specified dimension.
@@ -67,6 +88,7 @@ def do_train(cfg,
     best_index = {'mAP': 0, "Rank-1": 0, 'Rank-5': 0, 'Rank-10': 0}
     best_index_c1 = {'mAP': 0, "Rank-1": 0, 'Rank-5': 0, 'Rank-10': 0}
     best_index_c2 = {'mAP': 0, "Rank-1": 0, 'Rank-5': 0, 'Rank-10': 0}
+    previous_mask = torch.zeros((1, 1, 256, 128)).cuda()
     for epoch in range(1, epochs + 1):
         start_time = time.time()
         loss_meter.reset()
@@ -90,6 +112,13 @@ def do_train(cfg,
                                writer=writer, epoch=epoch)
                 loss = 0
                 # 判断len(output)的奇偶性，如果是odd，那么执行下面的语句，如果是even，那么执行else语句
+                current_mask = output[-1]
+                if epoch>1:
+                    ratio = IOU(current_mask, previous_mask)
+                    print(ratio)
+                    writer.add_scalar('Stable', ratio.item(), epoch)
+                previous_mask = current_mask
+                output = output[:-1]
                 if len(output) % 2 == 1:
                     index = len(output) - 1
                     for i in range(0, index, 2):

@@ -13,6 +13,7 @@ MODEL:
   BASE: 0
   DIST_TRAIN: False
   FREQUENCY_KEEP: 10
+  HEAD_KEEP: 2
 INPUT:
   SIZE_TRAIN: [ 256, 128 ]
   SIZE_TEST: [256, 128 ]
@@ -44,7 +45,7 @@ TEST:
   FEAT: 0
   CROSS: 0
   MISS: 'nothing'
-OUTPUT_DIR: './RGBNT201/test'
+OUTPUT_DIR: './3branch'
 
 
 

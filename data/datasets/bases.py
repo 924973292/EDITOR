@@ -17,10 +17,8 @@ def read_image(img_list):
         while not got_img:
             try:
                 img = Image.open(img_path).convert('RGB')
-                RGB = img.crop((0, 0, 256, 128))
-                NI = img.crop((256, 0, 512, 128))
-                TI = img.crop((512, 0, 768, 128))
-                img3 = [RGB, NI, TI]
+                #判断图像的宽度是256的几倍，如果是三倍，则进行下面的代码，否则只裁剪前两个
+                img3 = [img.crop((256 * i, 0, 256 * (i + 1), 128)) for i in range(img.size[0] // 256)]
                 got_img = True
             except IOError:
                 print("IOError incurred when reading '{}'. Will redo. Don't worry. Just chill.".format(img_path))
