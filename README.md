@@ -98,7 +98,7 @@ python train_net.py --config_file ../RGBNT201/EDITOR.yml
 ```
 ## Star History
 
-<iframe style="width:100%;height:auto;min-width:600px;min-height:400px;" src="https://star-history.com/embed?secret=Z2hwX2t0RkZXZ2dBYjRCY2lYZEFkU0N1aThqc3BkSnV2bDBJMEFsUw==#924973292/EDITOR&Date" frameBorder="0"></iframe>
+[![Star](Star)](https://star-history.com/embed?secret=Z2hwX2t0RkZXZ2dBYjRCY2lYZEFkU0N1aThqc3BkSnV2bDBJMEFsUw==#924973292/EDITOR&Date)
 
 ## Citation
 If you find EDITOR useful in your research, please consider citing:
