@@ -97,10 +97,6 @@ pip install -r requirements.txt
 python train_net.py --config_file ../RGBNT201/EDITOR.yml
 ```
 
-## Star History
-
-<iframe style="width:100%;height:auto;min-width:600px;min-height:400px;" src="https://star-history.com/embed?secret=Z2hwX2l3QjhmdVI3MHVORm45bVdTc3JFMEpTaDk5c3g1cTFNUEl4cg==#924973292/EDITOR&Date" frameBorder="0"></iframe>
-
 
 ## Citation
 If you find EDITOR useful in your research, please consider citing:
