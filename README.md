@@ -99,9 +99,7 @@ python train_net.py --config_file ../RGBNT201/EDITOR.yml
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=924973292/EDITOR&type=Date)](https://star-history.com/#924973292/EDITOR&Date)
-
-
+<iframe style="width:100%;height:auto;min-width:600px;min-height:400px;" src="https://star-history.com/embed?secret=Z2hwX2l3QjhmdVI3MHVORm45bVdTc3JFMEpTaDk5c3g1cTFNUEl4cg==#924973292/EDITOR&Date" frameBorder="0"></iframe>
 
 
 ## Citation
