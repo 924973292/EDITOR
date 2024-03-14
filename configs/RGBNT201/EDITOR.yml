@@ -1,0 +1,39 @@
+MODEL:
+  PRETRAIN_CHOICE: 'imagenet'
+  MIX_DIM: 768
+  PRETRAIN_PATH_T: 'your_pretrain_model_path'
+  TRANSFORMER_TYPE: 'vit_base_patch16_224'
+  STRIDE_SIZE: [ 16, 16 ]
+  SIE_CAMERA: True
+  DIST_TRAIN: False
+  FREQUENCY_KEEP: 10
+  HEAD_KEEP: 2
+  AL: 1
+INPUT:
+  SIZE_TRAIN: [ 256, 128 ]
+  SIZE_TEST: [256, 128 ]
+  PROB: 0.5 # random horizontal flip
+  RE_PROB: 0.5 # random erasing
+  PADDING: 10
+DATASETS:
+  NAMES: ('RGBNT201')
+  ROOT_DIR: 'your_dataset_path'
+DATALOADER:
+  SAMPLER: 'softmax_triplet'
+  NUM_INSTANCE: 16
+  NUM_WORKERS : 14
+SOLVER:
+  OPTIMIZER_NAME: 'SGD'
+  BASE_LR: 0.001
+  WARMUP_ITERS: 10
+  IMS_PER_BATCH: 128
+  MAX_EPOCHS: 70
+TEST:
+  RE_RANKING: 'no'
+  WEIGHT: ''
+  NECK_FEAT: 'before'
+  FEAT_NORM: 'yes'
+OUTPUT_DIR: './EDITOR'
+
+
+

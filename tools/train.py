@@ -25,7 +25,7 @@ def set_seed(seed):
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description="UniSReID Training")
+    parser = argparse.ArgumentParser(description="EDITOR Training")
     parser.add_argument(
         "--config_file", default="", help="path to config file", type=str
     )
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     if output_dir and not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    logger = setup_logger("UniSReID", output_dir, if_train=True)
+    logger = setup_logger("EDITOR", output_dir, if_train=True)
     logger.info("Saving model in the path :{}".format(cfg.OUTPUT_DIR))
     logger.info(args)
 
@@ -64,106 +64,25 @@ if __name__ == '__main__':
         torch.distributed.init_process_group(backend='nccl', init_method='env://')
 
     os.environ['CUDA_VISIBLE_DEVICES'] = cfg.MODEL.DEVICE_ID
-    if cfg.DATASETS.NAMES == 'RegDB':
-        R2N = []
-        N2R = []
-        for trial in range(1, 11):
-            cfg.DATASETS.TRIAL = trial
-            train_loader, train_loader_normal, val_loader, num_query, num_classes, camera_num, view_num = make_dataloader(
-                cfg)
-            print("data is ready")
-            model = make_model(cfg, num_class=num_classes, camera_num=camera_num, view_num=view_num)
+    train_loader, train_loader_normal, val_loader, num_query, num_classes, camera_num, view_num = make_dataloader(
+        cfg)
+    print("data is ready")
+    model = make_model(cfg, num_class=num_classes, camera_num=camera_num)
 
-            loss_func, center_criterion = make_loss(cfg, num_classes=num_classes)
+    loss_func, center_criterion = make_loss(cfg, num_classes=num_classes)
 
-            optimizer, optimizer_center = make_optimizer(cfg, model, center_criterion)
+    optimizer, optimizer_center = make_optimizer(cfg, model, center_criterion)
 
-            scheduler = create_scheduler(cfg, optimizer)
-            best_index_c1, best_index_c2 = do_train(
-                cfg,
-                model,
-                center_criterion,
-                train_loader,
-                val_loader,
-                optimizer,
-                optimizer_center,
-                scheduler,
-                loss_func,
-                num_query, args.local_rank
-            )
-            R2N.append(best_index_c1)
-            N2R.append(best_index_c2)
-
-        sum_results = {'mAP': 0, 'Rank-1': 0, 'Rank-5': 0, 'Rank-10': 0}
-        # 遍历每个trial的结果
-        for i, trial_result in enumerate(R2N):
-            print(f'trial{i + 1}:')
-            for metric, value in trial_result.items():
-                # 将小数值转换为百分比形式
-                percentage_value = value * 100
-                print(f'{metric}: {percentage_value:.2f}%')
-            print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-
-            # 累加结果以计算平均值
-            for metric, value in trial_result.items():
-                sum_results[metric] += value
-
-        # 计算平均值
-        num_trials = len(R2N)
-        mean_results = {metric: (sum_results[metric] / num_trials) * 100 for metric in sum_results}
-
-        # 打印平均值
-        print('mean:')
-        for metric, value in mean_results.items():
-            print(f'{metric}: {value:.2f}%')
-        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-
-        sum_results = {'mAP': 0, 'Rank-1': 0, 'Rank-5': 0, 'Rank-10': 0}
-
-        # 遍历每个trial的结果
-        for i, trial_result in enumerate(N2R):
-            print(f'trial{i + 1}:')
-            for metric, value in trial_result.items():
-                # 将小数值转换为百分比形式
-                percentage_value = value * 100
-                print(f'{metric}: {percentage_value:.2f}%')
-            print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-
-            # 累加结果以计算平均值
-            for metric, value in trial_result.items():
-                sum_results[metric] += value
-
-        # 计算平均值
-        num_trials = len(N2R)
-        mean_results = {metric: (sum_results[metric] / num_trials) * 100 for metric in sum_results}
-
-        # 打印平均值
-        print('mean:')
-        for metric, value in mean_results.items():
-            print(f'{metric}: {value:.2f}%')
-        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    else:
-        train_loader, train_loader_normal, val_loader, num_query, num_classes, camera_num, view_num = make_dataloader(
-            cfg)
-        print("data is ready")
-        model = make_model(cfg, num_class=num_classes, camera_num=camera_num, view_num=view_num)
-
-        loss_func, center_criterion = make_loss(cfg, num_classes=num_classes)
-
-        optimizer, optimizer_center = make_optimizer(cfg, model, center_criterion)
-
-        scheduler = create_scheduler(cfg, optimizer)
-        do_train(
-            cfg,
-            model,
-            center_criterion,
-            train_loader,
-            val_loader,
-            optimizer,
-            optimizer_center,
-            scheduler,
-            loss_func,
-            num_query, args.local_rank
-        )
+    scheduler = create_scheduler(cfg, optimizer)
+    do_train(
+        cfg,
+        model,
+        center_criterion,
+        train_loader,
+        val_loader,
+        optimizer,
+        optimizer_center,
+        scheduler,
+        loss_func,
+        num_query, args.local_rank
+    )

@@ -30,7 +30,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import collections.abc as container_abcs
-from modeling.fusion_part.memory import ModalityMemory
+from modeling.fusion_part.OCFR import OCFR
 import matplotlib.pyplot as plt
 import seaborn as sns  # 使用Seaborn库绘制KDE图
 
@@ -295,46 +295,8 @@ class BlockMask(nn.Module):
         self.mlp = MlpMasked(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop,
                              qkv_bias=qkv_bias)
         self.out_norm = norm_layer(dim)
+        self.memory_cls = OCFR(dim=dim, num_class=num_class, momentum=momentum)
         self.apply(self._init_weights)
-
-        self.memory_cls = ModalityMemory(dim=dim, num_class=num_class, momentum=momentum)
-
-    def visualize_similarity(self,a_ori_cls_token, a_cls_token, b_before_patch_tokens,b_after_patch_tokens, epoch, mode=1, pattern=None):
-        a_ori_cls_token = a_ori_cls_token.unsqueeze(1)
-        similarities_ori = torch.nn.functional.cosine_similarity(a_ori_cls_token, b_before_patch_tokens, dim=-1)
-        similarities_ori = torch.mean(similarities_ori, dim=1).squeeze().cpu().detach().numpy()
-
-        a_cls_token = a_cls_token.unsqueeze(1)
-        similarities = torch.nn.functional.cosine_similarity(a_cls_token, b_after_patch_tokens, dim=-1)
-        similarities = torch.mean(similarities, dim=1).squeeze().cpu().detach().numpy()
-        # Set Seaborn style
-        sns.set(style="whitegrid")
-
-        # Create a figure and axis
-        fig, ax = plt.subplots()
-
-        # Plot KDE curves for "before" and "after" fusion
-        sns.kdeplot(similarities, color='b', label='After HMA', ax=ax, multiple="stack")
-        sns.kdeplot(similarities_ori, color='g', label='Before HMA', ax=ax, multiple="stack")
-        if pattern == 'r2t':
-            sign = 'R2T'
-        elif pattern == 'r2n':
-            sign = 'R2N'
-        elif pattern == 'n2t':
-            sign = 'N2T'
-        elif pattern == 'n2r':
-            sign = 'N2R'
-        elif pattern == 't2r':
-            sign = 'T2R'
-        elif pattern == 't2n':
-            sign = 'T2N'
-        plt.title("Similarity Distribution (cls2patch) of " + sign, fontsize=18, fontweight='bold')
-        plt.xlabel("Cosine Similarity", fontsize=16, fontweight='bold')
-        plt.ylabel("Density", fontsize=16, fontweight='bold')
-
-        # Add a legend to distinguish "before" and "after" fusion
-        plt.legend(loc='upper right', fontsize=17)
-        plt.show()
     def _init_weights(self, m):
         if isinstance(m, nn.Linear):
             trunc_normal_(m.weight, std=.02)
@@ -381,17 +343,6 @@ class BlockMask(nn.Module):
             x = x + self.drop_path(self.attn1(self.norm1(x), mask=mask))
             x = x + self.drop_path(self.mlp(self.norm2(x), mask=mask))
             x = self.out_norm(x)
-            # RGB_show = x[:,:RGB.shape[1], :]
-            # NIR_show = x[:,RGB.shape[1]:RGB.shape[1]+NIR.shape[1], :]
-            # if TIR is not None:
-            #     TIR_show = x[:,RGB.shape[1]+NIR.shape[1]:, :]
-
-            # self.visualize_similarity(RGB[:, 0, :], RGB_show[:,0,:], NIR[:,1:,:],NIR_show[:,1:,:], pattern='r2n',epoch=0)
-            # self.visualize_similarity(RGB[:, 0, :], RGB_show[:,0,:], TIR[:,1:,:],TIR_show[:,1:,:], pattern='r2t',epoch=0)
-            # self.visualize_similarity(NIR[:, 0, :], NIR_show[:,0,:], RGB[:,1:,:],RGB_show[:,1:,:], pattern='n2r',epoch=0)
-            # self.visualize_similarity(NIR[:, 0, :], NIR_show[:,0,:], TIR[:,1:,:],TIR_show[:,1:,:], pattern='n2t',epoch=0)
-            # self.visualize_similarity(TIR[:, 0, :], TIR_show[:,0,:], RGB[:,1:,:],RGB_show[:,1:,:], pattern='t2r',epoch=0)
-            # self.visualize_similarity(TIR[:, 0, :], TIR_show[:,0,:], NIR[:,1:,:],NIR_show[:,1:,:], pattern='t2n',epoch=0)
             if TIR is not None:
                 mask3 = mask.repeat(1, 3, 1)
                 x = x * mask3
@@ -399,27 +350,6 @@ class BlockMask(nn.Module):
                 mask2 = mask.repeat(1, 2, 1)
                 x = x * mask2
             return x
-
-
-class BlockBatch(nn.Module):
-
-    def __init__(self, dim, num_heads, mlp_ratio=4., qkv_bias=False, qk_scale=None, drop=0., attn_drop=0.,
-                 drop_path=0., act_layer=nn.GELU, norm_layer=nn.BatchNorm1d):
-        super().__init__()
-        self.norm1 = norm_layer(dim)
-        self.attn = Attention(
-            dim, num_heads=num_heads, qkv_bias=qkv_bias, qk_scale=qk_scale, attn_drop=attn_drop, proj_drop=drop)
-        # NOTE: drop path for stochastic depth, we shall see if this is better than dropout here
-        self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
-        self.norm2 = norm_layer(dim)
-        mlp_hidden_dim = int(dim * mlp_ratio)
-        self.mlp = Mlp(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop)
-
-    def forward(self, x):
-        x = x + self.drop_path(self.attn(self.norm1(x.permute(0, 2, 1)).permute(0, 2, 1)))
-        x = x + self.drop_path(self.mlp(self.norm2(x.permute(0, 2, 1)).permute(0, 2, 1)))
-        return x
-
 
 class PatchEmbed(nn.Module):
     """ Image to Patch Embedding
@@ -612,33 +542,28 @@ class Trans(nn.Module):
         return self.head
 
     def get_mask(self, img, att_mat):
-        # 压缩结果的Batch维度 [layers, heads, patch, patch]
+        # Batch dimension of compression result [layers, heads, patch, patch]
         att_mat = att_mat.squeeze(0)
-        # print(f'压缩batch维度后shape：{att_mat.shape}')
 
-        # 对所有头的注意力权重取均值 [layers, patch, patch]
+        # Attention weights are averaged over all heads [layers, patch, patch]
         att_mat = torch.mean(att_mat, axis=1)
-        # print(f'对所有头取均值后shape：{att_mat.shape}')
 
-        # 为了考虑残差连接，将注意力矩阵加上一个单位矩阵并重新归一化权重。
+        # To account for residual connectivity, the attention matrix is added to a unit matrix and the weights are renormalized.
         residual_att = torch.eye(att_mat.shape[1]).to('cuda')
         aug_att_mat = att_mat + residual_att
         aug_att_mat = aug_att_mat / aug_att_mat.sum(axis=-1).unsqueeze(-1)
-        # print(f'归一化后shape：{aug_att_mat.shape}')
 
-        # 递归地将每层权重矩阵相乘，得到所有层权重的乘积
+        # Recursively multiply each layer weight matrix to get the product of all layer weights
         joint_attentions = torch.zeros(aug_att_mat.shape).to('cuda')
         joint_attentions[0] = aug_att_mat[0]
         for n in range(1, aug_att_mat.shape[0]):
             joint_attentions[n] = torch.matmul(aug_att_mat[n], joint_attentions[n - 1])
         v = joint_attentions[-1]
-        # print(f'所有层权重乘积的shape：{v.shape}')
 
-        # 从输出Token向input映射注意力，忽略class_token
+        # Mapping attention from output Token to input, ignoring class_token
         mask = v[0, 1:].reshape([16, 8]).clone().detach().cpu().numpy()
-        # print(f'mask的shape：{v.shape}')
 
-        # 将mask resize成image的尺寸
+        # Resize mask to the size of image
         mask_image = Image.fromarray(mask / mask.max())
         mask_image = mask_image.resize((img.shape[1], img.shape[0]))
         mask_image = np.array(mask_image)
@@ -695,7 +620,7 @@ class Trans(nn.Module):
         self.num_classes = num_classes
         self.fc = nn.Linear(self.embed_dim, num_classes) if num_classes > 0 else nn.Identity()
 
-    def forward(self, x, camera_id, view_id, img_path, epoch, modes, writer=None):
+    def forward(self, x, camera_id, view_id):
         B = x.shape[0]
         x = self.patch_embed(x)
 
@@ -715,12 +640,6 @@ class Trans(nn.Module):
         for index, blk in enumerate(self.blocks):
             x, attn = blk(x, get_att=True)
             attn_list.append(attn)
-            # if index == 11:
-            #     if self.training:
-            #         pre_fix = '/13559197192/wyh/UNIReID/data/RegDB/train/'
-            #         attn_list = torch.stack(attn_list, dim=1)
-            #         self.visualize_multiple_masks(img_path, attn_list, pre_fix=pre_fix, epoch=epoch, modes=modes,
-            #                                       writer=writer)
         x = self.norm(x)
         return x, attn_list
 
@@ -796,19 +715,6 @@ def vit_small_patch16_224(img_size=(256, 128), stride_size=16, drop_rate=0., att
 
 
 def deit_small_patch16_224(img_size=(256, 128), stride_size=16, drop_path_rate=0.1, drop_rate=0.0,
-                           attn_drop_rate=0.0, camera=0, view=0, local_feature=False, sie_xishu=1.5,
-                           **kwargs):
-    model = Trans(
-        img_size=img_size, patch_size=16, stride_size=stride_size, embed_dim=384, depth=12, num_heads=6, mlp_ratio=4,
-        qkv_bias=True,
-        drop_path_rate=drop_path_rate, drop_rate=drop_rate, attn_drop_rate=attn_drop_rate, camera=camera, view=view,
-        sie_xishu=sie_xishu, local_feature=local_feature,
-        norm_layer=partial(nn.LayerNorm, eps=1e-6), **kwargs)
-
-    return model
-
-
-def swin_small_patch16_224(img_size=(256, 128), stride_size=16, drop_path_rate=0.1, drop_rate=0.0,
                            attn_drop_rate=0.0, camera=0, view=0, local_feature=False, sie_xishu=1.5,
                            **kwargs):
     model = Trans(

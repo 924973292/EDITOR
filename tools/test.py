@@ -7,7 +7,7 @@ from engine.processor import do_inference
 from utils.logger import setup_logger
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="UniSReID Testing")
+    parser = argparse.ArgumentParser(description="EDITOR Testing")
     parser.add_argument(
         "--config_file", default="", help="path to config file", type=str
     )
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     if output_dir and not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    logger = setup_logger("UniSReID", output_dir, if_train=False)
+    logger = setup_logger("EDITOR", output_dir, if_train=False)
     logger.info(args)
 
     if args.config_file != "":
@@ -41,6 +41,5 @@ if __name__ == "__main__":
 
     model = make_model(cfg, num_class=num_classes, camera_num=camera_num, view_num=view_num)
     model.cuda()
-    pre = "RGBNT100_EDITOR"
-    model.load_param("/13559197192/wyh/UNIReID/"+pre+"/UniSReIDbest.pth")
-    do_inference(cfg,model,val_loader,num_query)
+    model.load_param('~your specific path~')
+    do_inference(cfg, model, val_loader, num_query)

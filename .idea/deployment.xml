@@ -1,15 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="root@10.8.131.51:30089 password (7)" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
+  <component name="PublishConfigData" autoUpload="Always" serverName="root@10.8.131.51:30497 password (2)" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
     <option name="confirmBeforeUploading" value="false" />
     <serverData>
-      <paths name="root@10.8.131.51:30041 password">
-        <serverdata>
-          <mappings>
-            <mapping deploy="/15127306268/wyh/MM" local="$PROJECT_DIR$" />
-          </mappings>
-        </serverdata>
-      </paths>
       <paths name="root@10.8.131.51:30089 password">
         <serverdata>
           <mappings>
@@ -17,73 +10,45 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="root@10.8.131.51:30089 password (3)">
+      <paths name="root@10.8.131.51:30497 password">
         <serverdata>
           <mappings>
-            <mapping deploy="/13559197192/wyh/UNIReID" local="$PROJECT_DIR$" />
+            <mapping deploy="/13994058190/WYH/EDITOR_PB" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>
-      <paths name="root@10.8.131.51:30089 password (5)">
+      <paths name="root@10.8.131.51:30497 password (2)">
         <serverdata>
           <mappings>
-            <mapping deploy="/13559197192/wyh/UNIReID" local="$PROJECT_DIR$" />
+            <mapping deploy="/13994058190/WYH/EDITOR_PB" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>
-      <paths name="root@10.8.131.51:30089 password (7)">
+      <paths name="root@10.8.131.51:30705 password (4)">
         <serverdata>
           <mappings>
-            <mapping deploy="/13559197192/wyh/UNIReID" local="$PROJECT_DIR$" />
+            <mapping deploy="/13994058190/WYH/EDITOR" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>
-      <paths name="root@10.8.131.51:30285 password">
+      <paths name="root@10.8.131.51:30705 password (5)">
         <serverdata>
           <mappings>
-            <mapping deploy="/15127306268/wyh/MM" local="$PROJECT_DIR$" />
+            <mapping deploy="/13994058190/WYH/EDITOR_PB" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>
-      <paths name="root@10.8.131.51:30285 password (6)">
+      <paths name="root@10.8.131.51:30998 password (18)">
         <serverdata>
           <mappings>
-            <mapping deploy="/15127306268/wyh/MM" local="$PROJECT_DIR$" />
+            <mapping deploy="/13994058190/WYH/EDITOR" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>
-      <paths name="root@10.8.131.51:30285 password (8)">
+      <paths name="root@10.8.131.51:30998 password (22)">
         <serverdata>
           <mappings>
-            <mapping deploy="/15127306268/wyh/TokenSelect" local="$PROJECT_DIR$" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="root@10.8.131.51:30362 password">
-        <serverdata>
-          <mappings>
-            <mapping deploy="/15127306268/wyh/MM" local="$PROJECT_DIR$" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="root@10.8.131.51:30666 password">
-        <serverdata>
-          <mappings>
-            <mapping deploy="/15127306268/wyh/MM" local="$PROJECT_DIR$" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="root@10.8.131.51:30730 password">
-        <serverdata>
-          <mappings>
-            <mapping deploy="/15127306268/wyh/MM" local="$PROJECT_DIR$" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="root@10.8.131.51:30730 password (2)">
-        <serverdata>
-          <mappings>
-            <mapping deploy="/15127306268/wyh/MM" local="$PROJECT_DIR$" />
+            <mapping deploy="/13994058190/WYH/EDITOR" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>

@@ -33,15 +33,13 @@ class MSVR310(BaseImageDataset):
         self.train_dir = osp.join(self.dataset_dir, 'bounding_box_train')
         self.query_dir = osp.join(self.dataset_dir, 'query3')
         self.gallery_dir = osp.join(self.dataset_dir, 'bounding_box_test')
-
         self._check_before_run()
 
         train = self._process_dir(self.train_dir, relabel=True)
         query = self._process_dir(self.query_dir, relabel=False)
         gallery = self._process_dir(self.gallery_dir, relabel=False)
-        # pdb.set_trace()
         if verbose:
-            print("=> RGB_IR loaded")
+            print("=> RGB_NIR_TIR loaded")
             self.print_dataset_statistics(train, query, gallery)
 
         self.train = train
@@ -54,7 +52,6 @@ class MSVR310(BaseImageDataset):
             self.query)
         self.num_gallery_pids, self.num_gallery_imgs, self.num_gallery_cams, self.num_gallery_vids = self.get_imagedata_info(
             self.gallery)
-        # pdb.set_trace()
 
     def _check_before_run(self):
         """Check if all files are available before going deeper"""
@@ -89,26 +86,3 @@ class MSVR310(BaseImageDataset):
                     vid = vid2label[vid]
                 dataset.append(((r_img_path, n_img_path, t_img_path), vid, camid, sceneid))
         return dataset
-
-    # def _process_dir2(self, dir_path, relabel=False):
-    #     img_paths = glob.glob(osp.join(dir_path, '*.jpg'))
-    #     pattern = re.compile(r'([-\d]+)_c([-\d]+)')
-
-    #     pid_container = set()
-    #     for img_path in img_paths:
-    #         pid, _ = map(int, pattern.search(img_path).groups())
-    #         if pid == -1: continue  # junk images are just ignored
-    #         pid_container.add(pid)
-    #     pid2label = {pid: label for label, pid in enumerate(pid_container)}
-
-    #     dataset = []
-    #     for img_path in img_paths:
-    #         pid, camid = map(int, pattern.search(img_path).groups())
-    #         #pdb.set_trace()
-    #         #if pid == -1: continue  # junk images are just ignored
-    #         assert 1 <= pid <= 600  # pid == 0 means background
-    #         assert 1 <= camid <= 8
-    #         camid -= 1  # index starts from 0
-    #         if relabel: pid = pid2label[pid]
-    #         dataset.append((img_path, pid, camid))
-    #     return dataset
