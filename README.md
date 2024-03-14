@@ -1,4 +1,4 @@
-<p align="center">
+![star-history-2024314 (2)](https://github.com/924973292/EDITOR/assets/89966785/1443be05-13c4-4d2a-a2c5-2b705279da9f)<p align="center">
 
   <h1 align="center">Magic Tokens: Select Diverse Tokens for Multi-modal Object Re-Identification</h1>
   <p align="center">
@@ -98,7 +98,8 @@ python train_net.py --config_file ../RGBNT201/EDITOR.yml
 ```
 ## Star History
 
-[![Star](Star)](https://star-history.com/embed?secret=Z2hwX2t0RkZXZ2dBYjRCY2lYZEFkU0N1aThqc3BkSnV2bDBJMEFsUw==#924973292/EDITOR&Date)
+![star-history-2024314 (2)](https://github.com/924973292/EDITOR/assets/89966785/079cf22d-9e6a-421c-8ca9-cfc144c31e4e)
+
 
 ## Citation
 If you find EDITOR useful in your research, please consider citing:
