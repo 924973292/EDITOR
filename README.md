@@ -1,5 +1,4 @@
-![star-history-2024314 (2)](https://github.com/924973292/EDITOR/assets/89966785/1443be05-13c4-4d2a-a2c5-2b705279da9f)<p align="center">
-
+<p align="center">
   <h1 align="center">Magic Tokens: Select Diverse Tokens for Multi-modal Object Re-Identification</h1>
   <p align="center">
     <a href="https://scholar.google.com/citations?user=MfbIbuEAAAAJ&hl=zh-CN" rel="external nofollow noopener" target="_blank"><strong>Pingping Zhang*</strong></a>
