@@ -96,6 +96,9 @@ cd ../(your path)
 pip install -r requirements.txt
 python train_net.py --config_file ../RGBNT201/EDITOR.yml
 ```
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=924973292/EDITOR&type=Date)](https://star-history.com/#924973292/EDITOR&Date)
 
 
 ## Citation
