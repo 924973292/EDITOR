@@ -98,9 +98,7 @@ python train_net.py --config_file ../RGBNT201/EDITOR.yml
 ```
 ## Star History
 
-<img src="[Results/Select_Vis.png](https://seladb.github.io/StarTrack-js/#/preload?r=924973292,EDITOR)" alt="Grad-CAM" width="1000px">
-
-
+![Star](https://seladb.github.io/StarTrack-js/#/preload?r=924973292,EDITOR)
 
 ## Citation
 If you find EDITOR useful in your research, please consider citing:
