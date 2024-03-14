@@ -98,7 +98,7 @@ python train_net.py --config_file ../RGBNT201/EDITOR.yml
 ```
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=924973292/EDITOR&type=Date)](https://star-history.com/#924973292/EDITOR&Date)
+[![Star History Chart]([https://api.star-history.com/svg?repos=924973292/EDITOR&type=Date)](https://star-history.com/#924973292/EDITOR&Date](https://seladb.github.io/StarTrack-js/#/preload?r=924973292,EDITOR))
 
 
 ## Citation
