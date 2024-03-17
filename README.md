@@ -1,7 +1,7 @@
 <p align="center">
   <h1 align="center">Magic Tokens: Select Diverse Tokens for Multi-modal Object Re-Identification</h1>
   <p align="center">
-    <img src="https://github.com/924973292/EDITOR/assets/89966785/1b737c44-ac54-4f7c-bdb7-83602ad01aca" alt="Description of the image" width="300" height="400">
+    <img src="https://github.com/924973292/EDITOR/assets/89966785/fb098ac4-af52-4e3f-8194-f850b48a49b6" alt="Description of the image" width="300" height="400">
   <p align="center">
     <a href="https://scholar.google.com/citations?user=MfbIbuEAAAAJ&hl=zh-CN" rel="external nofollow noopener" target="_blank"><strong>Pingping Zhang*</strong></a>
     ·
