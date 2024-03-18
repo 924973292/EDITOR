@@ -16,8 +16,8 @@
 <p align="center">
     <a href="https://arxiv.org/abs/2403.10254" rel="external nofollow noopener" target="_blank">CVPR 2024 Paper</a>
 
-![Introduction](Results/Introduction.png)
-![EDITOR](Results/Overall_Structure.png)
+![CVPR2024_poster_00](https://github.com/924973292/EDITOR/assets/89966785/73b090cb-bba2-46ed-b00f-1faef8e516cf)
+
 Previous methods may be easily affected by irrelevant backgrounds and usually ignore the modality gaps. 
 To address above issues, we propose a novel learning framework named **EDITOR** to s**E**lect **DI**verse **T**okens for multi-modal **O**bject **R**eID. 
 **EDITOR** prioritizes the selection of object-centric information, aiming to preserve the diverse features of different modalities while minimizing background interference. 
