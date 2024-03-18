@@ -14,7 +14,7 @@
     <a href="https://scholar.google.com/citations?hl=zh-CN&user=D3nE0agAAAAJ" rel="external nofollow noopener" target="_blank"><strong>Huchuan Lu</strong></a>
   </p>
 <p align="center">
-    <a href="https://arxiv.org/abs/2312.09612" rel="external nofollow noopener" target="_blank">CVPR 2024 Paper</a>
+    <a href="https://arxiv.org/abs/2403.10254" rel="external nofollow noopener" target="_blank">CVPR 2024 Paper</a>
 
 ![Introduction](Results/Introduction.png)
 ![EDITOR](Results/Overall_Structure.png)
