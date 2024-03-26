@@ -86,7 +86,10 @@ ViT-B    link: https://pan.baidu.com/s/1YE-24vSo5pv_wHOF-y4sfA  code: vmfm
 RGBNT201    file: `EDITOR/configs/RGBNT201/EDITOR.yml`  
 RGBNT100    file: `EDITOR/configs/RGBNT100/EDITOR.yml`  
 MSVR310     file: `EDITOR/configs/MSVR310/EDITOR.yml`
- 
+
+### Tips
+Please ensure that your batch size matches the one specified in the configuration file. Typically, using a batch size of 128 and a number of instances of 16 is more robust compared to using a batch size of 64 and a number of instances of 8. However, it's important to note that a batch size of 128 consumes over 24GB of GPU memory. In future work, we will pay attention to GPU memory consumption to provide convenient reproducible configurations for more researchers! Thank you for your attention!
+
 ### Bash
 ```bash
 # python = 3.8
