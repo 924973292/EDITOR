@@ -147,7 +147,9 @@ _C.SOLVER.KL = 0
 # Number of images per batch
 # This is global, so if we have 8 GPUs and IMS_PER_BATCH = 16, each GPU will
 # see 2 images per batch
-_C.SOLVER.IMS_PER_BATCH = 16
+_C.SOLVER.IMS_PER_BATCH = 128 
+# A batch size of 128 yields better results for both person and vehicle datasets compared to 64. 
+# Using a batch size of 64 may result in a slight decrease in performance.
 
 # ---------------------------------------------------------------------------- #
 # TEST
