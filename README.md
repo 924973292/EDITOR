@@ -113,7 +113,7 @@ If you find EDITOR useful in your research, please consider citing:
   journal={arXiv preprint arXiv:2403.10254},
   year={2024}
 }
-//
+
 @inproceedings{zhang2024magic,
     title     = {Magic Tokens: Select Diverse Tokens for Multi-modal Object Re-Identification},
     author    = {Pingping Zhang, Yuhao Wang, Yang Liu, Zhengzheng Tu, Huchuan Lu},
