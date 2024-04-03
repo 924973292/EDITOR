@@ -40,7 +40,6 @@ def _no_grad_trunc_normal_(tensor, mean, std, a, b):
         tensor.clamp_(min=a, max=b)
         return tensor
 
-
 def trunc_normal_(tensor, mean=0., std=1., a=-2., b=2.):
     # type: (Tensor, float, float, float, float) -> Tensor
     r"""Fills the input Tensor with values drawn from a truncated
@@ -60,6 +59,82 @@ def trunc_normal_(tensor, mean=0., std=1., a=-2., b=2.):
         >>> nn.init.trunc_normal_(w)
     """
     return _no_grad_trunc_normal_(tensor, mean, std, a, b)
+
+# Here, you can use the below function to get the Selection results in SUPP
+
+def display_image(image_path, mode=1):
+    pre_fix = '/13994058190/WYH/EDITOR/data/RGBNT201/train_171/'
+    if mode == 1:
+        pre_fix = pre_fix + 'RGB/'
+    elif mode == 2:
+        pre_fix = pre_fix + 'NI/'
+    elif mode == 3:
+        pre_fix = pre_fix + 'TI/'
+    image = Image.open(pre_fix + image_path)
+    resized_image = image.resize((128, 256))  # Resize to 256x128
+    plt.imshow(resized_image)
+    plt.axis('off')
+    plt.show()
+
+
+# Visualize the mask on the image
+def visualize_multiple_masks(images, masks, mode, pre_fix, writer=None, epoch=None):
+    num_images_to_display = 12  # Number of images to display
+    images = images[:num_images_to_display]
+    masks = masks[:num_images_to_display]
+    num_rows = 2  # Number of rows in the display grid
+    num_cols = 6  # Number of columns in the display grid
+    fig, axes = plt.subplots(num_rows, num_cols, figsize=(15, 6))
+
+    for i in range(num_images_to_display):
+        # Reshape the mask to 16x8
+        mask_2d = masks[i].reshape(16, 8).cpu().numpy()
+
+        # Upscale the mask to 256x128
+        mask_upscaled = np.kron(mask_2d, np.ones((16, 16)))
+
+        # Append the appropriate mode prefix
+        if mode == 1 or mode == 0 or mode == 4 or mode == 5:
+            prefix = pre_fix + 'RGB/'
+        elif mode == 2 or mode == 10:
+            prefix = pre_fix + 'NI/'
+        elif mode == 3 or mode == 11:
+            prefix = pre_fix + 'TI/'
+
+        # Load the original image
+        image = Image.open(prefix + images[i])
+        original_image = image.resize((128, 256))  # Resize to 256x128
+
+        # Convert the image to numpy array
+        original_np = np.array(original_image)
+
+        # Apply a color to the mask (e.g., yellow)
+        mask_color = np.array([0, 0, 0])  # Black color for the mask
+        masked_image = np.where(mask_upscaled[..., None], original_np, mask_color)
+        if mode == 0 or mode == 10 or mode == 11:
+            masked_image = original_np
+        row = i // num_cols
+        col = i % num_cols
+
+        # Display the masked image
+        axes[row, col].imshow(masked_image)
+        axes[row, col].axis('off')
+    plt.tight_layout()
+    plt.show()
+    if writer is not None:
+        if mode == 0:
+            sign = 'Original'
+        elif mode == 1:
+            sign = 'RGB'
+        elif mode == 2:
+            sign = 'NIR'
+        elif mode == 3:
+            sign = 'TIR'
+        elif mode == 4:
+            sign = 'FRE'
+        elif mode == 5:
+            sign = 'ATTN'
+        writer.add_figure('Person_Token_Select_' + sign, fig, global_step=epoch)
 
 
 class Part_Attention(nn.Module):
@@ -113,6 +188,23 @@ class SFTS(nn.Module):
         else:
             original_index = RGB_index | NIR_index
         index = (original_index | mask_fre).unsqueeze(-1)
+
+        # if self.training:
+        #     pre_fix = '/13994058190/WYH/EDITOR/data/RGBNT201/train_171/'
+        # else:
+        #     pre_fix = '/13994058190/WYH/EDITOR/data/RGBNT201/test/'
+        # visualize_multiple_masks(img_path, index, mode=0,pre_fix=pre_fix, writer=writer, epoch=epoch)
+        # visualize_multiple_masks(img_path, index, mode=10, pre_fix=pre_fix, writer=writer, epoch=epoch)
+        # visualize_multiple_masks(img_path, index, mode=11, pre_fix=pre_fix, writer=writer, epoch=epoch)
+        # visualize_multiple_masks(img_path,mask_fre.unsqueeze(-1), mode=4, pre_fix=pre_fix,writer=writer,epoch=epoch)
+        # visualize_multiple_masks(img_path,original_index.unsqueeze(-1), mode=5,pre_fix=pre_fix, writer=writer,epoch=epoch)
+        # visualize_multiple_masks(img_path, RGB_index, mode=1, pre_fix=pre_fix, writer=writer, epoch=epoch)
+        # visualize_multiple_masks(img_path, NIR_index, mode=2, pre_fix=pre_fix, writer=writer, epoch=epoch)
+        # visualize_multiple_masks(img_path, TIR_index, mode=3, pre_fix=pre_fix, writer=writer, epoch=epoch)
+        # visualize_multiple_masks(img_path, index, mode=1,pre_fix=pre_fix, writer=writer, epoch=epoch)
+        # visualize_multiple_masks(img_path, index, mode=2,pre_fix=pre_fix, writer=writer, epoch=epoch)
+        # visualize_multiple_masks(img_path, index, mode=3,pre_fix=pre_fix, writer=writer, epoch=epoch)
+
         RGB_parts = RGB_feat[:, 1:, :] * index
         NIR_parts = NIR_feat[:, 1:, :] * index
         RGB_feats = torch.cat([RGB_feat[:, 0].unsqueeze(1), RGB_parts], dim=1)
