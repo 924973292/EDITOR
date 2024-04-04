@@ -14,7 +14,8 @@ from .RGBNT100 import RGBNT100
 from .RGBNT300 import RGBNT300
 from .sampler_ddp import RandomIdentitySampler_DDP
 import torch.distributed as dist
-from itertools import product
+from .market_to_RGBNT201 import market_to_RGBNT201
+
 
 __factory = {
     'market1501': Market1501,
@@ -24,6 +25,7 @@ __factory = {
     'RGBNT100': RGBNT100,
     'MSVR310': MSVR310,
     'RGBNT300':RGBNT300,
+    'Market1501-MM': market_to_RGBNT201,
 }
 """ Random Erasing (Cutout)
 
