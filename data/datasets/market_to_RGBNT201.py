@@ -24,7 +24,6 @@ class market_to_RGBNT201(BaseImageDataset):
                 'The current data structure is deprecated.'
             )
         
-        
         self.train_dir = osp.join(self.data_dir, 'train')
         self.query_dir = osp.join(self.data_dir, 'query')
         self.gallery_dir = osp.join(self.data_dir, 'gallery')
