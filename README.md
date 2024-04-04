@@ -76,7 +76,7 @@ Hence, our method prioritizes the selection of object-centric information, aimin
 
 ## Reproduction
 ### Datasets
-RGBNT201    link: https://drive.google.com/drive/folders/1EscBadX-wMAT56_It5lXY-S3-b5nK1wH
+RGBNT201    link: https://drive.google.com/drive/folders/1EscBadX-wMAT56_It5lXY-S3-b5nK1wH  
 Market1501-MM link: https://drive.google.com/drive/folders/1EscBadX-wMAT56_It5lXY-S3-b5nK1wH
 RGBNT100    link: https://pan.baidu.com/s/1xqqh7N4Lctm3RcUdskG0Ug  code：rjin  
 MSVR310     link: https://pan.baidu.com/s/1soWMH10DyGG0krTKL7fsYg  code: p6ch
@@ -85,6 +85,7 @@ ViT-B    link: https://pan.baidu.com/s/1YE-24vSo5pv_wHOF-y4sfA  code: vmfm
 
 ### Configs
 RGBNT201    file: `EDITOR/configs/RGBNT201/EDITOR.yml`  
+Market1501-MM file: `EDITOR/configs/Market1501-MM/EDITOR.yml`  
 RGBNT100    file: `EDITOR/configs/RGBNT100/EDITOR.yml`  
 MSVR310     file: `EDITOR/configs/MSVR310/EDITOR.yml`
 
