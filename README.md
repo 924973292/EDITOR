@@ -62,16 +62,17 @@ Hence, our method prioritizes the selection of object-centric information, aimin
 <img src="Results/Parameter.png" alt="Performance comparison with different modules" width="1000px">
 
 ## Additional Results on Market1501-MM
-|              |     Methods       |  mAP  |  R-1  |  R-5  |  R-10 |
-|--------------|:-----------------:|:-----:|:-----:|:-----:|:-----:|
-| Single-modal |  MLFN (CVPR2018)  |  42.7 |  68.1 |  87.1 |  92.0 |
-|              | HACNN (CVPR2018)  |  42.9 |  69.1 |  86.6 |  92.2 |
-|              | OSNet (ICCV2019)  |  39.7 |  69.3 |  86.7 |  91.3 |
-| Multi-modal  | HAMNet (AAAI2020) |  60.0 |  82.8 |  92.5 |  95.0 |
-|              |  PFNet (AAAI2021) |  60.9 |  83.6 |  92.8 |  95.5 |
-|              |   IEEE (AAAI2022) |  64.3 |  83.9 |  93.0 |  95.7 |
-|              |    HTT (AAAI2024) |  67.2 |  81.5 |  95.8 |  97.8 |
-|              | EDITOR (CVPR2024) | - | - | - | - |
+|     Methods       |  mAP  |  R-1  |  R-5  |  R-10 |
+|:-----------------:|:-----:|:-----:|:-----:|:-----:|
+|  MLFN (CVPR2018)  |  42.7 |  68.1 |  87.1 |  92.0 |
+| HACNN (CVPR2018)  |  42.9 |  69.1 |  86.6 |  92.2 |
+| OSNet (ICCV2019)  |  39.7 |  69.3 |  86.7 |  91.3 |
+|:-----------------:|:-----:|:-----:|:-----:|:-----:|
+| HAMNet (AAAI2020) |  60.0 |  82.8 |  92.5 |  95.0 |
+|  PFNet (AAAI2021) |  60.9 |  83.6 |  92.8 |  95.5 |
+|   IEEE (AAAI2022) |  64.3 |  83.9 |  93.0 |  95.7 |
+|    HTT (AAAI2024) |  67.2 |  81.5 |  95.8 |  97.8 |
+| EDITOR (CVPR2024) | - | - | - | - |
 
 
 ## Visualizations
