@@ -71,7 +71,8 @@ Hence, our method prioritizes the selection of object-centric information, aimin
 |  PFNet (AAAI2021) |  60.9 |  83.6 |  92.8 |  95.5 |
 |   IEEE (AAAI2022) |  64.3 |  83.9 |  93.0 |  95.7 |
 |    HTT (AAAI2024) |  67.2 |  81.5 |  95.8 |  97.8 |
-| EDITOR (CVPR2024) | - | - | - | - |
+| EDITOR (CVPR2024)[A](<>)| 77.33 | 90.59 | 96.73 | 98.04 |
+| EDITOR (CVPR2024)[B](<>)| - | - | - | - |
 
 
 ## Visualizations
