@@ -1,0 +1,1526 @@
+2024-04-05 01:15:27,477 EDITOR INFO: Saving model in the path :./EDITOR
+2024-04-05 01:15:27,477 EDITOR INFO: Namespace(config_file='/13994058190/WYH/EDITOR_PB/configs/Market1501-MM/EDITOR.yml', local_rank=0, opts=[])
+2024-04-05 01:15:27,477 EDITOR INFO: Loaded configuration file /13994058190/WYH/EDITOR_PB/configs/Market1501-MM/EDITOR.yml
+2024-04-05 01:15:27,477 EDITOR INFO: 
+MODEL:
+  PRETRAIN_CHOICE: 'imagenet'
+  MIX_DIM: 768
+  PRETRAIN_PATH_T: '/13994058190/WYH/PTH/vitb_16_224_21k.pth'
+  TRANSFORMER_TYPE: 'vit_base_patch16_224'
+  STRIDE_SIZE: [ 16, 16 ]
+  SIE_CAMERA: True
+  DIST_TRAIN: False
+  FREQUENCY_KEEP: 10
+  HEAD_KEEP: 2
+  AL: 0
+INPUT:
+  SIZE_TRAIN: [ 256, 128 ]
+  SIZE_TEST: [256, 128 ]
+  PROB: 0.5 # random horizontal flip
+  RE_PROB: 0.5 # random erasing
+  PADDING: 10
+DATASETS:
+  NAMES: ('Market1501-MM')
+  ROOT_DIR: '/13994058190/WYH/DATA/data_finetune'
+DATALOADER:
+  SAMPLER: 'softmax_triplet'
+  NUM_INSTANCE: 16
+  NUM_WORKERS : 14
+SOLVER:
+  OPTIMIZER_NAME: 'SGD'
+  BASE_LR: 0.001
+  WARMUP_ITERS: 10
+  IMS_PER_BATCH: 128
+  MAX_EPOCHS: 70
+TEST:
+  RE_RANKING: 'no'
+  WEIGHT: ''
+  NECK_FEAT: 'before'
+  FEAT_NORM: 'yes'
+OUTPUT_DIR: './EDITOR'
+
+
+
+
+2024-04-05 01:15:27,478 EDITOR INFO: Running with config:
+DATALOADER:
+  NUM_INSTANCE: 16
+  NUM_WORKERS: 14
+  SAMPLER: softmax_triplet
+DATASETS:
+  NAMES: Market1501-MM
+  ROOT_DIR: /13994058190/WYH/DATA/data_finetune
+INPUT:
+  PADDING: 10
+  PIXEL_MEAN: [0.5, 0.5, 0.5]
+  PIXEL_STD: [0.5, 0.5, 0.5]
+  PROB: 0.5
+  RE_PROB: 0.5
+  SIZE_TEST: [256, 128]
+  SIZE_TRAIN: [256, 128]
+MODEL:
+  AL: 0
+  ATT_DROP_RATE: 0.0
+  DEVICE: cuda
+  DEVICE_ID: 0
+  DIST_TRAIN: False
+  DROP_OUT: 0.0
+  DROP_PATH: 0.1
+  FREQUENCY_KEEP: 10
+  HEAD_KEEP: 2
+  ID_LOSS_TYPE: softmax
+  ID_LOSS_WEIGHT: 1.0
+  IF_LABELSMOOTH: on
+  IF_WITH_CENTER: no
+  MARGIN: 0
+  METRIC_LOSS_TYPE: triplet
+  MIX_DIM: 768
+  NAME: EDITOR
+  NECK: bnneck
+  NO_MARGIN: True
+  PRETRAIN_CHOICE: imagenet
+  PRETRAIN_PATH_T: /13994058190/WYH/PTH/vitb_16_224_21k.pth
+  SIE_CAMERA: True
+  SIE_COE: 3.0
+  SIE_VIEW: False
+  STRIDE_SIZE: [16, 16]
+  TRANSFORMER_TYPE: vit_base_patch16_224
+  TRIPLET_LOSS_WEIGHT: 1.0
+OUTPUT_DIR: ./EDITOR
+SOLVER:
+  BASE_LR: 0.001
+  BIAS_LR_FACTOR: 2
+  CENTER_LOSS_WEIGHT: 0.0005
+  CENTER_LR: 0.5
+  CHECKPOINT_PERIOD: 60
+  CLUSTER_MARGIN: 0.3
+  COSINE_MARGIN: 0.5
+  COSINE_SCALE: 30
+  EVAL_PERIOD: 1
+  GAMMA: 0.1
+  IMS_PER_BATCH: 128
+  KL: 0
+  LARGE_FC_LR: False
+  LOG_PERIOD: 10
+  MARGIN: 0.3
+  MAX_EPOCHS: 70
+  MOMENTUM: 0.9
+  OPTIMIZER_NAME: SGD
+  RANGE_ALPHA: 0
+  RANGE_BETA: 1
+  RANGE_K: 2
+  RANGE_LOSS_WEIGHT: 1
+  RANGE_MARGIN: 0.3
+  SEED: 1111
+  WARMUP_FACTOR: 0.01
+  WARMUP_ITERS: 10
+  WARMUP_METHOD: linear
+  WEIGHT_DECAY: 0.0001
+  WEIGHT_DECAY_BIAS: 0.0001
+TEST:
+  FEAT_NORM: yes
+  IMS_PER_BATCH: 64
+  NECK_FEAT: before
+  RE_RANKING: no
+  WEIGHT: 
+2024-04-05 01:15:43,750 EDITOR.train INFO: start training
+2024-04-05 01:16:01,480 EDITOR.train INFO: Epoch[1] Iteration[10/106] Loss: 74.366, Acc: 0.002, Base Lr: 1.09e-04
+2024-04-05 01:16:11,310 EDITOR.train INFO: Epoch[1] Iteration[20/106] Loss: 68.598, Acc: 0.002, Base Lr: 1.09e-04
+2024-04-05 01:16:21,837 EDITOR.train INFO: Epoch[1] Iteration[30/106] Loss: 65.428, Acc: 0.001, Base Lr: 1.09e-04
+2024-04-05 01:16:31,994 EDITOR.train INFO: Epoch[1] Iteration[40/106] Loss: 62.768, Acc: 0.002, Base Lr: 1.09e-04
+2024-04-05 01:16:42,106 EDITOR.train INFO: Epoch[1] Iteration[50/106] Loss: 60.683, Acc: 0.001, Base Lr: 1.09e-04
+2024-04-05 01:16:52,705 EDITOR.train INFO: Epoch[1] Iteration[60/106] Loss: 59.046, Acc: 0.001, Base Lr: 1.09e-04
+2024-04-05 01:17:04,075 EDITOR.train INFO: Epoch[1] Iteration[70/106] Loss: 57.765, Acc: 0.001, Base Lr: 1.09e-04
+2024-04-05 01:17:15,074 EDITOR.train INFO: Epoch[1] Iteration[80/106] Loss: 56.716, Acc: 0.001, Base Lr: 1.09e-04
+2024-04-05 01:17:25,774 EDITOR.train INFO: Epoch[1] Iteration[90/106] Loss: 55.826, Acc: 0.002, Base Lr: 1.09e-04
+2024-04-05 01:17:36,044 EDITOR.train INFO: Epoch[1] Iteration[100/106] Loss: 55.083, Acc: 0.001, Base Lr: 1.09e-04
+2024-04-05 01:17:41,533 EDITOR.train INFO: Epoch 1 done. Time per batch: 1.120[s] Speed: 114.3[samples/s]
+2024-04-05 01:19:07,146 EDITOR.train INFO: Validation Results - Epoch: 1
+2024-04-05 01:19:07,146 EDITOR.train INFO: mAP: 7.30%
+2024-04-05 01:19:07,146 EDITOR.train INFO: CMC curve, Rank-1  :23.04%
+2024-04-05 01:19:07,146 EDITOR.train INFO: CMC curve, Rank-5  :41.15%
+2024-04-05 01:19:07,146 EDITOR.train INFO: CMC curve, Rank-10 :50.80%
+2024-04-05 01:19:08,024 EDITOR.train INFO: Best Multi-Modal mAP: 7.30%
+2024-04-05 01:19:08,024 EDITOR.train INFO: Best Multi-Modal Rank-1: 23.04%
+2024-04-05 01:19:08,024 EDITOR.train INFO: Best Multi-Modal Rank-5: 41.15%
+2024-04-05 01:19:08,024 EDITOR.train INFO: Best Multi-Modal Rank-10: 50.80%
+2024-04-05 01:19:25,373 EDITOR.train INFO: Epoch[2] Iteration[10/106] Loss: 46.811, Acc: 0.011, Base Lr: 2.08e-04
+2024-04-05 01:19:35,740 EDITOR.train INFO: Epoch[2] Iteration[20/106] Loss: 46.955, Acc: 0.008, Base Lr: 2.08e-04
+2024-04-05 01:19:46,243 EDITOR.train INFO: Epoch[2] Iteration[30/106] Loss: 46.466, Acc: 0.008, Base Lr: 2.08e-04
+2024-04-05 01:19:56,277 EDITOR.train INFO: Epoch[2] Iteration[40/106] Loss: 46.142, Acc: 0.007, Base Lr: 2.08e-04
+2024-04-05 01:20:06,520 EDITOR.train INFO: Epoch[2] Iteration[50/106] Loss: 45.736, Acc: 0.007, Base Lr: 2.08e-04
+2024-04-05 01:20:16,811 EDITOR.train INFO: Epoch[2] Iteration[60/106] Loss: 45.520, Acc: 0.008, Base Lr: 2.08e-04
+2024-04-05 01:20:27,738 EDITOR.train INFO: Epoch[2] Iteration[70/106] Loss: 45.241, Acc: 0.008, Base Lr: 2.08e-04
+2024-04-05 01:20:37,779 EDITOR.train INFO: Epoch[2] Iteration[80/106] Loss: 45.039, Acc: 0.009, Base Lr: 2.08e-04
+2024-04-05 01:20:47,427 EDITOR.train INFO: Epoch[2] Iteration[90/106] Loss: 44.890, Acc: 0.009, Base Lr: 2.08e-04
+2024-04-05 01:20:57,405 EDITOR.train INFO: Epoch[2] Iteration[100/106] Loss: 44.743, Acc: 0.012, Base Lr: 2.08e-04
+2024-04-05 01:21:02,754 EDITOR.train INFO: Epoch 2 done. Time per batch: 1.093[s] Speed: 117.1[samples/s]
+2024-04-05 01:22:26,768 EDITOR.train INFO: Validation Results - Epoch: 2
+2024-04-05 01:22:26,769 EDITOR.train INFO: mAP: 17.83%
+2024-04-05 01:22:26,769 EDITOR.train INFO: CMC curve, Rank-1  :42.64%
+2024-04-05 01:22:26,769 EDITOR.train INFO: CMC curve, Rank-5  :65.32%
+2024-04-05 01:22:26,769 EDITOR.train INFO: CMC curve, Rank-10 :73.28%
+2024-04-05 01:22:27,745 EDITOR.train INFO: Best Multi-Modal mAP: 17.83%
+2024-04-05 01:22:27,745 EDITOR.train INFO: Best Multi-Modal Rank-1: 42.64%
+2024-04-05 01:22:27,745 EDITOR.train INFO: Best Multi-Modal Rank-5: 65.32%
+2024-04-05 01:22:27,745 EDITOR.train INFO: Best Multi-Modal Rank-10: 73.28%
+2024-04-05 01:22:43,954 EDITOR.train INFO: Epoch[3] Iteration[10/106] Loss: 42.016, Acc: 0.045, Base Lr: 3.07e-04
+2024-04-05 01:22:54,178 EDITOR.train INFO: Epoch[3] Iteration[20/106] Loss: 41.654, Acc: 0.045, Base Lr: 3.07e-04
+2024-04-05 01:23:04,335 EDITOR.train INFO: Epoch[3] Iteration[30/106] Loss: 41.385, Acc: 0.040, Base Lr: 3.07e-04
+2024-04-05 01:23:14,306 EDITOR.train INFO: Epoch[3] Iteration[40/106] Loss: 41.278, Acc: 0.041, Base Lr: 3.07e-04
+2024-04-05 01:23:24,119 EDITOR.train INFO: Epoch[3] Iteration[50/106] Loss: 41.056, Acc: 0.046, Base Lr: 3.07e-04
+2024-04-05 01:23:33,714 EDITOR.train INFO: Epoch[3] Iteration[60/106] Loss: 40.844, Acc: 0.046, Base Lr: 3.07e-04
+2024-04-05 01:23:43,392 EDITOR.train INFO: Epoch[3] Iteration[70/106] Loss: 40.666, Acc: 0.050, Base Lr: 3.07e-04
+2024-04-05 01:23:54,082 EDITOR.train INFO: Epoch[3] Iteration[80/106] Loss: 40.369, Acc: 0.050, Base Lr: 3.07e-04
+2024-04-05 01:24:03,925 EDITOR.train INFO: Epoch[3] Iteration[90/106] Loss: 40.123, Acc: 0.053, Base Lr: 3.07e-04
+2024-04-05 01:24:13,571 EDITOR.train INFO: Epoch[3] Iteration[100/106] Loss: 39.892, Acc: 0.061, Base Lr: 3.07e-04
+2024-04-05 01:24:19,388 EDITOR.train INFO: Epoch 3 done. Time per batch: 1.062[s] Speed: 120.5[samples/s]
+2024-04-05 01:25:37,657 EDITOR.train INFO: Validation Results - Epoch: 3
+2024-04-05 01:25:37,657 EDITOR.train INFO: mAP: 27.47%
+2024-04-05 01:25:37,658 EDITOR.train INFO: CMC curve, Rank-1  :53.27%
+2024-04-05 01:25:37,658 EDITOR.train INFO: CMC curve, Rank-5  :75.48%
+2024-04-05 01:25:37,658 EDITOR.train INFO: CMC curve, Rank-10 :82.69%
+2024-04-05 01:25:38,502 EDITOR.train INFO: Best Multi-Modal mAP: 27.47%
+2024-04-05 01:25:38,502 EDITOR.train INFO: Best Multi-Modal Rank-1: 53.27%
+2024-04-05 01:25:38,502 EDITOR.train INFO: Best Multi-Modal Rank-5: 75.48%
+2024-04-05 01:25:38,502 EDITOR.train INFO: Best Multi-Modal Rank-10: 82.69%
+2024-04-05 01:25:55,790 EDITOR.train INFO: Epoch[4] Iteration[10/106] Loss: 37.263, Acc: 0.127, Base Lr: 4.06e-04
+2024-04-05 01:26:06,596 EDITOR.train INFO: Epoch[4] Iteration[20/106] Loss: 37.032, Acc: 0.140, Base Lr: 4.06e-04
+2024-04-05 01:26:17,114 EDITOR.train INFO: Epoch[4] Iteration[30/106] Loss: 36.976, Acc: 0.113, Base Lr: 4.06e-04
+2024-04-05 01:26:26,987 EDITOR.train INFO: Epoch[4] Iteration[40/106] Loss: 36.862, Acc: 0.105, Base Lr: 4.06e-04
+2024-04-05 01:26:38,173 EDITOR.train INFO: Epoch[4] Iteration[50/106] Loss: 36.636, Acc: 0.097, Base Lr: 4.06e-04
+2024-04-05 01:26:47,608 EDITOR.train INFO: Epoch[4] Iteration[60/106] Loss: 36.588, Acc: 0.095, Base Lr: 4.06e-04
+2024-04-05 01:26:57,555 EDITOR.train INFO: Epoch[4] Iteration[70/106] Loss: 36.465, Acc: 0.104, Base Lr: 4.06e-04
+2024-04-05 01:27:08,239 EDITOR.train INFO: Epoch[4] Iteration[80/106] Loss: 36.332, Acc: 0.102, Base Lr: 4.06e-04
+2024-04-05 01:27:17,587 EDITOR.train INFO: Epoch[4] Iteration[90/106] Loss: 36.200, Acc: 0.099, Base Lr: 4.06e-04
+2024-04-05 01:27:28,160 EDITOR.train INFO: Epoch[4] Iteration[100/106] Loss: 36.037, Acc: 0.101, Base Lr: 4.06e-04
+2024-04-05 01:27:33,021 EDITOR.train INFO: Epoch 4 done. Time per batch: 1.086[s] Speed: 117.9[samples/s]
+2024-04-05 01:28:50,901 EDITOR.train INFO: Validation Results - Epoch: 4
+2024-04-05 01:28:50,901 EDITOR.train INFO: mAP: 34.38%
+2024-04-05 01:28:50,901 EDITOR.train INFO: CMC curve, Rank-1  :59.62%
+2024-04-05 01:28:50,901 EDITOR.train INFO: CMC curve, Rank-5  :80.64%
+2024-04-05 01:28:50,901 EDITOR.train INFO: CMC curve, Rank-10 :87.00%
+2024-04-05 01:28:51,722 EDITOR.train INFO: Best Multi-Modal mAP: 34.38%
+2024-04-05 01:28:51,723 EDITOR.train INFO: Best Multi-Modal Rank-1: 59.62%
+2024-04-05 01:28:51,723 EDITOR.train INFO: Best Multi-Modal Rank-5: 80.64%
+2024-04-05 01:28:51,723 EDITOR.train INFO: Best Multi-Modal Rank-10: 87.00%
+2024-04-05 01:29:10,166 EDITOR.train INFO: Epoch[5] Iteration[10/106] Loss: 33.785, Acc: 0.066, Base Lr: 5.05e-04
+2024-04-05 01:29:21,400 EDITOR.train INFO: Epoch[5] Iteration[20/106] Loss: 33.723, Acc: 0.091, Base Lr: 5.05e-04
+2024-04-05 01:29:30,632 EDITOR.train INFO: Epoch[5] Iteration[30/106] Loss: 33.788, Acc: 0.080, Base Lr: 5.05e-04
+2024-04-05 01:29:40,389 EDITOR.train INFO: Epoch[5] Iteration[40/106] Loss: 33.716, Acc: 0.085, Base Lr: 5.05e-04
+2024-04-05 01:29:50,337 EDITOR.train INFO: Epoch[5] Iteration[50/106] Loss: 33.592, Acc: 0.081, Base Lr: 5.05e-04
+2024-04-05 01:30:00,825 EDITOR.train INFO: Epoch[5] Iteration[60/106] Loss: 33.484, Acc: 0.080, Base Lr: 5.05e-04
+2024-04-05 01:30:10,799 EDITOR.train INFO: Epoch[5] Iteration[70/106] Loss: 33.356, Acc: 0.085, Base Lr: 5.05e-04
+2024-04-05 01:30:20,999 EDITOR.train INFO: Epoch[5] Iteration[80/106] Loss: 33.230, Acc: 0.093, Base Lr: 5.05e-04
+2024-04-05 01:30:29,957 EDITOR.train INFO: Epoch[5] Iteration[90/106] Loss: 33.112, Acc: 0.097, Base Lr: 5.05e-04
+2024-04-05 01:30:39,349 EDITOR.train INFO: Epoch[5] Iteration[100/106] Loss: 33.035, Acc: 0.101, Base Lr: 5.05e-04
+2024-04-05 01:30:44,621 EDITOR.train INFO: Epoch 5 done. Time per batch: 1.072[s] Speed: 119.4[samples/s]
+2024-04-05 01:32:02,442 EDITOR.train INFO: Validation Results - Epoch: 5
+2024-04-05 01:32:02,443 EDITOR.train INFO: mAP: 40.49%
+2024-04-05 01:32:02,443 EDITOR.train INFO: CMC curve, Rank-1  :65.14%
+2024-04-05 01:32:02,443 EDITOR.train INFO: CMC curve, Rank-5  :84.26%
+2024-04-05 01:32:02,443 EDITOR.train INFO: CMC curve, Rank-10 :90.62%
+2024-04-05 01:32:03,270 EDITOR.train INFO: Best Multi-Modal mAP: 40.49%
+2024-04-05 01:32:03,270 EDITOR.train INFO: Best Multi-Modal Rank-1: 65.14%
+2024-04-05 01:32:03,270 EDITOR.train INFO: Best Multi-Modal Rank-5: 84.26%
+2024-04-05 01:32:03,270 EDITOR.train INFO: Best Multi-Modal Rank-10: 90.62%
+2024-04-05 01:32:19,236 EDITOR.train INFO: Epoch[6] Iteration[10/106] Loss: 31.425, Acc: 0.076, Base Lr: 6.04e-04
+2024-04-05 01:32:28,736 EDITOR.train INFO: Epoch[6] Iteration[20/106] Loss: 31.218, Acc: 0.086, Base Lr: 6.04e-04
+2024-04-05 01:32:39,751 EDITOR.train INFO: Epoch[6] Iteration[30/106] Loss: 31.176, Acc: 0.074, Base Lr: 6.04e-04
+2024-04-05 01:32:49,436 EDITOR.train INFO: Epoch[6] Iteration[40/106] Loss: 31.206, Acc: 0.074, Base Lr: 6.04e-04
+2024-04-05 01:32:59,271 EDITOR.train INFO: Epoch[6] Iteration[50/106] Loss: 31.142, Acc: 0.087, Base Lr: 6.04e-04
+2024-04-05 01:33:09,023 EDITOR.train INFO: Epoch[6] Iteration[60/106] Loss: 31.125, Acc: 0.087, Base Lr: 6.04e-04
+2024-04-05 01:33:20,101 EDITOR.train INFO: Epoch[6] Iteration[70/106] Loss: 31.071, Acc: 0.095, Base Lr: 6.04e-04
+2024-04-05 01:33:30,999 EDITOR.train INFO: Epoch[6] Iteration[80/106] Loss: 31.019, Acc: 0.100, Base Lr: 6.04e-04
+2024-04-05 01:33:40,489 EDITOR.train INFO: Epoch[6] Iteration[90/106] Loss: 30.982, Acc: 0.102, Base Lr: 6.04e-04
+2024-04-05 01:33:50,096 EDITOR.train INFO: Epoch[6] Iteration[100/106] Loss: 30.920, Acc: 0.104, Base Lr: 6.04e-04
+2024-04-05 01:33:55,222 EDITOR.train INFO: Epoch 6 done. Time per batch: 1.063[s] Speed: 120.4[samples/s]
+2024-04-05 01:35:13,474 EDITOR.train INFO: Validation Results - Epoch: 6
+2024-04-05 01:35:13,474 EDITOR.train INFO: mAP: 45.10%
+2024-04-05 01:35:13,474 EDITOR.train INFO: CMC curve, Rank-1  :68.85%
+2024-04-05 01:35:13,474 EDITOR.train INFO: CMC curve, Rank-5  :87.05%
+2024-04-05 01:35:13,474 EDITOR.train INFO: CMC curve, Rank-10 :92.43%
+2024-04-05 01:35:14,455 EDITOR.train INFO: Best Multi-Modal mAP: 45.10%
+2024-04-05 01:35:14,456 EDITOR.train INFO: Best Multi-Modal Rank-1: 68.85%
+2024-04-05 01:35:14,456 EDITOR.train INFO: Best Multi-Modal Rank-5: 87.05%
+2024-04-05 01:35:14,456 EDITOR.train INFO: Best Multi-Modal Rank-10: 92.43%
+2024-04-05 01:35:29,989 EDITOR.train INFO: Epoch[7] Iteration[10/106] Loss: 29.461, Acc: 0.110, Base Lr: 7.03e-04
+2024-04-05 01:35:39,811 EDITOR.train INFO: Epoch[7] Iteration[20/106] Loss: 29.471, Acc: 0.081, Base Lr: 7.03e-04
+2024-04-05 01:35:50,556 EDITOR.train INFO: Epoch[7] Iteration[30/106] Loss: 29.413, Acc: 0.082, Base Lr: 7.03e-04
+2024-04-05 01:36:00,213 EDITOR.train INFO: Epoch[7] Iteration[40/106] Loss: 29.380, Acc: 0.081, Base Lr: 7.03e-04
+2024-04-05 01:36:10,042 EDITOR.train INFO: Epoch[7] Iteration[50/106] Loss: 29.368, Acc: 0.083, Base Lr: 7.03e-04
+2024-04-05 01:36:20,205 EDITOR.train INFO: Epoch[7] Iteration[60/106] Loss: 29.382, Acc: 0.076, Base Lr: 7.03e-04
+2024-04-05 01:36:30,061 EDITOR.train INFO: Epoch[7] Iteration[70/106] Loss: 29.273, Acc: 0.083, Base Lr: 7.03e-04
+2024-04-05 01:36:39,403 EDITOR.train INFO: Epoch[7] Iteration[80/106] Loss: 29.205, Acc: 0.090, Base Lr: 7.03e-04
+2024-04-05 01:36:49,239 EDITOR.train INFO: Epoch[7] Iteration[90/106] Loss: 29.137, Acc: 0.097, Base Lr: 7.03e-04
+2024-04-05 01:36:58,996 EDITOR.train INFO: Epoch[7] Iteration[100/106] Loss: 29.042, Acc: 0.109, Base Lr: 7.03e-04
+2024-04-05 01:37:04,243 EDITOR.train INFO: Epoch 7 done. Time per batch: 1.045[s] Speed: 122.5[samples/s]
+2024-04-05 01:38:20,947 EDITOR.train INFO: Validation Results - Epoch: 7
+2024-04-05 01:38:20,948 EDITOR.train INFO: mAP: 49.77%
+2024-04-05 01:38:20,948 EDITOR.train INFO: CMC curve, Rank-1  :72.89%
+2024-04-05 01:38:20,948 EDITOR.train INFO: CMC curve, Rank-5  :88.90%
+2024-04-05 01:38:20,948 EDITOR.train INFO: CMC curve, Rank-10 :93.74%
+2024-04-05 01:38:21,738 EDITOR.train INFO: Best Multi-Modal mAP: 49.77%
+2024-04-05 01:38:21,738 EDITOR.train INFO: Best Multi-Modal Rank-1: 72.89%
+2024-04-05 01:38:21,739 EDITOR.train INFO: Best Multi-Modal Rank-5: 88.90%
+2024-04-05 01:38:21,739 EDITOR.train INFO: Best Multi-Modal Rank-10: 93.74%
+2024-04-05 01:38:37,439 EDITOR.train INFO: Epoch[8] Iteration[10/106] Loss: 28.411, Acc: 0.060, Base Lr: 8.02e-04
+2024-04-05 01:38:47,749 EDITOR.train INFO: Epoch[8] Iteration[20/106] Loss: 28.129, Acc: 0.091, Base Lr: 8.02e-04
+2024-04-05 01:38:58,204 EDITOR.train INFO: Epoch[8] Iteration[30/106] Loss: 28.049, Acc: 0.094, Base Lr: 8.02e-04
+2024-04-05 01:39:08,143 EDITOR.train INFO: Epoch[8] Iteration[40/106] Loss: 27.804, Acc: 0.115, Base Lr: 8.02e-04
+2024-04-05 01:39:17,800 EDITOR.train INFO: Epoch[8] Iteration[50/106] Loss: 27.800, Acc: 0.108, Base Lr: 8.02e-04
+2024-04-05 01:39:28,658 EDITOR.train INFO: Epoch[8] Iteration[60/106] Loss: 27.702, Acc: 0.115, Base Lr: 8.02e-04
+2024-04-05 01:39:38,579 EDITOR.train INFO: Epoch[8] Iteration[70/106] Loss: 27.637, Acc: 0.119, Base Lr: 8.02e-04
+2024-04-05 01:39:48,569 EDITOR.train INFO: Epoch[8] Iteration[80/106] Loss: 27.543, Acc: 0.124, Base Lr: 8.02e-04
+2024-04-05 01:39:58,440 EDITOR.train INFO: Epoch[8] Iteration[90/106] Loss: 27.498, Acc: 0.126, Base Lr: 8.02e-04
+2024-04-05 01:40:07,933 EDITOR.train INFO: Epoch[8] Iteration[100/106] Loss: 27.395, Acc: 0.129, Base Lr: 8.02e-04
+2024-04-05 01:40:13,160 EDITOR.train INFO: Epoch 8 done. Time per batch: 1.060[s] Speed: 120.8[samples/s]
+2024-04-05 01:41:32,375 EDITOR.train INFO: Validation Results - Epoch: 8
+2024-04-05 01:41:32,376 EDITOR.train INFO: mAP: 54.63%
+2024-04-05 01:41:32,376 EDITOR.train INFO: CMC curve, Rank-1  :76.43%
+2024-04-05 01:41:32,376 EDITOR.train INFO: CMC curve, Rank-5  :91.06%
+2024-04-05 01:41:32,376 EDITOR.train INFO: CMC curve, Rank-10 :94.92%
+2024-04-05 01:41:33,173 EDITOR.train INFO: Best Multi-Modal mAP: 54.63%
+2024-04-05 01:41:33,173 EDITOR.train INFO: Best Multi-Modal Rank-1: 76.43%
+2024-04-05 01:41:33,173 EDITOR.train INFO: Best Multi-Modal Rank-5: 91.06%
+2024-04-05 01:41:33,173 EDITOR.train INFO: Best Multi-Modal Rank-10: 94.92%
+2024-04-05 01:41:50,933 EDITOR.train INFO: Epoch[9] Iteration[10/106] Loss: 26.063, Acc: 0.109, Base Lr: 9.01e-04
+2024-04-05 01:41:59,956 EDITOR.train INFO: Epoch[9] Iteration[20/106] Loss: 26.293, Acc: 0.114, Base Lr: 9.01e-04
+2024-04-05 01:42:11,037 EDITOR.train INFO: Epoch[9] Iteration[30/106] Loss: 26.104, Acc: 0.143, Base Lr: 9.01e-04
+2024-04-05 01:42:20,577 EDITOR.train INFO: Epoch[9] Iteration[40/106] Loss: 26.115, Acc: 0.140, Base Lr: 9.01e-04
+2024-04-05 01:42:30,689 EDITOR.train INFO: Epoch[9] Iteration[50/106] Loss: 26.054, Acc: 0.150, Base Lr: 9.01e-04
+2024-04-05 01:42:40,343 EDITOR.train INFO: Epoch[9] Iteration[60/106] Loss: 25.992, Acc: 0.155, Base Lr: 9.01e-04
+2024-04-05 01:42:50,535 EDITOR.train INFO: Epoch[9] Iteration[70/106] Loss: 25.975, Acc: 0.160, Base Lr: 9.01e-04
+2024-04-05 01:43:00,742 EDITOR.train INFO: Epoch[9] Iteration[80/106] Loss: 25.988, Acc: 0.156, Base Lr: 9.01e-04
+2024-04-05 01:43:10,239 EDITOR.train INFO: Epoch[9] Iteration[90/106] Loss: 25.959, Acc: 0.157, Base Lr: 9.01e-04
+2024-04-05 01:43:19,737 EDITOR.train INFO: Epoch[9] Iteration[100/106] Loss: 25.854, Acc: 0.166, Base Lr: 9.01e-04
+2024-04-05 01:43:25,378 EDITOR.train INFO: Epoch 9 done. Time per batch: 1.068[s] Speed: 119.9[samples/s]
+2024-04-05 01:44:41,177 EDITOR.train INFO: Validation Results - Epoch: 9
+2024-04-05 01:44:41,178 EDITOR.train INFO: mAP: 57.19%
+2024-04-05 01:44:41,178 EDITOR.train INFO: CMC curve, Rank-1  :78.41%
+2024-04-05 01:44:41,178 EDITOR.train INFO: CMC curve, Rank-5  :92.34%
+2024-04-05 01:44:41,178 EDITOR.train INFO: CMC curve, Rank-10 :95.34%
+2024-04-05 01:44:42,173 EDITOR.train INFO: Best Multi-Modal mAP: 57.19%
+2024-04-05 01:44:42,173 EDITOR.train INFO: Best Multi-Modal Rank-1: 78.41%
+2024-04-05 01:44:42,173 EDITOR.train INFO: Best Multi-Modal Rank-5: 92.34%
+2024-04-05 01:44:42,173 EDITOR.train INFO: Best Multi-Modal Rank-10: 95.34%
+2024-04-05 01:44:58,636 EDITOR.train INFO: Epoch[10] Iteration[10/106] Loss: 25.098, Acc: 0.190, Base Lr: 9.51e-04
+2024-04-05 01:45:09,017 EDITOR.train INFO: Epoch[10] Iteration[20/106] Loss: 24.739, Acc: 0.190, Base Lr: 9.51e-04
+2024-04-05 01:45:19,067 EDITOR.train INFO: Epoch[10] Iteration[30/106] Loss: 24.775, Acc: 0.176, Base Lr: 9.51e-04
+2024-04-05 01:45:29,095 EDITOR.train INFO: Epoch[10] Iteration[40/106] Loss: 24.700, Acc: 0.178, Base Lr: 9.51e-04
+2024-04-05 01:45:39,144 EDITOR.train INFO: Epoch[10] Iteration[50/106] Loss: 24.616, Acc: 0.184, Base Lr: 9.51e-04
+2024-04-05 01:45:49,175 EDITOR.train INFO: Epoch[10] Iteration[60/106] Loss: 24.547, Acc: 0.189, Base Lr: 9.51e-04
+2024-04-05 01:45:58,837 EDITOR.train INFO: Epoch[10] Iteration[70/106] Loss: 24.507, Acc: 0.195, Base Lr: 9.51e-04
+2024-04-05 01:46:08,897 EDITOR.train INFO: Epoch[10] Iteration[80/106] Loss: 24.462, Acc: 0.198, Base Lr: 9.51e-04
+2024-04-05 01:46:18,374 EDITOR.train INFO: Epoch[10] Iteration[90/106] Loss: 24.482, Acc: 0.200, Base Lr: 9.51e-04
+2024-04-05 01:46:27,622 EDITOR.train INFO: Epoch[10] Iteration[100/106] Loss: 24.399, Acc: 0.209, Base Lr: 9.51e-04
+2024-04-05 01:46:32,957 EDITOR.train INFO: Epoch 10 done. Time per batch: 1.052[s] Speed: 121.7[samples/s]
+2024-04-05 01:47:49,699 EDITOR.train INFO: Validation Results - Epoch: 10
+2024-04-05 01:47:49,700 EDITOR.train INFO: mAP: 59.18%
+2024-04-05 01:47:49,700 EDITOR.train INFO: CMC curve, Rank-1  :80.11%
+2024-04-05 01:47:49,700 EDITOR.train INFO: CMC curve, Rank-5  :93.02%
+2024-04-05 01:47:49,700 EDITOR.train INFO: CMC curve, Rank-10 :95.46%
+2024-04-05 01:47:50,520 EDITOR.train INFO: Best Multi-Modal mAP: 59.18%
+2024-04-05 01:47:50,520 EDITOR.train INFO: Best Multi-Modal Rank-1: 80.11%
+2024-04-05 01:47:50,520 EDITOR.train INFO: Best Multi-Modal Rank-5: 93.02%
+2024-04-05 01:47:50,520 EDITOR.train INFO: Best Multi-Modal Rank-10: 95.46%
+2024-04-05 01:48:06,998 EDITOR.train INFO: Epoch[11] Iteration[10/106] Loss: 22.924, Acc: 0.320, Base Lr: 9.40e-04
+2024-04-05 01:48:16,857 EDITOR.train INFO: Epoch[11] Iteration[20/106] Loss: 23.112, Acc: 0.316, Base Lr: 9.40e-04
+2024-04-05 01:48:26,899 EDITOR.train INFO: Epoch[11] Iteration[30/106] Loss: 23.064, Acc: 0.310, Base Lr: 9.40e-04
+2024-04-05 01:48:37,838 EDITOR.train INFO: Epoch[11] Iteration[40/106] Loss: 23.263, Acc: 0.294, Base Lr: 9.40e-04
+2024-04-05 01:48:48,541 EDITOR.train INFO: Epoch[11] Iteration[50/106] Loss: 23.264, Acc: 0.289, Base Lr: 9.40e-04
+2024-04-05 01:48:58,412 EDITOR.train INFO: Epoch[11] Iteration[60/106] Loss: 23.254, Acc: 0.288, Base Lr: 9.40e-04
+2024-04-05 01:49:07,989 EDITOR.train INFO: Epoch[11] Iteration[70/106] Loss: 23.211, Acc: 0.288, Base Lr: 9.40e-04
+2024-04-05 01:49:17,847 EDITOR.train INFO: Epoch[11] Iteration[80/106] Loss: 23.151, Acc: 0.285, Base Lr: 9.40e-04
+2024-04-05 01:49:27,917 EDITOR.train INFO: Epoch[11] Iteration[90/106] Loss: 23.080, Acc: 0.288, Base Lr: 9.40e-04
+2024-04-05 01:49:37,533 EDITOR.train INFO: Epoch[11] Iteration[100/106] Loss: 23.057, Acc: 0.296, Base Lr: 9.40e-04
+2024-04-05 01:49:42,795 EDITOR.train INFO: Epoch 11 done. Time per batch: 1.062[s] Speed: 120.6[samples/s]
+2024-04-05 01:50:58,480 EDITOR.train INFO: Validation Results - Epoch: 11
+2024-04-05 01:50:58,481 EDITOR.train INFO: mAP: 60.98%
+2024-04-05 01:50:58,481 EDITOR.train INFO: CMC curve, Rank-1  :80.94%
+2024-04-05 01:50:58,481 EDITOR.train INFO: CMC curve, Rank-5  :93.08%
+2024-04-05 01:50:58,481 EDITOR.train INFO: CMC curve, Rank-10 :95.61%
+2024-04-05 01:50:59,468 EDITOR.train INFO: Best Multi-Modal mAP: 60.98%
+2024-04-05 01:50:59,468 EDITOR.train INFO: Best Multi-Modal Rank-1: 80.94%
+2024-04-05 01:50:59,468 EDITOR.train INFO: Best Multi-Modal Rank-5: 93.08%
+2024-04-05 01:50:59,468 EDITOR.train INFO: Best Multi-Modal Rank-10: 95.61%
+2024-04-05 01:51:15,840 EDITOR.train INFO: Epoch[12] Iteration[10/106] Loss: 22.487, Acc: 0.373, Base Lr: 9.29e-04
+2024-04-05 01:51:25,302 EDITOR.train INFO: Epoch[12] Iteration[20/106] Loss: 22.168, Acc: 0.385, Base Lr: 9.29e-04
+2024-04-05 01:51:34,908 EDITOR.train INFO: Epoch[12] Iteration[30/106] Loss: 22.069, Acc: 0.390, Base Lr: 9.29e-04
+2024-04-05 01:51:45,226 EDITOR.train INFO: Epoch[12] Iteration[40/106] Loss: 22.008, Acc: 0.383, Base Lr: 9.29e-04
+2024-04-05 01:51:55,252 EDITOR.train INFO: Epoch[12] Iteration[50/106] Loss: 22.153, Acc: 0.370, Base Lr: 9.29e-04
+2024-04-05 01:52:06,091 EDITOR.train INFO: Epoch[12] Iteration[60/106] Loss: 22.179, Acc: 0.372, Base Lr: 9.29e-04
+2024-04-05 01:52:15,946 EDITOR.train INFO: Epoch[12] Iteration[70/106] Loss: 22.107, Acc: 0.382, Base Lr: 9.29e-04
+2024-04-05 01:52:26,537 EDITOR.train INFO: Epoch[12] Iteration[80/106] Loss: 22.010, Acc: 0.385, Base Lr: 9.29e-04
+2024-04-05 01:52:36,272 EDITOR.train INFO: Epoch[12] Iteration[90/106] Loss: 22.020, Acc: 0.381, Base Lr: 9.29e-04
+2024-04-05 01:52:46,039 EDITOR.train INFO: Epoch[12] Iteration[100/106] Loss: 21.915, Acc: 0.389, Base Lr: 9.29e-04
+2024-04-05 01:52:50,919 EDITOR.train INFO: Epoch 12 done. Time per batch: 1.060[s] Speed: 120.8[samples/s]
+2024-04-05 01:54:07,139 EDITOR.train INFO: Validation Results - Epoch: 12
+2024-04-05 01:54:07,139 EDITOR.train INFO: mAP: 63.11%
+2024-04-05 01:54:07,139 EDITOR.train INFO: CMC curve, Rank-1  :82.78%
+2024-04-05 01:54:07,139 EDITOR.train INFO: CMC curve, Rank-5  :93.97%
+2024-04-05 01:54:07,140 EDITOR.train INFO: CMC curve, Rank-10 :96.05%
+2024-04-05 01:54:08,025 EDITOR.train INFO: Best Multi-Modal mAP: 63.11%
+2024-04-05 01:54:08,025 EDITOR.train INFO: Best Multi-Modal Rank-1: 82.78%
+2024-04-05 01:54:08,025 EDITOR.train INFO: Best Multi-Modal Rank-5: 93.97%
+2024-04-05 01:54:08,025 EDITOR.train INFO: Best Multi-Modal Rank-10: 96.05%
+2024-04-05 01:54:25,584 EDITOR.train INFO: Epoch[13] Iteration[10/106] Loss: 20.830, Acc: 0.502, Base Lr: 9.17e-04
+2024-04-05 01:54:37,295 EDITOR.train INFO: Epoch[13] Iteration[20/106] Loss: 20.993, Acc: 0.527, Base Lr: 9.17e-04
+2024-04-05 01:54:47,828 EDITOR.train INFO: Epoch[13] Iteration[30/106] Loss: 20.717, Acc: 0.539, Base Lr: 9.17e-04
+2024-04-05 01:54:57,837 EDITOR.train INFO: Epoch[13] Iteration[40/106] Loss: 20.587, Acc: 0.529, Base Lr: 9.17e-04
+2024-04-05 01:55:08,505 EDITOR.train INFO: Epoch[13] Iteration[50/106] Loss: 20.609, Acc: 0.523, Base Lr: 9.17e-04
+2024-04-05 01:55:19,920 EDITOR.train INFO: Epoch[13] Iteration[60/106] Loss: 20.674, Acc: 0.510, Base Lr: 9.17e-04
+2024-04-05 01:55:30,198 EDITOR.train INFO: Epoch[13] Iteration[70/106] Loss: 20.671, Acc: 0.503, Base Lr: 9.17e-04
+2024-04-05 01:55:40,686 EDITOR.train INFO: Epoch[13] Iteration[80/106] Loss: 20.759, Acc: 0.498, Base Lr: 9.17e-04
+2024-04-05 01:55:50,557 EDITOR.train INFO: Epoch[13] Iteration[90/106] Loss: 20.748, Acc: 0.497, Base Lr: 9.17e-04
+2024-04-05 01:56:00,059 EDITOR.train INFO: Epoch[13] Iteration[100/106] Loss: 20.702, Acc: 0.496, Base Lr: 9.17e-04
+2024-04-05 01:56:05,351 EDITOR.train INFO: Epoch 13 done. Time per batch: 1.114[s] Speed: 114.9[samples/s]
+2024-04-05 01:57:23,387 EDITOR.train INFO: Validation Results - Epoch: 13
+2024-04-05 01:57:23,388 EDITOR.train INFO: mAP: 62.80%
+2024-04-05 01:57:23,388 EDITOR.train INFO: CMC curve, Rank-1  :82.39%
+2024-04-05 01:57:23,388 EDITOR.train INFO: CMC curve, Rank-5  :93.91%
+2024-04-05 01:57:23,388 EDITOR.train INFO: CMC curve, Rank-10 :96.05%
+2024-04-05 01:57:23,389 EDITOR.train INFO: Best Multi-Modal mAP: 63.11%
+2024-04-05 01:57:23,389 EDITOR.train INFO: Best Multi-Modal Rank-1: 82.78%
+2024-04-05 01:57:23,389 EDITOR.train INFO: Best Multi-Modal Rank-5: 93.97%
+2024-04-05 01:57:23,390 EDITOR.train INFO: Best Multi-Modal Rank-10: 96.05%
+2024-04-05 01:57:39,568 EDITOR.train INFO: Epoch[14] Iteration[10/106] Loss: 19.893, Acc: 0.651, Base Lr: 9.05e-04
+2024-04-05 01:57:50,178 EDITOR.train INFO: Epoch[14] Iteration[20/106] Loss: 20.028, Acc: 0.647, Base Lr: 9.05e-04
+2024-04-05 01:58:00,580 EDITOR.train INFO: Epoch[14] Iteration[30/106] Loss: 19.942, Acc: 0.616, Base Lr: 9.05e-04
+2024-04-05 01:58:10,693 EDITOR.train INFO: Epoch[14] Iteration[40/106] Loss: 19.903, Acc: 0.606, Base Lr: 9.05e-04
+2024-04-05 01:58:21,612 EDITOR.train INFO: Epoch[14] Iteration[50/106] Loss: 19.861, Acc: 0.604, Base Lr: 9.05e-04
+2024-04-05 01:58:32,684 EDITOR.train INFO: Epoch[14] Iteration[60/106] Loss: 19.847, Acc: 0.595, Base Lr: 9.05e-04
+2024-04-05 01:58:43,407 EDITOR.train INFO: Epoch[14] Iteration[70/106] Loss: 19.874, Acc: 0.583, Base Lr: 9.05e-04
+2024-04-05 01:58:54,474 EDITOR.train INFO: Epoch[14] Iteration[80/106] Loss: 19.826, Acc: 0.580, Base Lr: 9.05e-04
+2024-04-05 01:59:04,516 EDITOR.train INFO: Epoch[14] Iteration[90/106] Loss: 19.823, Acc: 0.574, Base Lr: 9.05e-04
+2024-04-05 01:59:14,013 EDITOR.train INFO: Epoch[14] Iteration[100/106] Loss: 19.733, Acc: 0.578, Base Lr: 9.05e-04
+2024-04-05 01:59:19,310 EDITOR.train INFO: Epoch 14 done. Time per batch: 1.102[s] Speed: 116.1[samples/s]
+2024-04-05 02:00:45,358 EDITOR.train INFO: Validation Results - Epoch: 14
+2024-04-05 02:00:45,358 EDITOR.train INFO: mAP: 64.92%
+2024-04-05 02:00:45,358 EDITOR.train INFO: CMC curve, Rank-1  :83.37%
+2024-04-05 02:00:45,358 EDITOR.train INFO: CMC curve, Rank-5  :94.45%
+2024-04-05 02:00:45,358 EDITOR.train INFO: CMC curve, Rank-10 :96.29%
+2024-04-05 02:00:46,297 EDITOR.train INFO: Best Multi-Modal mAP: 64.92%
+2024-04-05 02:00:46,297 EDITOR.train INFO: Best Multi-Modal Rank-1: 83.37%
+2024-04-05 02:00:46,297 EDITOR.train INFO: Best Multi-Modal Rank-5: 94.45%
+2024-04-05 02:00:46,297 EDITOR.train INFO: Best Multi-Modal Rank-10: 96.29%
+2024-04-05 02:01:02,089 EDITOR.train INFO: Epoch[15] Iteration[10/106] Loss: 18.514, Acc: 0.707, Base Lr: 8.91e-04
+2024-04-05 02:01:12,806 EDITOR.train INFO: Epoch[15] Iteration[20/106] Loss: 18.724, Acc: 0.693, Base Lr: 8.91e-04
+2024-04-05 02:01:22,192 EDITOR.train INFO: Epoch[15] Iteration[30/106] Loss: 18.529, Acc: 0.703, Base Lr: 8.91e-04
+2024-04-05 02:01:32,460 EDITOR.train INFO: Epoch[15] Iteration[40/106] Loss: 18.679, Acc: 0.684, Base Lr: 8.91e-04
+2024-04-05 02:01:42,523 EDITOR.train INFO: Epoch[15] Iteration[50/106] Loss: 18.716, Acc: 0.677, Base Lr: 8.91e-04
+2024-04-05 02:01:52,907 EDITOR.train INFO: Epoch[15] Iteration[60/106] Loss: 18.781, Acc: 0.667, Base Lr: 8.91e-04
+2024-04-05 02:02:02,972 EDITOR.train INFO: Epoch[15] Iteration[70/106] Loss: 18.850, Acc: 0.660, Base Lr: 8.91e-04
+2024-04-05 02:02:12,539 EDITOR.train INFO: Epoch[15] Iteration[80/106] Loss: 18.930, Acc: 0.653, Base Lr: 8.91e-04
+2024-04-05 02:02:22,488 EDITOR.train INFO: Epoch[15] Iteration[90/106] Loss: 18.938, Acc: 0.653, Base Lr: 8.91e-04
+2024-04-05 02:02:32,290 EDITOR.train INFO: Epoch[15] Iteration[100/106] Loss: 18.899, Acc: 0.650, Base Lr: 8.91e-04
+2024-04-05 02:02:37,472 EDITOR.train INFO: Epoch 15 done. Time per batch: 1.056[s] Speed: 121.3[samples/s]
+2024-04-05 02:03:58,512 EDITOR.train INFO: Validation Results - Epoch: 15
+2024-04-05 02:03:58,513 EDITOR.train INFO: mAP: 66.95%
+2024-04-05 02:03:58,513 EDITOR.train INFO: CMC curve, Rank-1  :85.10%
+2024-04-05 02:03:58,513 EDITOR.train INFO: CMC curve, Rank-5  :94.83%
+2024-04-05 02:03:58,513 EDITOR.train INFO: CMC curve, Rank-10 :96.35%
+2024-04-05 02:03:59,470 EDITOR.train INFO: Best Multi-Modal mAP: 66.95%
+2024-04-05 02:03:59,470 EDITOR.train INFO: Best Multi-Modal Rank-1: 85.10%
+2024-04-05 02:03:59,471 EDITOR.train INFO: Best Multi-Modal Rank-5: 94.83%
+2024-04-05 02:03:59,471 EDITOR.train INFO: Best Multi-Modal Rank-10: 96.35%
+2024-04-05 02:04:17,309 EDITOR.train INFO: Epoch[16] Iteration[10/106] Loss: 17.862, Acc: 0.774, Base Lr: 8.77e-04
+2024-04-05 02:04:26,948 EDITOR.train INFO: Epoch[16] Iteration[20/106] Loss: 18.019, Acc: 0.757, Base Lr: 8.77e-04
+2024-04-05 02:04:37,172 EDITOR.train INFO: Epoch[16] Iteration[30/106] Loss: 17.859, Acc: 0.755, Base Lr: 8.77e-04
+2024-04-05 02:04:46,938 EDITOR.train INFO: Epoch[16] Iteration[40/106] Loss: 18.048, Acc: 0.734, Base Lr: 8.77e-04
+2024-04-05 02:04:57,091 EDITOR.train INFO: Epoch[16] Iteration[50/106] Loss: 17.988, Acc: 0.730, Base Lr: 8.77e-04
+2024-04-05 02:05:08,188 EDITOR.train INFO: Epoch[16] Iteration[60/106] Loss: 18.062, Acc: 0.719, Base Lr: 8.77e-04
+2024-04-05 02:05:18,435 EDITOR.train INFO: Epoch[16] Iteration[70/106] Loss: 18.106, Acc: 0.709, Base Lr: 8.77e-04
+2024-04-05 02:05:28,202 EDITOR.train INFO: Epoch[16] Iteration[80/106] Loss: 18.097, Acc: 0.708, Base Lr: 8.77e-04
+2024-04-05 02:05:37,932 EDITOR.train INFO: Epoch[16] Iteration[90/106] Loss: 18.131, Acc: 0.701, Base Lr: 8.77e-04
+2024-04-05 02:05:47,991 EDITOR.train INFO: Epoch[16] Iteration[100/106] Loss: 18.051, Acc: 0.704, Base Lr: 8.77e-04
+2024-04-05 02:05:53,418 EDITOR.train INFO: Epoch 16 done. Time per batch: 1.084[s] Speed: 118.1[samples/s]
+2024-04-05 02:07:09,705 EDITOR.train INFO: Validation Results - Epoch: 16
+2024-04-05 02:07:09,705 EDITOR.train INFO: mAP: 67.37%
+2024-04-05 02:07:09,705 EDITOR.train INFO: CMC curve, Rank-1  :85.96%
+2024-04-05 02:07:09,705 EDITOR.train INFO: CMC curve, Rank-5  :94.89%
+2024-04-05 02:07:09,706 EDITOR.train INFO: CMC curve, Rank-10 :96.70%
+2024-04-05 02:07:10,548 EDITOR.train INFO: Best Multi-Modal mAP: 67.37%
+2024-04-05 02:07:10,548 EDITOR.train INFO: Best Multi-Modal Rank-1: 85.96%
+2024-04-05 02:07:10,548 EDITOR.train INFO: Best Multi-Modal Rank-5: 94.89%
+2024-04-05 02:07:10,548 EDITOR.train INFO: Best Multi-Modal Rank-10: 96.70%
+2024-04-05 02:07:28,123 EDITOR.train INFO: Epoch[17] Iteration[10/106] Loss: 17.266, Acc: 0.863, Base Lr: 8.62e-04
+2024-04-05 02:07:38,312 EDITOR.train INFO: Epoch[17] Iteration[20/106] Loss: 17.395, Acc: 0.805, Base Lr: 8.62e-04
+2024-04-05 02:07:48,539 EDITOR.train INFO: Epoch[17] Iteration[30/106] Loss: 17.065, Acc: 0.809, Base Lr: 8.62e-04
+2024-04-05 02:07:58,576 EDITOR.train INFO: Epoch[17] Iteration[40/106] Loss: 17.037, Acc: 0.806, Base Lr: 8.62e-04
+2024-04-05 02:08:09,753 EDITOR.train INFO: Epoch[17] Iteration[50/106] Loss: 17.016, Acc: 0.805, Base Lr: 8.62e-04
+2024-04-05 02:08:20,188 EDITOR.train INFO: Epoch[17] Iteration[60/106] Loss: 17.101, Acc: 0.791, Base Lr: 8.62e-04
+2024-04-05 02:08:30,839 EDITOR.train INFO: Epoch[17] Iteration[70/106] Loss: 17.092, Acc: 0.785, Base Lr: 8.62e-04
+2024-04-05 02:08:40,695 EDITOR.train INFO: Epoch[17] Iteration[80/106] Loss: 17.188, Acc: 0.773, Base Lr: 8.62e-04
+2024-04-05 02:08:50,123 EDITOR.train INFO: Epoch[17] Iteration[90/106] Loss: 17.196, Acc: 0.766, Base Lr: 8.62e-04
+2024-04-05 02:09:00,299 EDITOR.train INFO: Epoch[17] Iteration[100/106] Loss: 17.174, Acc: 0.766, Base Lr: 8.62e-04
+2024-04-05 02:09:05,876 EDITOR.train INFO: Epoch 17 done. Time per batch: 1.090[s] Speed: 117.4[samples/s]
+2024-04-05 02:10:24,859 EDITOR.train INFO: Validation Results - Epoch: 17
+2024-04-05 02:10:24,860 EDITOR.train INFO: mAP: 67.65%
+2024-04-05 02:10:24,860 EDITOR.train INFO: CMC curve, Rank-1  :85.75%
+2024-04-05 02:10:24,860 EDITOR.train INFO: CMC curve, Rank-5  :95.16%
+2024-04-05 02:10:24,860 EDITOR.train INFO: CMC curve, Rank-10 :96.62%
+2024-04-05 02:10:25,939 EDITOR.train INFO: Best Multi-Modal mAP: 67.65%
+2024-04-05 02:10:25,940 EDITOR.train INFO: Best Multi-Modal Rank-1: 85.75%
+2024-04-05 02:10:25,940 EDITOR.train INFO: Best Multi-Modal Rank-5: 95.16%
+2024-04-05 02:10:25,940 EDITOR.train INFO: Best Multi-Modal Rank-10: 96.62%
+2024-04-05 02:10:42,298 EDITOR.train INFO: Epoch[18] Iteration[10/106] Loss: 16.798, Acc: 0.829, Base Lr: 8.46e-04
+2024-04-05 02:10:53,462 EDITOR.train INFO: Epoch[18] Iteration[20/106] Loss: 16.459, Acc: 0.837, Base Lr: 8.46e-04
+2024-04-05 02:11:03,881 EDITOR.train INFO: Epoch[18] Iteration[30/106] Loss: 16.246, Acc: 0.840, Base Lr: 8.46e-04
+2024-04-05 02:11:14,280 EDITOR.train INFO: Epoch[18] Iteration[40/106] Loss: 16.265, Acc: 0.840, Base Lr: 8.46e-04
+2024-04-05 02:11:25,047 EDITOR.train INFO: Epoch[18] Iteration[50/106] Loss: 16.325, Acc: 0.830, Base Lr: 8.46e-04
+2024-04-05 02:11:35,804 EDITOR.train INFO: Epoch[18] Iteration[60/106] Loss: 16.412, Acc: 0.822, Base Lr: 8.46e-04
+2024-04-05 02:11:45,366 EDITOR.train INFO: Epoch[18] Iteration[70/106] Loss: 16.461, Acc: 0.815, Base Lr: 8.46e-04
+2024-04-05 02:11:55,528 EDITOR.train INFO: Epoch[18] Iteration[80/106] Loss: 16.505, Acc: 0.804, Base Lr: 8.46e-04
+2024-04-05 02:12:05,753 EDITOR.train INFO: Epoch[18] Iteration[90/106] Loss: 16.534, Acc: 0.802, Base Lr: 8.46e-04
+2024-04-05 02:12:16,054 EDITOR.train INFO: Epoch[18] Iteration[100/106] Loss: 16.596, Acc: 0.792, Base Lr: 8.46e-04
+2024-04-05 02:12:21,737 EDITOR.train INFO: Epoch 18 done. Time per batch: 1.102[s] Speed: 116.2[samples/s]
+2024-04-05 02:13:39,737 EDITOR.train INFO: Validation Results - Epoch: 18
+2024-04-05 02:13:39,737 EDITOR.train INFO: mAP: 69.00%
+2024-04-05 02:13:39,737 EDITOR.train INFO: CMC curve, Rank-1  :86.49%
+2024-04-05 02:13:39,737 EDITOR.train INFO: CMC curve, Rank-5  :95.49%
+2024-04-05 02:13:39,737 EDITOR.train INFO: CMC curve, Rank-10 :97.12%
+2024-04-05 02:13:40,675 EDITOR.train INFO: Best Multi-Modal mAP: 69.00%
+2024-04-05 02:13:40,675 EDITOR.train INFO: Best Multi-Modal Rank-1: 86.49%
+2024-04-05 02:13:40,675 EDITOR.train INFO: Best Multi-Modal Rank-5: 95.49%
+2024-04-05 02:13:40,675 EDITOR.train INFO: Best Multi-Modal Rank-10: 97.12%
+2024-04-05 02:13:59,178 EDITOR.train INFO: Epoch[19] Iteration[10/106] Loss: 16.113, Acc: 0.841, Base Lr: 8.29e-04
+2024-04-05 02:14:09,958 EDITOR.train INFO: Epoch[19] Iteration[20/106] Loss: 16.035, Acc: 0.855, Base Lr: 8.29e-04
+2024-04-05 02:14:20,093 EDITOR.train INFO: Epoch[19] Iteration[30/106] Loss: 15.944, Acc: 0.857, Base Lr: 8.29e-04
+2024-04-05 02:14:30,304 EDITOR.train INFO: Epoch[19] Iteration[40/106] Loss: 16.010, Acc: 0.846, Base Lr: 8.29e-04
+2024-04-05 02:14:41,694 EDITOR.train INFO: Epoch[19] Iteration[50/106] Loss: 16.049, Acc: 0.842, Base Lr: 8.29e-04
+2024-04-05 02:14:51,627 EDITOR.train INFO: Epoch[19] Iteration[60/106] Loss: 15.965, Acc: 0.845, Base Lr: 8.29e-04
+2024-04-05 02:15:01,717 EDITOR.train INFO: Epoch[19] Iteration[70/106] Loss: 16.015, Acc: 0.842, Base Lr: 8.29e-04
+2024-04-05 02:15:11,903 EDITOR.train INFO: Epoch[19] Iteration[80/106] Loss: 16.063, Acc: 0.832, Base Lr: 8.29e-04
+2024-04-05 02:15:21,701 EDITOR.train INFO: Epoch[19] Iteration[90/106] Loss: 16.089, Acc: 0.829, Base Lr: 8.29e-04
+2024-04-05 02:15:31,990 EDITOR.train INFO: Epoch[19] Iteration[100/106] Loss: 16.122, Acc: 0.823, Base Lr: 8.29e-04
+2024-04-05 02:15:37,256 EDITOR.train INFO: Epoch 19 done. Time per batch: 1.098[s] Speed: 116.6[samples/s]
+2024-04-05 02:16:54,621 EDITOR.train INFO: Validation Results - Epoch: 19
+2024-04-05 02:16:54,622 EDITOR.train INFO: mAP: 69.97%
+2024-04-05 02:16:54,622 EDITOR.train INFO: CMC curve, Rank-1  :86.88%
+2024-04-05 02:16:54,622 EDITOR.train INFO: CMC curve, Rank-5  :95.75%
+2024-04-05 02:16:54,622 EDITOR.train INFO: CMC curve, Rank-10 :97.27%
+2024-04-05 02:16:55,519 EDITOR.train INFO: Best Multi-Modal mAP: 69.97%
+2024-04-05 02:16:55,520 EDITOR.train INFO: Best Multi-Modal Rank-1: 86.88%
+2024-04-05 02:16:55,520 EDITOR.train INFO: Best Multi-Modal Rank-5: 95.75%
+2024-04-05 02:16:55,520 EDITOR.train INFO: Best Multi-Modal Rank-10: 97.27%
+2024-04-05 02:17:12,711 EDITOR.train INFO: Epoch[20] Iteration[10/106] Loss: 15.456, Acc: 0.870, Base Lr: 8.12e-04
+2024-04-05 02:17:22,745 EDITOR.train INFO: Epoch[20] Iteration[20/106] Loss: 15.468, Acc: 0.873, Base Lr: 8.12e-04
+2024-04-05 02:17:33,034 EDITOR.train INFO: Epoch[20] Iteration[30/106] Loss: 15.798, Acc: 0.857, Base Lr: 8.12e-04
+2024-04-05 02:17:43,195 EDITOR.train INFO: Epoch[20] Iteration[40/106] Loss: 15.696, Acc: 0.862, Base Lr: 8.12e-04
+2024-04-05 02:17:53,098 EDITOR.train INFO: Epoch[20] Iteration[50/106] Loss: 15.594, Acc: 0.861, Base Lr: 8.12e-04
+2024-04-05 02:18:03,158 EDITOR.train INFO: Epoch[20] Iteration[60/106] Loss: 15.464, Acc: 0.861, Base Lr: 8.12e-04
+2024-04-05 02:18:13,439 EDITOR.train INFO: Epoch[20] Iteration[70/106] Loss: 15.472, Acc: 0.859, Base Lr: 8.12e-04
+2024-04-05 02:18:23,515 EDITOR.train INFO: Epoch[20] Iteration[80/106] Loss: 15.555, Acc: 0.854, Base Lr: 8.12e-04
+2024-04-05 02:18:32,718 EDITOR.train INFO: Epoch[20] Iteration[90/106] Loss: 15.634, Acc: 0.846, Base Lr: 8.12e-04
+2024-04-05 02:18:42,625 EDITOR.train INFO: Epoch[20] Iteration[100/106] Loss: 15.632, Acc: 0.844, Base Lr: 8.12e-04
+2024-04-05 02:18:48,653 EDITOR.train INFO: Epoch 20 done. Time per batch: 1.076[s] Speed: 118.9[samples/s]
+2024-04-05 02:20:06,543 EDITOR.train INFO: Validation Results - Epoch: 20
+2024-04-05 02:20:06,544 EDITOR.train INFO: mAP: 70.82%
+2024-04-05 02:20:06,544 EDITOR.train INFO: CMC curve, Rank-1  :87.53%
+2024-04-05 02:20:06,544 EDITOR.train INFO: CMC curve, Rank-5  :95.90%
+2024-04-05 02:20:06,544 EDITOR.train INFO: CMC curve, Rank-10 :97.21%
+2024-04-05 02:20:07,424 EDITOR.train INFO: Best Multi-Modal mAP: 70.82%
+2024-04-05 02:20:07,425 EDITOR.train INFO: Best Multi-Modal Rank-1: 87.53%
+2024-04-05 02:20:07,425 EDITOR.train INFO: Best Multi-Modal Rank-5: 95.90%
+2024-04-05 02:20:07,425 EDITOR.train INFO: Best Multi-Modal Rank-10: 97.21%
+2024-04-05 02:20:24,892 EDITOR.train INFO: Epoch[21] Iteration[10/106] Loss: 14.887, Acc: 0.896, Base Lr: 7.94e-04
+2024-04-05 02:20:34,786 EDITOR.train INFO: Epoch[21] Iteration[20/106] Loss: 14.834, Acc: 0.900, Base Lr: 7.94e-04
+2024-04-05 02:20:45,345 EDITOR.train INFO: Epoch[21] Iteration[30/106] Loss: 14.649, Acc: 0.907, Base Lr: 7.94e-04
+2024-04-05 02:20:55,612 EDITOR.train INFO: Epoch[21] Iteration[40/106] Loss: 14.919, Acc: 0.890, Base Lr: 7.94e-04
+2024-04-05 02:21:06,183 EDITOR.train INFO: Epoch[21] Iteration[50/106] Loss: 14.878, Acc: 0.891, Base Lr: 7.94e-04
+2024-04-05 02:21:16,599 EDITOR.train INFO: Epoch[21] Iteration[60/106] Loss: 14.909, Acc: 0.880, Base Lr: 7.94e-04
+2024-04-05 02:21:27,292 EDITOR.train INFO: Epoch[21] Iteration[70/106] Loss: 15.018, Acc: 0.875, Base Lr: 7.94e-04
+2024-04-05 02:21:37,286 EDITOR.train INFO: Epoch[21] Iteration[80/106] Loss: 15.025, Acc: 0.871, Base Lr: 7.94e-04
+2024-04-05 02:21:47,126 EDITOR.train INFO: Epoch[21] Iteration[90/106] Loss: 14.976, Acc: 0.873, Base Lr: 7.94e-04
+2024-04-05 02:21:56,816 EDITOR.train INFO: Epoch[21] Iteration[100/106] Loss: 15.028, Acc: 0.872, Base Lr: 7.94e-04
+2024-04-05 02:22:01,702 EDITOR.train INFO: Epoch 21 done. Time per batch: 1.083[s] Speed: 118.2[samples/s]
+2024-04-05 02:23:14,861 EDITOR.train INFO: Validation Results - Epoch: 21
+2024-04-05 02:23:14,862 EDITOR.train INFO: mAP: 71.14%
+2024-04-05 02:23:14,862 EDITOR.train INFO: CMC curve, Rank-1  :87.65%
+2024-04-05 02:23:14,862 EDITOR.train INFO: CMC curve, Rank-5  :96.05%
+2024-04-05 02:23:14,862 EDITOR.train INFO: CMC curve, Rank-10 :97.27%
+2024-04-05 02:23:15,759 EDITOR.train INFO: Best Multi-Modal mAP: 71.14%
+2024-04-05 02:23:15,760 EDITOR.train INFO: Best Multi-Modal Rank-1: 87.65%
+2024-04-05 02:23:15,760 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.05%
+2024-04-05 02:23:15,760 EDITOR.train INFO: Best Multi-Modal Rank-10: 97.27%
+2024-04-05 02:23:32,221 EDITOR.train INFO: Epoch[22] Iteration[10/106] Loss: 14.003, Acc: 0.916, Base Lr: 7.76e-04
+2024-04-05 02:23:42,222 EDITOR.train INFO: Epoch[22] Iteration[20/106] Loss: 14.452, Acc: 0.903, Base Lr: 7.76e-04
+2024-04-05 02:23:52,203 EDITOR.train INFO: Epoch[22] Iteration[30/106] Loss: 14.295, Acc: 0.905, Base Lr: 7.76e-04
+2024-04-05 02:24:02,468 EDITOR.train INFO: Epoch[22] Iteration[40/106] Loss: 14.355, Acc: 0.899, Base Lr: 7.76e-04
+2024-04-05 02:24:12,640 EDITOR.train INFO: Epoch[22] Iteration[50/106] Loss: 14.329, Acc: 0.899, Base Lr: 7.76e-04
+2024-04-05 02:24:23,993 EDITOR.train INFO: Epoch[22] Iteration[60/106] Loss: 14.347, Acc: 0.898, Base Lr: 7.76e-04
+2024-04-05 02:24:34,065 EDITOR.train INFO: Epoch[22] Iteration[70/106] Loss: 14.419, Acc: 0.892, Base Lr: 7.76e-04
+2024-04-05 02:24:44,579 EDITOR.train INFO: Epoch[22] Iteration[80/106] Loss: 14.623, Acc: 0.882, Base Lr: 7.76e-04
+2024-04-05 02:24:54,639 EDITOR.train INFO: Epoch[22] Iteration[90/106] Loss: 14.594, Acc: 0.880, Base Lr: 7.76e-04
+2024-04-05 02:25:04,841 EDITOR.train INFO: Epoch[22] Iteration[100/106] Loss: 14.580, Acc: 0.879, Base Lr: 7.76e-04
+2024-04-05 02:25:10,284 EDITOR.train INFO: Epoch 22 done. Time per batch: 1.089[s] Speed: 117.5[samples/s]
+2024-04-05 02:26:40,560 EDITOR.train INFO: Validation Results - Epoch: 22
+2024-04-05 02:26:40,561 EDITOR.train INFO: mAP: 71.52%
+2024-04-05 02:26:40,561 EDITOR.train INFO: CMC curve, Rank-1  :87.71%
+2024-04-05 02:26:40,561 EDITOR.train INFO: CMC curve, Rank-5  :96.17%
+2024-04-05 02:26:40,561 EDITOR.train INFO: CMC curve, Rank-10 :97.68%
+2024-04-05 02:26:41,578 EDITOR.train INFO: Best Multi-Modal mAP: 71.52%
+2024-04-05 02:26:41,578 EDITOR.train INFO: Best Multi-Modal Rank-1: 87.71%
+2024-04-05 02:26:41,578 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.17%
+2024-04-05 02:26:41,579 EDITOR.train INFO: Best Multi-Modal Rank-10: 97.68%
+2024-04-05 02:26:59,603 EDITOR.train INFO: Epoch[23] Iteration[10/106] Loss: 14.305, Acc: 0.894, Base Lr: 7.57e-04
+2024-04-05 02:27:10,264 EDITOR.train INFO: Epoch[23] Iteration[20/106] Loss: 14.381, Acc: 0.898, Base Lr: 7.57e-04
+2024-04-05 02:27:20,708 EDITOR.train INFO: Epoch[23] Iteration[30/106] Loss: 14.415, Acc: 0.896, Base Lr: 7.57e-04
+2024-04-05 02:27:31,099 EDITOR.train INFO: Epoch[23] Iteration[40/106] Loss: 14.390, Acc: 0.890, Base Lr: 7.57e-04
+2024-04-05 02:27:41,787 EDITOR.train INFO: Epoch[23] Iteration[50/106] Loss: 14.385, Acc: 0.889, Base Lr: 7.57e-04
+2024-04-05 02:27:52,678 EDITOR.train INFO: Epoch[23] Iteration[60/106] Loss: 14.413, Acc: 0.887, Base Lr: 7.57e-04
+2024-04-05 02:28:04,111 EDITOR.train INFO: Epoch[23] Iteration[70/106] Loss: 14.354, Acc: 0.887, Base Lr: 7.57e-04
+2024-04-05 02:28:15,396 EDITOR.train INFO: Epoch[23] Iteration[80/106] Loss: 14.395, Acc: 0.887, Base Lr: 7.57e-04
+2024-04-05 02:28:25,036 EDITOR.train INFO: Epoch[23] Iteration[90/106] Loss: 14.349, Acc: 0.888, Base Lr: 7.57e-04
+2024-04-05 02:28:35,290 EDITOR.train INFO: Epoch[23] Iteration[100/106] Loss: 14.245, Acc: 0.890, Base Lr: 7.57e-04
+2024-04-05 02:28:41,256 EDITOR.train INFO: Epoch 23 done. Time per batch: 1.138[s] Speed: 112.4[samples/s]
+2024-04-05 02:30:00,766 EDITOR.train INFO: Validation Results - Epoch: 23
+2024-04-05 02:30:00,766 EDITOR.train INFO: mAP: 71.86%
+2024-04-05 02:30:00,766 EDITOR.train INFO: CMC curve, Rank-1  :88.30%
+2024-04-05 02:30:00,766 EDITOR.train INFO: CMC curve, Rank-5  :95.90%
+2024-04-05 02:30:00,766 EDITOR.train INFO: CMC curve, Rank-10 :97.48%
+2024-04-05 02:30:01,674 EDITOR.train INFO: Best Multi-Modal mAP: 71.86%
+2024-04-05 02:30:01,675 EDITOR.train INFO: Best Multi-Modal Rank-1: 88.30%
+2024-04-05 02:30:01,675 EDITOR.train INFO: Best Multi-Modal Rank-5: 95.90%
+2024-04-05 02:30:01,675 EDITOR.train INFO: Best Multi-Modal Rank-10: 97.48%
+2024-04-05 02:30:18,251 EDITOR.train INFO: Epoch[24] Iteration[10/106] Loss: 13.105, Acc: 0.937, Base Lr: 7.37e-04
+2024-04-05 02:30:28,394 EDITOR.train INFO: Epoch[24] Iteration[20/106] Loss: 13.530, Acc: 0.923, Base Lr: 7.37e-04
+2024-04-05 02:30:38,592 EDITOR.train INFO: Epoch[24] Iteration[30/106] Loss: 13.691, Acc: 0.914, Base Lr: 7.37e-04
+2024-04-05 02:30:49,195 EDITOR.train INFO: Epoch[24] Iteration[40/106] Loss: 13.630, Acc: 0.918, Base Lr: 7.37e-04
+2024-04-05 02:31:00,611 EDITOR.train INFO: Epoch[24] Iteration[50/106] Loss: 13.651, Acc: 0.915, Base Lr: 7.37e-04
+2024-04-05 02:31:11,381 EDITOR.train INFO: Epoch[24] Iteration[60/106] Loss: 13.700, Acc: 0.913, Base Lr: 7.37e-04
+2024-04-05 02:31:22,921 EDITOR.train INFO: Epoch[24] Iteration[70/106] Loss: 13.755, Acc: 0.912, Base Lr: 7.37e-04
+2024-04-05 02:31:34,006 EDITOR.train INFO: Epoch[24] Iteration[80/106] Loss: 13.841, Acc: 0.909, Base Lr: 7.37e-04
+2024-04-05 02:31:44,038 EDITOR.train INFO: Epoch[24] Iteration[90/106] Loss: 13.854, Acc: 0.908, Base Lr: 7.37e-04
+2024-04-05 02:31:53,836 EDITOR.train INFO: Epoch[24] Iteration[100/106] Loss: 13.842, Acc: 0.905, Base Lr: 7.37e-04
+2024-04-05 02:31:59,551 EDITOR.train INFO: Epoch 24 done. Time per batch: 1.118[s] Speed: 114.4[samples/s]
+2024-04-05 02:33:19,858 EDITOR.train INFO: Validation Results - Epoch: 24
+2024-04-05 02:33:19,859 EDITOR.train INFO: mAP: 72.73%
+2024-04-05 02:33:19,859 EDITOR.train INFO: CMC curve, Rank-1  :88.78%
+2024-04-05 02:33:19,859 EDITOR.train INFO: CMC curve, Rank-5  :96.17%
+2024-04-05 02:33:19,859 EDITOR.train INFO: CMC curve, Rank-10 :97.98%
+2024-04-05 02:33:20,861 EDITOR.train INFO: Best Multi-Modal mAP: 72.73%
+2024-04-05 02:33:20,861 EDITOR.train INFO: Best Multi-Modal Rank-1: 88.78%
+2024-04-05 02:33:20,861 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.17%
+2024-04-05 02:33:20,861 EDITOR.train INFO: Best Multi-Modal Rank-10: 97.98%
+2024-04-05 02:33:38,920 EDITOR.train INFO: Epoch[25] Iteration[10/106] Loss: 13.378, Acc: 0.930, Base Lr: 7.17e-04
+2024-04-05 02:33:49,245 EDITOR.train INFO: Epoch[25] Iteration[20/106] Loss: 13.345, Acc: 0.930, Base Lr: 7.17e-04
+2024-04-05 02:33:59,096 EDITOR.train INFO: Epoch[25] Iteration[30/106] Loss: 13.337, Acc: 0.927, Base Lr: 7.17e-04
+2024-04-05 02:34:09,363 EDITOR.train INFO: Epoch[25] Iteration[40/106] Loss: 13.357, Acc: 0.923, Base Lr: 7.17e-04
+2024-04-05 02:34:19,829 EDITOR.train INFO: Epoch[25] Iteration[50/106] Loss: 13.399, Acc: 0.920, Base Lr: 7.17e-04
+2024-04-05 02:34:29,475 EDITOR.train INFO: Epoch[25] Iteration[60/106] Loss: 13.527, Acc: 0.916, Base Lr: 7.17e-04
+2024-04-05 02:34:39,328 EDITOR.train INFO: Epoch[25] Iteration[70/106] Loss: 13.609, Acc: 0.913, Base Lr: 7.17e-04
+2024-04-05 02:34:49,010 EDITOR.train INFO: Epoch[25] Iteration[80/106] Loss: 13.666, Acc: 0.910, Base Lr: 7.17e-04
+2024-04-05 02:34:58,784 EDITOR.train INFO: Epoch[25] Iteration[90/106] Loss: 13.696, Acc: 0.911, Base Lr: 7.17e-04
+2024-04-05 02:35:08,103 EDITOR.train INFO: Epoch[25] Iteration[100/106] Loss: 13.677, Acc: 0.911, Base Lr: 7.17e-04
+2024-04-05 02:35:13,419 EDITOR.train INFO: Epoch 25 done. Time per batch: 1.068[s] Speed: 119.9[samples/s]
+2024-04-05 02:36:33,119 EDITOR.train INFO: Validation Results - Epoch: 25
+2024-04-05 02:36:33,120 EDITOR.train INFO: mAP: 73.27%
+2024-04-05 02:36:33,120 EDITOR.train INFO: CMC curve, Rank-1  :88.98%
+2024-04-05 02:36:33,120 EDITOR.train INFO: CMC curve, Rank-5  :96.20%
+2024-04-05 02:36:33,120 EDITOR.train INFO: CMC curve, Rank-10 :97.68%
+2024-04-05 02:36:33,953 EDITOR.train INFO: Best Multi-Modal mAP: 73.27%
+2024-04-05 02:36:33,953 EDITOR.train INFO: Best Multi-Modal Rank-1: 88.98%
+2024-04-05 02:36:33,953 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.20%
+2024-04-05 02:36:33,953 EDITOR.train INFO: Best Multi-Modal Rank-10: 97.68%
+2024-04-05 02:36:50,676 EDITOR.train INFO: Epoch[26] Iteration[10/106] Loss: 12.630, Acc: 0.935, Base Lr: 6.97e-04
+2024-04-05 02:37:01,107 EDITOR.train INFO: Epoch[26] Iteration[20/106] Loss: 13.005, Acc: 0.921, Base Lr: 6.97e-04
+2024-04-05 02:37:11,239 EDITOR.train INFO: Epoch[26] Iteration[30/106] Loss: 13.179, Acc: 0.927, Base Lr: 6.97e-04
+2024-04-05 02:37:22,303 EDITOR.train INFO: Epoch[26] Iteration[40/106] Loss: 13.271, Acc: 0.922, Base Lr: 6.97e-04
+2024-04-05 02:37:31,884 EDITOR.train INFO: Epoch[26] Iteration[50/106] Loss: 13.391, Acc: 0.919, Base Lr: 6.97e-04
+2024-04-05 02:37:42,028 EDITOR.train INFO: Epoch[26] Iteration[60/106] Loss: 13.345, Acc: 0.920, Base Lr: 6.97e-04
+2024-04-05 02:37:52,594 EDITOR.train INFO: Epoch[26] Iteration[70/106] Loss: 13.372, Acc: 0.918, Base Lr: 6.97e-04
+2024-04-05 02:38:02,507 EDITOR.train INFO: Epoch[26] Iteration[80/106] Loss: 13.424, Acc: 0.916, Base Lr: 6.97e-04
+2024-04-05 02:38:12,263 EDITOR.train INFO: Epoch[26] Iteration[90/106] Loss: 13.425, Acc: 0.915, Base Lr: 6.97e-04
+2024-04-05 02:38:22,637 EDITOR.train INFO: Epoch[26] Iteration[100/106] Loss: 13.384, Acc: 0.915, Base Lr: 6.97e-04
+2024-04-05 02:38:28,221 EDITOR.train INFO: Epoch 26 done. Time per batch: 1.087[s] Speed: 117.8[samples/s]
+2024-04-05 02:39:51,950 EDITOR.train INFO: Validation Results - Epoch: 26
+2024-04-05 02:39:51,950 EDITOR.train INFO: mAP: 73.29%
+2024-04-05 02:39:51,950 EDITOR.train INFO: CMC curve, Rank-1  :89.22%
+2024-04-05 02:39:51,950 EDITOR.train INFO: CMC curve, Rank-5  :96.26%
+2024-04-05 02:39:51,950 EDITOR.train INFO: CMC curve, Rank-10 :97.80%
+2024-04-05 02:39:52,874 EDITOR.train INFO: Best Multi-Modal mAP: 73.29%
+2024-04-05 02:39:52,874 EDITOR.train INFO: Best Multi-Modal Rank-1: 89.22%
+2024-04-05 02:39:52,874 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.26%
+2024-04-05 02:39:52,874 EDITOR.train INFO: Best Multi-Modal Rank-10: 97.80%
+2024-04-05 02:40:10,011 EDITOR.train INFO: Epoch[27] Iteration[10/106] Loss: 12.344, Acc: 0.948, Base Lr: 6.76e-04
+2024-04-05 02:40:20,112 EDITOR.train INFO: Epoch[27] Iteration[20/106] Loss: 12.682, Acc: 0.946, Base Lr: 6.76e-04
+2024-04-05 02:40:30,087 EDITOR.train INFO: Epoch[27] Iteration[30/106] Loss: 12.877, Acc: 0.943, Base Lr: 6.76e-04
+2024-04-05 02:40:40,789 EDITOR.train INFO: Epoch[27] Iteration[40/106] Loss: 12.917, Acc: 0.940, Base Lr: 6.76e-04
+2024-04-05 02:40:50,892 EDITOR.train INFO: Epoch[27] Iteration[50/106] Loss: 13.090, Acc: 0.935, Base Lr: 6.76e-04
+2024-04-05 02:41:01,914 EDITOR.train INFO: Epoch[27] Iteration[60/106] Loss: 13.126, Acc: 0.931, Base Lr: 6.76e-04
+2024-04-05 02:41:13,203 EDITOR.train INFO: Epoch[27] Iteration[70/106] Loss: 13.109, Acc: 0.929, Base Lr: 6.76e-04
+2024-04-05 02:41:23,214 EDITOR.train INFO: Epoch[27] Iteration[80/106] Loss: 13.156, Acc: 0.926, Base Lr: 6.76e-04
+2024-04-05 02:41:32,590 EDITOR.train INFO: Epoch[27] Iteration[90/106] Loss: 13.166, Acc: 0.924, Base Lr: 6.76e-04
+2024-04-05 02:41:42,537 EDITOR.train INFO: Epoch[27] Iteration[100/106] Loss: 13.131, Acc: 0.923, Base Lr: 6.76e-04
+2024-04-05 02:41:47,764 EDITOR.train INFO: Epoch 27 done. Time per batch: 1.090[s] Speed: 117.4[samples/s]
+2024-04-05 02:43:08,123 EDITOR.train INFO: Validation Results - Epoch: 27
+2024-04-05 02:43:08,123 EDITOR.train INFO: mAP: 73.69%
+2024-04-05 02:43:08,123 EDITOR.train INFO: CMC curve, Rank-1  :89.34%
+2024-04-05 02:43:08,123 EDITOR.train INFO: CMC curve, Rank-5  :96.50%
+2024-04-05 02:43:08,123 EDITOR.train INFO: CMC curve, Rank-10 :97.95%
+2024-04-05 02:43:09,034 EDITOR.train INFO: Best Multi-Modal mAP: 73.69%
+2024-04-05 02:43:09,035 EDITOR.train INFO: Best Multi-Modal Rank-1: 89.34%
+2024-04-05 02:43:09,035 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.50%
+2024-04-05 02:43:09,035 EDITOR.train INFO: Best Multi-Modal Rank-10: 97.95%
+2024-04-05 02:43:25,287 EDITOR.train INFO: Epoch[28] Iteration[10/106] Loss: 12.904, Acc: 0.951, Base Lr: 6.55e-04
+2024-04-05 02:43:36,177 EDITOR.train INFO: Epoch[28] Iteration[20/106] Loss: 12.713, Acc: 0.944, Base Lr: 6.55e-04
+2024-04-05 02:43:47,113 EDITOR.train INFO: Epoch[28] Iteration[30/106] Loss: 12.501, Acc: 0.946, Base Lr: 6.55e-04
+2024-04-05 02:43:57,320 EDITOR.train INFO: Epoch[28] Iteration[40/106] Loss: 12.751, Acc: 0.938, Base Lr: 6.55e-04
+2024-04-05 02:44:07,774 EDITOR.train INFO: Epoch[28] Iteration[50/106] Loss: 12.782, Acc: 0.936, Base Lr: 6.55e-04
+2024-04-05 02:44:17,924 EDITOR.train INFO: Epoch[28] Iteration[60/106] Loss: 12.721, Acc: 0.939, Base Lr: 6.55e-04
+2024-04-05 02:44:28,192 EDITOR.train INFO: Epoch[28] Iteration[70/106] Loss: 12.840, Acc: 0.933, Base Lr: 6.55e-04
+2024-04-05 02:44:38,473 EDITOR.train INFO: Epoch[28] Iteration[80/106] Loss: 12.829, Acc: 0.934, Base Lr: 6.55e-04
+2024-04-05 02:44:49,141 EDITOR.train INFO: Epoch[28] Iteration[90/106] Loss: 12.788, Acc: 0.933, Base Lr: 6.55e-04
+2024-04-05 02:44:58,939 EDITOR.train INFO: Epoch[28] Iteration[100/106] Loss: 12.815, Acc: 0.933, Base Lr: 6.55e-04
+2024-04-05 02:45:04,159 EDITOR.train INFO: Epoch 28 done. Time per batch: 1.095[s] Speed: 116.9[samples/s]
+2024-04-05 02:46:21,764 EDITOR.train INFO: Validation Results - Epoch: 28
+2024-04-05 02:46:21,764 EDITOR.train INFO: mAP: 73.78%
+2024-04-05 02:46:21,764 EDITOR.train INFO: CMC curve, Rank-1  :89.67%
+2024-04-05 02:46:21,764 EDITOR.train INFO: CMC curve, Rank-5  :96.50%
+2024-04-05 02:46:21,764 EDITOR.train INFO: CMC curve, Rank-10 :97.98%
+2024-04-05 02:46:22,654 EDITOR.train INFO: Best Multi-Modal mAP: 73.78%
+2024-04-05 02:46:22,654 EDITOR.train INFO: Best Multi-Modal Rank-1: 89.67%
+2024-04-05 02:46:22,654 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.50%
+2024-04-05 02:46:22,654 EDITOR.train INFO: Best Multi-Modal Rank-10: 97.98%
+2024-04-05 02:46:38,789 EDITOR.train INFO: Epoch[29] Iteration[10/106] Loss: 12.999, Acc: 0.931, Base Lr: 6.33e-04
+2024-04-05 02:46:49,739 EDITOR.train INFO: Epoch[29] Iteration[20/106] Loss: 12.915, Acc: 0.942, Base Lr: 6.33e-04
+2024-04-05 02:46:59,497 EDITOR.train INFO: Epoch[29] Iteration[30/106] Loss: 12.811, Acc: 0.941, Base Lr: 6.33e-04
+2024-04-05 02:47:10,278 EDITOR.train INFO: Epoch[29] Iteration[40/106] Loss: 12.740, Acc: 0.942, Base Lr: 6.33e-04
+2024-04-05 02:47:21,206 EDITOR.train INFO: Epoch[29] Iteration[50/106] Loss: 12.619, Acc: 0.941, Base Lr: 6.33e-04
+2024-04-05 02:47:31,760 EDITOR.train INFO: Epoch[29] Iteration[60/106] Loss: 12.715, Acc: 0.941, Base Lr: 6.33e-04
+2024-04-05 02:47:41,335 EDITOR.train INFO: Epoch[29] Iteration[70/106] Loss: 12.665, Acc: 0.941, Base Lr: 6.33e-04
+2024-04-05 02:47:51,333 EDITOR.train INFO: Epoch[29] Iteration[80/106] Loss: 12.665, Acc: 0.940, Base Lr: 6.33e-04
+2024-04-05 02:48:01,914 EDITOR.train INFO: Epoch[29] Iteration[90/106] Loss: 12.651, Acc: 0.940, Base Lr: 6.33e-04
+2024-04-05 02:48:11,243 EDITOR.train INFO: Epoch[29] Iteration[100/106] Loss: 12.638, Acc: 0.939, Base Lr: 6.33e-04
+2024-04-05 02:48:17,197 EDITOR.train INFO: Epoch 29 done. Time per batch: 1.088[s] Speed: 117.6[samples/s]
+2024-04-05 02:49:41,246 EDITOR.train INFO: Validation Results - Epoch: 29
+2024-04-05 02:49:41,246 EDITOR.train INFO: mAP: 74.42%
+2024-04-05 02:49:41,247 EDITOR.train INFO: CMC curve, Rank-1  :90.05%
+2024-04-05 02:49:41,247 EDITOR.train INFO: CMC curve, Rank-5  :96.56%
+2024-04-05 02:49:41,247 EDITOR.train INFO: CMC curve, Rank-10 :97.95%
+2024-04-05 02:49:42,249 EDITOR.train INFO: Best Multi-Modal mAP: 74.42%
+2024-04-05 02:49:42,249 EDITOR.train INFO: Best Multi-Modal Rank-1: 90.05%
+2024-04-05 02:49:42,249 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.56%
+2024-04-05 02:49:42,249 EDITOR.train INFO: Best Multi-Modal Rank-10: 97.95%
+2024-04-05 02:49:59,300 EDITOR.train INFO: Epoch[30] Iteration[10/106] Loss: 12.308, Acc: 0.946, Base Lr: 6.12e-04
+2024-04-05 02:50:09,800 EDITOR.train INFO: Epoch[30] Iteration[20/106] Loss: 12.309, Acc: 0.950, Base Lr: 6.12e-04
+2024-04-05 02:50:19,796 EDITOR.train INFO: Epoch[30] Iteration[30/106] Loss: 12.328, Acc: 0.953, Base Lr: 6.12e-04
+2024-04-05 02:50:29,957 EDITOR.train INFO: Epoch[30] Iteration[40/106] Loss: 12.434, Acc: 0.947, Base Lr: 6.12e-04
+2024-04-05 02:50:40,187 EDITOR.train INFO: Epoch[30] Iteration[50/106] Loss: 12.420, Acc: 0.945, Base Lr: 6.12e-04
+2024-04-05 02:50:51,084 EDITOR.train INFO: Epoch[30] Iteration[60/106] Loss: 12.441, Acc: 0.944, Base Lr: 6.12e-04
+2024-04-05 02:51:01,321 EDITOR.train INFO: Epoch[30] Iteration[70/106] Loss: 12.392, Acc: 0.943, Base Lr: 6.12e-04
+2024-04-05 02:51:11,837 EDITOR.train INFO: Epoch[30] Iteration[80/106] Loss: 12.414, Acc: 0.941, Base Lr: 6.12e-04
+2024-04-05 02:51:21,602 EDITOR.train INFO: Epoch[30] Iteration[90/106] Loss: 12.462, Acc: 0.940, Base Lr: 6.12e-04
+2024-04-05 02:51:30,987 EDITOR.train INFO: Epoch[30] Iteration[100/106] Loss: 12.475, Acc: 0.939, Base Lr: 6.12e-04
+2024-04-05 02:51:36,007 EDITOR.train INFO: Epoch 30 done. Time per batch: 1.079[s] Speed: 118.6[samples/s]
+2024-04-05 02:52:54,996 EDITOR.train INFO: Validation Results - Epoch: 30
+2024-04-05 02:52:54,996 EDITOR.train INFO: mAP: 74.53%
+2024-04-05 02:52:54,996 EDITOR.train INFO: CMC curve, Rank-1  :89.70%
+2024-04-05 02:52:54,996 EDITOR.train INFO: CMC curve, Rank-5  :96.79%
+2024-04-05 02:52:54,996 EDITOR.train INFO: CMC curve, Rank-10 :97.95%
+2024-04-05 02:52:55,907 EDITOR.train INFO: Best Multi-Modal mAP: 74.53%
+2024-04-05 02:52:55,907 EDITOR.train INFO: Best Multi-Modal Rank-1: 89.70%
+2024-04-05 02:52:55,908 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.79%
+2024-04-05 02:52:55,908 EDITOR.train INFO: Best Multi-Modal Rank-10: 97.95%
+2024-04-05 02:53:13,310 EDITOR.train INFO: Epoch[31] Iteration[10/106] Loss: 12.181, Acc: 0.947, Base Lr: 5.90e-04
+2024-04-05 02:53:23,393 EDITOR.train INFO: Epoch[31] Iteration[20/106] Loss: 12.093, Acc: 0.951, Base Lr: 5.90e-04
+2024-04-05 02:53:33,804 EDITOR.train INFO: Epoch[31] Iteration[30/106] Loss: 12.219, Acc: 0.951, Base Lr: 5.90e-04
+2024-04-05 02:53:43,879 EDITOR.train INFO: Epoch[31] Iteration[40/106] Loss: 12.333, Acc: 0.945, Base Lr: 5.90e-04
+2024-04-05 02:53:54,514 EDITOR.train INFO: Epoch[31] Iteration[50/106] Loss: 12.245, Acc: 0.947, Base Lr: 5.90e-04
+2024-04-05 02:54:04,722 EDITOR.train INFO: Epoch[31] Iteration[60/106] Loss: 12.303, Acc: 0.947, Base Lr: 5.90e-04
+2024-04-05 02:54:14,990 EDITOR.train INFO: Epoch[31] Iteration[70/106] Loss: 12.263, Acc: 0.945, Base Lr: 5.90e-04
+2024-04-05 02:54:25,817 EDITOR.train INFO: Epoch[31] Iteration[80/106] Loss: 12.258, Acc: 0.945, Base Lr: 5.90e-04
+2024-04-05 02:54:35,837 EDITOR.train INFO: Epoch[31] Iteration[90/106] Loss: 12.233, Acc: 0.945, Base Lr: 5.90e-04
+2024-04-05 02:54:45,563 EDITOR.train INFO: Epoch[31] Iteration[100/106] Loss: 12.255, Acc: 0.943, Base Lr: 5.90e-04
+2024-04-05 02:54:51,072 EDITOR.train INFO: Epoch 31 done. Time per batch: 1.096[s] Speed: 116.8[samples/s]
+2024-04-05 02:56:07,780 EDITOR.train INFO: Validation Results - Epoch: 31
+2024-04-05 02:56:07,781 EDITOR.train INFO: mAP: 74.46%
+2024-04-05 02:56:07,781 EDITOR.train INFO: CMC curve, Rank-1  :90.44%
+2024-04-05 02:56:07,781 EDITOR.train INFO: CMC curve, Rank-5  :96.50%
+2024-04-05 02:56:07,781 EDITOR.train INFO: CMC curve, Rank-10 :98.25%
+2024-04-05 02:56:07,782 EDITOR.train INFO: Best Multi-Modal mAP: 74.53%
+2024-04-05 02:56:07,782 EDITOR.train INFO: Best Multi-Modal Rank-1: 89.70%
+2024-04-05 02:56:07,782 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.79%
+2024-04-05 02:56:07,782 EDITOR.train INFO: Best Multi-Modal Rank-10: 97.95%
+2024-04-05 02:56:24,398 EDITOR.train INFO: Epoch[32] Iteration[10/106] Loss: 11.898, Acc: 0.959, Base Lr: 5.68e-04
+2024-04-05 02:56:35,088 EDITOR.train INFO: Epoch[32] Iteration[20/106] Loss: 11.837, Acc: 0.954, Base Lr: 5.68e-04
+2024-04-05 02:56:47,139 EDITOR.train INFO: Epoch[32] Iteration[30/106] Loss: 11.965, Acc: 0.953, Base Lr: 5.68e-04
+2024-04-05 02:56:57,969 EDITOR.train INFO: Epoch[32] Iteration[40/106] Loss: 12.056, Acc: 0.949, Base Lr: 5.68e-04
+2024-04-05 02:57:08,741 EDITOR.train INFO: Epoch[32] Iteration[50/106] Loss: 12.018, Acc: 0.951, Base Lr: 5.68e-04
+2024-04-05 02:57:19,058 EDITOR.train INFO: Epoch[32] Iteration[60/106] Loss: 12.013, Acc: 0.951, Base Lr: 5.68e-04
+2024-04-05 02:57:28,746 EDITOR.train INFO: Epoch[32] Iteration[70/106] Loss: 11.938, Acc: 0.953, Base Lr: 5.68e-04
+2024-04-05 02:57:38,530 EDITOR.train INFO: Epoch[32] Iteration[80/106] Loss: 12.035, Acc: 0.952, Base Lr: 5.68e-04
+2024-04-05 02:57:47,881 EDITOR.train INFO: Epoch[32] Iteration[90/106] Loss: 12.068, Acc: 0.951, Base Lr: 5.68e-04
+2024-04-05 02:57:58,795 EDITOR.train INFO: Epoch[32] Iteration[100/106] Loss: 12.042, Acc: 0.950, Base Lr: 5.68e-04
+2024-04-05 02:58:04,159 EDITOR.train INFO: Epoch 32 done. Time per batch: 1.107[s] Speed: 115.6[samples/s]
+2024-04-05 02:59:25,776 EDITOR.train INFO: Validation Results - Epoch: 32
+2024-04-05 02:59:25,777 EDITOR.train INFO: mAP: 74.93%
+2024-04-05 02:59:25,777 EDITOR.train INFO: CMC curve, Rank-1  :90.35%
+2024-04-05 02:59:25,777 EDITOR.train INFO: CMC curve, Rank-5  :96.76%
+2024-04-05 02:59:25,777 EDITOR.train INFO: CMC curve, Rank-10 :98.07%
+2024-04-05 02:59:26,642 EDITOR.train INFO: Best Multi-Modal mAP: 74.93%
+2024-04-05 02:59:26,643 EDITOR.train INFO: Best Multi-Modal Rank-1: 90.35%
+2024-04-05 02:59:26,643 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.76%
+2024-04-05 02:59:26,643 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.07%
+2024-04-05 02:59:43,352 EDITOR.train INFO: Epoch[33] Iteration[10/106] Loss: 12.201, Acc: 0.955, Base Lr: 5.45e-04
+2024-04-05 02:59:53,647 EDITOR.train INFO: Epoch[33] Iteration[20/106] Loss: 12.086, Acc: 0.950, Base Lr: 5.45e-04
+2024-04-05 03:00:03,388 EDITOR.train INFO: Epoch[33] Iteration[30/106] Loss: 11.961, Acc: 0.956, Base Lr: 5.45e-04
+2024-04-05 03:00:14,426 EDITOR.train INFO: Epoch[33] Iteration[40/106] Loss: 11.987, Acc: 0.955, Base Lr: 5.45e-04
+2024-04-05 03:00:24,850 EDITOR.train INFO: Epoch[33] Iteration[50/106] Loss: 12.091, Acc: 0.953, Base Lr: 5.45e-04
+2024-04-05 03:00:36,000 EDITOR.train INFO: Epoch[33] Iteration[60/106] Loss: 11.941, Acc: 0.955, Base Lr: 5.45e-04
+2024-04-05 03:00:46,622 EDITOR.train INFO: Epoch[33] Iteration[70/106] Loss: 11.933, Acc: 0.951, Base Lr: 5.45e-04
+2024-04-05 03:00:56,705 EDITOR.train INFO: Epoch[33] Iteration[80/106] Loss: 11.982, Acc: 0.947, Base Lr: 5.45e-04
+2024-04-05 03:01:06,212 EDITOR.train INFO: Epoch[33] Iteration[90/106] Loss: 11.991, Acc: 0.947, Base Lr: 5.45e-04
+2024-04-05 03:01:16,289 EDITOR.train INFO: Epoch[33] Iteration[100/106] Loss: 11.934, Acc: 0.947, Base Lr: 5.45e-04
+2024-04-05 03:01:21,548 EDITOR.train INFO: Epoch 33 done. Time per batch: 1.093[s] Speed: 117.1[samples/s]
+2024-04-05 03:02:42,613 EDITOR.train INFO: Validation Results - Epoch: 33
+2024-04-05 03:02:42,614 EDITOR.train INFO: mAP: 74.61%
+2024-04-05 03:02:42,614 EDITOR.train INFO: CMC curve, Rank-1  :89.49%
+2024-04-05 03:02:42,614 EDITOR.train INFO: CMC curve, Rank-5  :96.44%
+2024-04-05 03:02:42,614 EDITOR.train INFO: CMC curve, Rank-10 :98.13%
+2024-04-05 03:02:42,614 EDITOR.train INFO: Best Multi-Modal mAP: 74.93%
+2024-04-05 03:02:42,615 EDITOR.train INFO: Best Multi-Modal Rank-1: 90.35%
+2024-04-05 03:02:42,615 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.76%
+2024-04-05 03:02:42,615 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.07%
+2024-04-05 03:03:00,842 EDITOR.train INFO: Epoch[34] Iteration[10/106] Loss: 12.159, Acc: 0.965, Base Lr: 5.23e-04
+2024-04-05 03:03:11,277 EDITOR.train INFO: Epoch[34] Iteration[20/106] Loss: 11.933, Acc: 0.966, Base Lr: 5.23e-04
+2024-04-05 03:03:21,752 EDITOR.train INFO: Epoch[34] Iteration[30/106] Loss: 11.726, Acc: 0.972, Base Lr: 5.23e-04
+2024-04-05 03:03:32,571 EDITOR.train INFO: Epoch[34] Iteration[40/106] Loss: 11.737, Acc: 0.968, Base Lr: 5.23e-04
+2024-04-05 03:03:43,306 EDITOR.train INFO: Epoch[34] Iteration[50/106] Loss: 11.899, Acc: 0.961, Base Lr: 5.23e-04
+2024-04-05 03:03:53,587 EDITOR.train INFO: Epoch[34] Iteration[60/106] Loss: 11.863, Acc: 0.960, Base Lr: 5.23e-04
+2024-04-05 03:04:04,293 EDITOR.train INFO: Epoch[34] Iteration[70/106] Loss: 11.834, Acc: 0.960, Base Lr: 5.23e-04
+2024-04-05 03:04:14,573 EDITOR.train INFO: Epoch[34] Iteration[80/106] Loss: 11.817, Acc: 0.960, Base Lr: 5.23e-04
+2024-04-05 03:04:24,742 EDITOR.train INFO: Epoch[34] Iteration[90/106] Loss: 11.850, Acc: 0.958, Base Lr: 5.23e-04
+2024-04-05 03:04:34,642 EDITOR.train INFO: Epoch[34] Iteration[100/106] Loss: 11.888, Acc: 0.956, Base Lr: 5.23e-04
+2024-04-05 03:04:39,742 EDITOR.train INFO: Epoch 34 done. Time per batch: 1.113[s] Speed: 115.0[samples/s]
+2024-04-05 03:05:54,752 EDITOR.train INFO: Validation Results - Epoch: 34
+2024-04-05 03:05:54,752 EDITOR.train INFO: mAP: 74.85%
+2024-04-05 03:05:54,752 EDITOR.train INFO: CMC curve, Rank-1  :90.32%
+2024-04-05 03:05:54,752 EDITOR.train INFO: CMC curve, Rank-5  :96.59%
+2024-04-05 03:05:54,753 EDITOR.train INFO: CMC curve, Rank-10 :98.13%
+2024-04-05 03:05:54,753 EDITOR.train INFO: Best Multi-Modal mAP: 74.93%
+2024-04-05 03:05:54,754 EDITOR.train INFO: Best Multi-Modal Rank-1: 90.35%
+2024-04-05 03:05:54,754 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.76%
+2024-04-05 03:05:54,754 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.07%
+2024-04-05 03:06:12,288 EDITOR.train INFO: Epoch[35] Iteration[10/106] Loss: 11.906, Acc: 0.976, Base Lr: 5.01e-04
+2024-04-05 03:06:22,530 EDITOR.train INFO: Epoch[35] Iteration[20/106] Loss: 11.890, Acc: 0.964, Base Lr: 5.01e-04
+2024-04-05 03:06:32,408 EDITOR.train INFO: Epoch[35] Iteration[30/106] Loss: 11.842, Acc: 0.960, Base Lr: 5.01e-04
+2024-04-05 03:06:42,007 EDITOR.train INFO: Epoch[35] Iteration[40/106] Loss: 11.843, Acc: 0.959, Base Lr: 5.01e-04
+2024-04-05 03:06:52,936 EDITOR.train INFO: Epoch[35] Iteration[50/106] Loss: 11.819, Acc: 0.960, Base Lr: 5.01e-04
+2024-04-05 03:07:02,695 EDITOR.train INFO: Epoch[35] Iteration[60/106] Loss: 11.806, Acc: 0.958, Base Lr: 5.01e-04
+2024-04-05 03:07:13,185 EDITOR.train INFO: Epoch[35] Iteration[70/106] Loss: 11.819, Acc: 0.958, Base Lr: 5.01e-04
+2024-04-05 03:07:23,696 EDITOR.train INFO: Epoch[35] Iteration[80/106] Loss: 11.831, Acc: 0.956, Base Lr: 5.01e-04
+2024-04-05 03:07:33,938 EDITOR.train INFO: Epoch[35] Iteration[90/106] Loss: 11.779, Acc: 0.958, Base Lr: 5.01e-04
+2024-04-05 03:07:43,415 EDITOR.train INFO: Epoch[35] Iteration[100/106] Loss: 11.764, Acc: 0.957, Base Lr: 5.01e-04
+2024-04-05 03:07:48,871 EDITOR.train INFO: Epoch 35 done. Time per batch: 1.086[s] Speed: 117.9[samples/s]
+2024-04-05 03:09:12,582 EDITOR.train INFO: Validation Results - Epoch: 35
+2024-04-05 03:09:12,583 EDITOR.train INFO: mAP: 75.37%
+2024-04-05 03:09:12,583 EDITOR.train INFO: CMC curve, Rank-1  :90.14%
+2024-04-05 03:09:12,583 EDITOR.train INFO: CMC curve, Rank-5  :96.91%
+2024-04-05 03:09:12,583 EDITOR.train INFO: CMC curve, Rank-10 :98.16%
+2024-04-05 03:09:13,631 EDITOR.train INFO: Best Multi-Modal mAP: 75.37%
+2024-04-05 03:09:13,632 EDITOR.train INFO: Best Multi-Modal Rank-1: 90.14%
+2024-04-05 03:09:13,632 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.91%
+2024-04-05 03:09:13,632 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.16%
+2024-04-05 03:09:31,125 EDITOR.train INFO: Epoch[36] Iteration[10/106] Loss: 11.341, Acc: 0.970, Base Lr: 4.78e-04
+2024-04-05 03:09:41,123 EDITOR.train INFO: Epoch[36] Iteration[20/106] Loss: 11.285, Acc: 0.967, Base Lr: 4.78e-04
+2024-04-05 03:09:51,204 EDITOR.train INFO: Epoch[36] Iteration[30/106] Loss: 11.375, Acc: 0.963, Base Lr: 4.78e-04
+2024-04-05 03:10:01,826 EDITOR.train INFO: Epoch[36] Iteration[40/106] Loss: 11.399, Acc: 0.961, Base Lr: 4.78e-04
+2024-04-05 03:10:11,706 EDITOR.train INFO: Epoch[36] Iteration[50/106] Loss: 11.425, Acc: 0.960, Base Lr: 4.78e-04
+2024-04-05 03:10:22,707 EDITOR.train INFO: Epoch[36] Iteration[60/106] Loss: 11.457, Acc: 0.960, Base Lr: 4.78e-04
+2024-04-05 03:10:33,681 EDITOR.train INFO: Epoch[36] Iteration[70/106] Loss: 11.472, Acc: 0.959, Base Lr: 4.78e-04
+2024-04-05 03:10:44,238 EDITOR.train INFO: Epoch[36] Iteration[80/106] Loss: 11.456, Acc: 0.958, Base Lr: 4.78e-04
+2024-04-05 03:10:54,640 EDITOR.train INFO: Epoch[36] Iteration[90/106] Loss: 11.513, Acc: 0.958, Base Lr: 4.78e-04
+2024-04-05 03:11:04,328 EDITOR.train INFO: Epoch[36] Iteration[100/106] Loss: 11.509, Acc: 0.957, Base Lr: 4.78e-04
+2024-04-05 03:11:09,426 EDITOR.train INFO: Epoch 36 done. Time per batch: 1.099[s] Speed: 116.4[samples/s]
+2024-04-05 03:12:29,100 EDITOR.train INFO: Validation Results - Epoch: 36
+2024-04-05 03:12:29,100 EDITOR.train INFO: mAP: 75.83%
+2024-04-05 03:12:29,100 EDITOR.train INFO: CMC curve, Rank-1  :90.50%
+2024-04-05 03:12:29,100 EDITOR.train INFO: CMC curve, Rank-5  :96.70%
+2024-04-05 03:12:29,100 EDITOR.train INFO: CMC curve, Rank-10 :98.13%
+2024-04-05 03:12:29,958 EDITOR.train INFO: Best Multi-Modal mAP: 75.83%
+2024-04-05 03:12:29,958 EDITOR.train INFO: Best Multi-Modal Rank-1: 90.50%
+2024-04-05 03:12:29,958 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.70%
+2024-04-05 03:12:29,958 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.13%
+2024-04-05 03:12:46,084 EDITOR.train INFO: Epoch[37] Iteration[10/106] Loss: 11.464, Acc: 0.961, Base Lr: 4.56e-04
+2024-04-05 03:12:56,958 EDITOR.train INFO: Epoch[37] Iteration[20/106] Loss: 11.532, Acc: 0.955, Base Lr: 4.56e-04
+2024-04-05 03:13:07,209 EDITOR.train INFO: Epoch[37] Iteration[30/106] Loss: 11.500, Acc: 0.958, Base Lr: 4.56e-04
+2024-04-05 03:13:18,552 EDITOR.train INFO: Epoch[37] Iteration[40/106] Loss: 11.468, Acc: 0.959, Base Lr: 4.56e-04
+2024-04-05 03:13:28,776 EDITOR.train INFO: Epoch[37] Iteration[50/106] Loss: 11.480, Acc: 0.959, Base Lr: 4.56e-04
+2024-04-05 03:13:39,409 EDITOR.train INFO: Epoch[37] Iteration[60/106] Loss: 11.478, Acc: 0.959, Base Lr: 4.56e-04
+2024-04-05 03:13:50,328 EDITOR.train INFO: Epoch[37] Iteration[70/106] Loss: 11.380, Acc: 0.962, Base Lr: 4.56e-04
+2024-04-05 03:14:00,404 EDITOR.train INFO: Epoch[37] Iteration[80/106] Loss: 11.414, Acc: 0.960, Base Lr: 4.56e-04
+2024-04-05 03:14:10,621 EDITOR.train INFO: Epoch[37] Iteration[90/106] Loss: 11.447, Acc: 0.959, Base Lr: 4.56e-04
+2024-04-05 03:14:20,745 EDITOR.train INFO: Epoch[37] Iteration[100/106] Loss: 11.442, Acc: 0.958, Base Lr: 4.56e-04
+2024-04-05 03:14:26,101 EDITOR.train INFO: Epoch 37 done. Time per batch: 1.095[s] Speed: 116.9[samples/s]
+2024-04-05 03:15:47,284 EDITOR.train INFO: Validation Results - Epoch: 37
+2024-04-05 03:15:47,285 EDITOR.train INFO: mAP: 75.85%
+2024-04-05 03:15:47,285 EDITOR.train INFO: CMC curve, Rank-1  :90.59%
+2024-04-05 03:15:47,285 EDITOR.train INFO: CMC curve, Rank-5  :96.91%
+2024-04-05 03:15:47,285 EDITOR.train INFO: CMC curve, Rank-10 :98.28%
+2024-04-05 03:15:48,197 EDITOR.train INFO: Best Multi-Modal mAP: 75.85%
+2024-04-05 03:15:48,198 EDITOR.train INFO: Best Multi-Modal Rank-1: 90.59%
+2024-04-05 03:15:48,198 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.91%
+2024-04-05 03:15:48,198 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.28%
+2024-04-05 03:16:04,485 EDITOR.train INFO: Epoch[38] Iteration[10/106] Loss: 11.441, Acc: 0.966, Base Lr: 4.33e-04
+2024-04-05 03:16:14,978 EDITOR.train INFO: Epoch[38] Iteration[20/106] Loss: 11.214, Acc: 0.970, Base Lr: 4.33e-04
+2024-04-05 03:16:25,756 EDITOR.train INFO: Epoch[38] Iteration[30/106] Loss: 11.268, Acc: 0.966, Base Lr: 4.33e-04
+2024-04-05 03:16:35,908 EDITOR.train INFO: Epoch[38] Iteration[40/106] Loss: 11.297, Acc: 0.968, Base Lr: 4.33e-04
+2024-04-05 03:16:46,414 EDITOR.train INFO: Epoch[38] Iteration[50/106] Loss: 11.343, Acc: 0.965, Base Lr: 4.33e-04
+2024-04-05 03:16:57,204 EDITOR.train INFO: Epoch[38] Iteration[60/106] Loss: 11.270, Acc: 0.967, Base Lr: 4.33e-04
+2024-04-05 03:17:07,677 EDITOR.train INFO: Epoch[38] Iteration[70/106] Loss: 11.279, Acc: 0.967, Base Lr: 4.33e-04
+2024-04-05 03:17:17,641 EDITOR.train INFO: Epoch[38] Iteration[80/106] Loss: 11.290, Acc: 0.966, Base Lr: 4.33e-04
+2024-04-05 03:17:27,405 EDITOR.train INFO: Epoch[38] Iteration[90/106] Loss: 11.301, Acc: 0.964, Base Lr: 4.33e-04
+2024-04-05 03:17:37,086 EDITOR.train INFO: Epoch[38] Iteration[100/106] Loss: 11.307, Acc: 0.963, Base Lr: 4.33e-04
+2024-04-05 03:17:41,917 EDITOR.train INFO: Epoch 38 done. Time per batch: 1.081[s] Speed: 118.4[samples/s]
+2024-04-05 03:19:02,552 EDITOR.train INFO: Validation Results - Epoch: 38
+2024-04-05 03:19:02,553 EDITOR.train INFO: mAP: 76.57%
+2024-04-05 03:19:02,553 EDITOR.train INFO: CMC curve, Rank-1  :90.88%
+2024-04-05 03:19:02,553 EDITOR.train INFO: CMC curve, Rank-5  :96.94%
+2024-04-05 03:19:02,553 EDITOR.train INFO: CMC curve, Rank-10 :98.31%
+2024-04-05 03:19:03,581 EDITOR.train INFO: Best Multi-Modal mAP: 76.57%
+2024-04-05 03:19:03,582 EDITOR.train INFO: Best Multi-Modal Rank-1: 90.88%
+2024-04-05 03:19:03,582 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.94%
+2024-04-05 03:19:03,582 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.31%
+2024-04-05 03:19:19,919 EDITOR.train INFO: Epoch[39] Iteration[10/106] Loss: 11.883, Acc: 0.957, Base Lr: 4.11e-04
+2024-04-05 03:19:31,560 EDITOR.train INFO: Epoch[39] Iteration[20/106] Loss: 11.299, Acc: 0.964, Base Lr: 4.11e-04
+2024-04-05 03:19:42,518 EDITOR.train INFO: Epoch[39] Iteration[30/106] Loss: 11.256, Acc: 0.968, Base Lr: 4.11e-04
+2024-04-05 03:19:53,014 EDITOR.train INFO: Epoch[39] Iteration[40/106] Loss: 11.235, Acc: 0.967, Base Lr: 4.11e-04
+2024-04-05 03:20:03,590 EDITOR.train INFO: Epoch[39] Iteration[50/106] Loss: 11.220, Acc: 0.965, Base Lr: 4.11e-04
+2024-04-05 03:20:14,300 EDITOR.train INFO: Epoch[39] Iteration[60/106] Loss: 11.222, Acc: 0.962, Base Lr: 4.11e-04
+2024-04-05 03:20:25,803 EDITOR.train INFO: Epoch[39] Iteration[70/106] Loss: 11.209, Acc: 0.963, Base Lr: 4.11e-04
+2024-04-05 03:20:36,172 EDITOR.train INFO: Epoch[39] Iteration[80/106] Loss: 11.242, Acc: 0.963, Base Lr: 4.11e-04
+2024-04-05 03:20:46,608 EDITOR.train INFO: Epoch[39] Iteration[90/106] Loss: 11.239, Acc: 0.963, Base Lr: 4.11e-04
+2024-04-05 03:20:57,041 EDITOR.train INFO: Epoch[39] Iteration[100/106] Loss: 11.305, Acc: 0.963, Base Lr: 4.11e-04
+2024-04-05 03:21:02,475 EDITOR.train INFO: Epoch 39 done. Time per batch: 1.131[s] Speed: 113.2[samples/s]
+2024-04-05 03:22:19,468 EDITOR.train INFO: Validation Results - Epoch: 39
+2024-04-05 03:22:19,469 EDITOR.train INFO: mAP: 76.10%
+2024-04-05 03:22:19,469 EDITOR.train INFO: CMC curve, Rank-1  :90.88%
+2024-04-05 03:22:19,469 EDITOR.train INFO: CMC curve, Rank-5  :96.82%
+2024-04-05 03:22:19,469 EDITOR.train INFO: CMC curve, Rank-10 :98.19%
+2024-04-05 03:22:19,469 EDITOR.train INFO: Best Multi-Modal mAP: 76.57%
+2024-04-05 03:22:19,470 EDITOR.train INFO: Best Multi-Modal Rank-1: 90.88%
+2024-04-05 03:22:19,470 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.94%
+2024-04-05 03:22:19,470 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.31%
+2024-04-05 03:22:36,773 EDITOR.train INFO: Epoch[40] Iteration[10/106] Loss: 11.250, Acc: 0.979, Base Lr: 3.89e-04
+2024-04-05 03:22:46,991 EDITOR.train INFO: Epoch[40] Iteration[20/106] Loss: 11.230, Acc: 0.971, Base Lr: 3.89e-04
+2024-04-05 03:22:57,108 EDITOR.train INFO: Epoch[40] Iteration[30/106] Loss: 11.266, Acc: 0.968, Base Lr: 3.89e-04
+2024-04-05 03:23:07,510 EDITOR.train INFO: Epoch[40] Iteration[40/106] Loss: 11.138, Acc: 0.969, Base Lr: 3.89e-04
+2024-04-05 03:23:18,687 EDITOR.train INFO: Epoch[40] Iteration[50/106] Loss: 11.195, Acc: 0.967, Base Lr: 3.89e-04
+2024-04-05 03:23:29,177 EDITOR.train INFO: Epoch[40] Iteration[60/106] Loss: 11.111, Acc: 0.968, Base Lr: 3.89e-04
+2024-04-05 03:23:39,101 EDITOR.train INFO: Epoch[40] Iteration[70/106] Loss: 11.143, Acc: 0.967, Base Lr: 3.89e-04
+2024-04-05 03:23:49,296 EDITOR.train INFO: Epoch[40] Iteration[80/106] Loss: 11.105, Acc: 0.966, Base Lr: 3.89e-04
+2024-04-05 03:23:59,187 EDITOR.train INFO: Epoch[40] Iteration[90/106] Loss: 11.110, Acc: 0.964, Base Lr: 3.89e-04
+2024-04-05 03:24:08,963 EDITOR.train INFO: Epoch[40] Iteration[100/106] Loss: 11.109, Acc: 0.965, Base Lr: 3.89e-04
+2024-04-05 03:24:14,245 EDITOR.train INFO: Epoch 40 done. Time per batch: 1.092[s] Speed: 117.2[samples/s]
+2024-04-05 03:25:33,278 EDITOR.train INFO: Validation Results - Epoch: 40
+2024-04-05 03:25:33,279 EDITOR.train INFO: mAP: 76.35%
+2024-04-05 03:25:33,279 EDITOR.train INFO: CMC curve, Rank-1  :90.50%
+2024-04-05 03:25:33,279 EDITOR.train INFO: CMC curve, Rank-5  :96.82%
+2024-04-05 03:25:33,279 EDITOR.train INFO: CMC curve, Rank-10 :98.22%
+2024-04-05 03:25:33,279 EDITOR.train INFO: Best Multi-Modal mAP: 76.57%
+2024-04-05 03:25:33,280 EDITOR.train INFO: Best Multi-Modal Rank-1: 90.88%
+2024-04-05 03:25:33,280 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.94%
+2024-04-05 03:25:33,280 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.31%
+2024-04-05 03:25:50,040 EDITOR.train INFO: Epoch[41] Iteration[10/106] Loss: 11.113, Acc: 0.973, Base Lr: 3.68e-04
+2024-04-05 03:26:00,161 EDITOR.train INFO: Epoch[41] Iteration[20/106] Loss: 11.244, Acc: 0.972, Base Lr: 3.68e-04
+2024-04-05 03:26:10,862 EDITOR.train INFO: Epoch[41] Iteration[30/106] Loss: 11.159, Acc: 0.975, Base Lr: 3.68e-04
+2024-04-05 03:26:21,630 EDITOR.train INFO: Epoch[41] Iteration[40/106] Loss: 11.182, Acc: 0.974, Base Lr: 3.68e-04
+2024-04-05 03:26:32,819 EDITOR.train INFO: Epoch[41] Iteration[50/106] Loss: 11.160, Acc: 0.973, Base Lr: 3.68e-04
+2024-04-05 03:26:43,590 EDITOR.train INFO: Epoch[41] Iteration[60/106] Loss: 11.122, Acc: 0.971, Base Lr: 3.68e-04
+2024-04-05 03:26:53,693 EDITOR.train INFO: Epoch[41] Iteration[70/106] Loss: 11.167, Acc: 0.970, Base Lr: 3.68e-04
+2024-04-05 03:27:03,904 EDITOR.train INFO: Epoch[41] Iteration[80/106] Loss: 11.159, Acc: 0.970, Base Lr: 3.68e-04
+2024-04-05 03:27:13,321 EDITOR.train INFO: Epoch[41] Iteration[90/106] Loss: 11.176, Acc: 0.968, Base Lr: 3.68e-04
+2024-04-05 03:27:23,626 EDITOR.train INFO: Epoch[41] Iteration[100/106] Loss: 11.151, Acc: 0.968, Base Lr: 3.68e-04
+2024-04-05 03:27:28,901 EDITOR.train INFO: Epoch 41 done. Time per batch: 1.100[s] Speed: 116.4[samples/s]
+2024-04-05 03:28:48,192 EDITOR.train INFO: Validation Results - Epoch: 41
+2024-04-05 03:28:48,192 EDITOR.train INFO: mAP: 76.38%
+2024-04-05 03:28:48,192 EDITOR.train INFO: CMC curve, Rank-1  :91.09%
+2024-04-05 03:28:48,192 EDITOR.train INFO: CMC curve, Rank-5  :96.94%
+2024-04-05 03:28:48,192 EDITOR.train INFO: CMC curve, Rank-10 :98.28%
+2024-04-05 03:28:48,193 EDITOR.train INFO: Best Multi-Modal mAP: 76.57%
+2024-04-05 03:28:48,193 EDITOR.train INFO: Best Multi-Modal Rank-1: 90.88%
+2024-04-05 03:28:48,193 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.94%
+2024-04-05 03:28:48,193 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.31%
+2024-04-05 03:29:04,588 EDITOR.train INFO: Epoch[42] Iteration[10/106] Loss: 11.040, Acc: 0.977, Base Lr: 3.46e-04
+2024-04-05 03:29:15,305 EDITOR.train INFO: Epoch[42] Iteration[20/106] Loss: 10.859, Acc: 0.982, Base Lr: 3.46e-04
+2024-04-05 03:29:25,925 EDITOR.train INFO: Epoch[42] Iteration[30/106] Loss: 10.900, Acc: 0.976, Base Lr: 3.46e-04
+2024-04-05 03:29:37,252 EDITOR.train INFO: Epoch[42] Iteration[40/106] Loss: 10.937, Acc: 0.973, Base Lr: 3.46e-04
+2024-04-05 03:29:47,339 EDITOR.train INFO: Epoch[42] Iteration[50/106] Loss: 10.949, Acc: 0.972, Base Lr: 3.46e-04
+2024-04-05 03:29:57,190 EDITOR.train INFO: Epoch[42] Iteration[60/106] Loss: 10.916, Acc: 0.972, Base Lr: 3.46e-04
+2024-04-05 03:30:07,599 EDITOR.train INFO: Epoch[42] Iteration[70/106] Loss: 10.944, Acc: 0.972, Base Lr: 3.46e-04
+2024-04-05 03:30:18,501 EDITOR.train INFO: Epoch[42] Iteration[80/106] Loss: 10.993, Acc: 0.971, Base Lr: 3.46e-04
+2024-04-05 03:30:29,437 EDITOR.train INFO: Epoch[42] Iteration[90/106] Loss: 10.984, Acc: 0.971, Base Lr: 3.46e-04
+2024-04-05 03:30:39,619 EDITOR.train INFO: Epoch[42] Iteration[100/106] Loss: 10.996, Acc: 0.971, Base Lr: 3.46e-04
+2024-04-05 03:30:45,202 EDITOR.train INFO: Epoch 42 done. Time per batch: 1.113[s] Speed: 115.0[samples/s]
+2024-04-05 03:32:10,222 EDITOR.train INFO: Validation Results - Epoch: 42
+2024-04-05 03:32:10,222 EDITOR.train INFO: mAP: 76.02%
+2024-04-05 03:32:10,222 EDITOR.train INFO: CMC curve, Rank-1  :90.59%
+2024-04-05 03:32:10,222 EDITOR.train INFO: CMC curve, Rank-5  :96.88%
+2024-04-05 03:32:10,222 EDITOR.train INFO: CMC curve, Rank-10 :98.22%
+2024-04-05 03:32:10,223 EDITOR.train INFO: Best Multi-Modal mAP: 76.57%
+2024-04-05 03:32:10,223 EDITOR.train INFO: Best Multi-Modal Rank-1: 90.88%
+2024-04-05 03:32:10,223 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.94%
+2024-04-05 03:32:10,223 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.31%
+2024-04-05 03:32:27,197 EDITOR.train INFO: Epoch[43] Iteration[10/106] Loss: 11.343, Acc: 0.973, Base Lr: 3.25e-04
+2024-04-05 03:32:38,163 EDITOR.train INFO: Epoch[43] Iteration[20/106] Loss: 11.242, Acc: 0.970, Base Lr: 3.25e-04
+2024-04-05 03:32:49,604 EDITOR.train INFO: Epoch[43] Iteration[30/106] Loss: 11.063, Acc: 0.973, Base Lr: 3.25e-04
+2024-04-05 03:33:00,384 EDITOR.train INFO: Epoch[43] Iteration[40/106] Loss: 11.087, Acc: 0.971, Base Lr: 3.25e-04
+2024-04-05 03:33:11,175 EDITOR.train INFO: Epoch[43] Iteration[50/106] Loss: 11.085, Acc: 0.971, Base Lr: 3.25e-04
+2024-04-05 03:33:20,916 EDITOR.train INFO: Epoch[43] Iteration[60/106] Loss: 11.113, Acc: 0.969, Base Lr: 3.25e-04
+2024-04-05 03:33:30,929 EDITOR.train INFO: Epoch[43] Iteration[70/106] Loss: 11.077, Acc: 0.968, Base Lr: 3.25e-04
+2024-04-05 03:33:41,186 EDITOR.train INFO: Epoch[43] Iteration[80/106] Loss: 11.047, Acc: 0.968, Base Lr: 3.25e-04
+2024-04-05 03:33:51,648 EDITOR.train INFO: Epoch[43] Iteration[90/106] Loss: 10.987, Acc: 0.969, Base Lr: 3.25e-04
+2024-04-05 03:34:02,306 EDITOR.train INFO: Epoch[43] Iteration[100/106] Loss: 10.956, Acc: 0.969, Base Lr: 3.25e-04
+2024-04-05 03:34:07,891 EDITOR.train INFO: Epoch 43 done. Time per batch: 1.112[s] Speed: 115.1[samples/s]
+2024-04-05 03:35:27,648 EDITOR.train INFO: Validation Results - Epoch: 43
+2024-04-05 03:35:27,648 EDITOR.train INFO: mAP: 76.60%
+2024-04-05 03:35:27,648 EDITOR.train INFO: CMC curve, Rank-1  :91.06%
+2024-04-05 03:35:27,649 EDITOR.train INFO: CMC curve, Rank-5  :96.88%
+2024-04-05 03:35:27,649 EDITOR.train INFO: CMC curve, Rank-10 :98.31%
+2024-04-05 03:35:28,554 EDITOR.train INFO: Best Multi-Modal mAP: 76.60%
+2024-04-05 03:35:28,555 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.06%
+2024-04-05 03:35:28,555 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.88%
+2024-04-05 03:35:28,555 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.31%
+2024-04-05 03:35:46,336 EDITOR.train INFO: Epoch[44] Iteration[10/106] Loss: 10.675, Acc: 0.979, Base Lr: 3.04e-04
+2024-04-05 03:35:56,879 EDITOR.train INFO: Epoch[44] Iteration[20/106] Loss: 10.780, Acc: 0.970, Base Lr: 3.04e-04
+2024-04-05 03:36:08,144 EDITOR.train INFO: Epoch[44] Iteration[30/106] Loss: 10.841, Acc: 0.974, Base Lr: 3.04e-04
+2024-04-05 03:36:18,814 EDITOR.train INFO: Epoch[44] Iteration[40/106] Loss: 10.894, Acc: 0.975, Base Lr: 3.04e-04
+2024-04-05 03:36:28,711 EDITOR.train INFO: Epoch[44] Iteration[50/106] Loss: 10.844, Acc: 0.976, Base Lr: 3.04e-04
+2024-04-05 03:36:38,807 EDITOR.train INFO: Epoch[44] Iteration[60/106] Loss: 10.814, Acc: 0.975, Base Lr: 3.04e-04
+2024-04-05 03:36:49,736 EDITOR.train INFO: Epoch[44] Iteration[70/106] Loss: 10.825, Acc: 0.975, Base Lr: 3.04e-04
+2024-04-05 03:37:00,517 EDITOR.train INFO: Epoch[44] Iteration[80/106] Loss: 10.826, Acc: 0.975, Base Lr: 3.04e-04
+2024-04-05 03:37:10,243 EDITOR.train INFO: Epoch[44] Iteration[90/106] Loss: 10.836, Acc: 0.975, Base Lr: 3.04e-04
+2024-04-05 03:37:19,808 EDITOR.train INFO: Epoch[44] Iteration[100/106] Loss: 10.824, Acc: 0.974, Base Lr: 3.04e-04
+2024-04-05 03:37:24,847 EDITOR.train INFO: Epoch 44 done. Time per batch: 1.106[s] Speed: 115.7[samples/s]
+2024-04-05 03:38:43,068 EDITOR.train INFO: Validation Results - Epoch: 44
+2024-04-05 03:38:43,069 EDITOR.train INFO: mAP: 76.61%
+2024-04-05 03:38:43,069 EDITOR.train INFO: CMC curve, Rank-1  :91.21%
+2024-04-05 03:38:43,069 EDITOR.train INFO: CMC curve, Rank-5  :96.79%
+2024-04-05 03:38:43,069 EDITOR.train INFO: CMC curve, Rank-10 :98.22%
+2024-04-05 03:38:43,895 EDITOR.train INFO: Best Multi-Modal mAP: 76.61%
+2024-04-05 03:38:43,896 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.21%
+2024-04-05 03:38:43,896 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.79%
+2024-04-05 03:38:43,896 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.22%
+2024-04-05 03:39:01,622 EDITOR.train INFO: Epoch[45] Iteration[10/106] Loss: 11.062, Acc: 0.977, Base Lr: 2.84e-04
+2024-04-05 03:39:12,185 EDITOR.train INFO: Epoch[45] Iteration[20/106] Loss: 11.087, Acc: 0.980, Base Lr: 2.84e-04
+2024-04-05 03:39:22,595 EDITOR.train INFO: Epoch[45] Iteration[30/106] Loss: 10.923, Acc: 0.977, Base Lr: 2.84e-04
+2024-04-05 03:39:33,504 EDITOR.train INFO: Epoch[45] Iteration[40/106] Loss: 10.850, Acc: 0.976, Base Lr: 2.84e-04
+2024-04-05 03:39:43,723 EDITOR.train INFO: Epoch[45] Iteration[50/106] Loss: 10.851, Acc: 0.974, Base Lr: 2.84e-04
+2024-04-05 03:39:54,355 EDITOR.train INFO: Epoch[45] Iteration[60/106] Loss: 10.841, Acc: 0.971, Base Lr: 2.84e-04
+2024-04-05 03:40:05,005 EDITOR.train INFO: Epoch[45] Iteration[70/106] Loss: 10.799, Acc: 0.973, Base Lr: 2.84e-04
+2024-04-05 03:40:15,017 EDITOR.train INFO: Epoch[45] Iteration[80/106] Loss: 10.812, Acc: 0.974, Base Lr: 2.84e-04
+2024-04-05 03:40:26,444 EDITOR.train INFO: Epoch[45] Iteration[90/106] Loss: 10.846, Acc: 0.972, Base Lr: 2.84e-04
+2024-04-05 03:40:35,909 EDITOR.train INFO: Epoch[45] Iteration[100/106] Loss: 10.823, Acc: 0.972, Base Lr: 2.84e-04
+2024-04-05 03:40:40,756 EDITOR.train INFO: Epoch 45 done. Time per batch: 1.104[s] Speed: 115.9[samples/s]
+2024-04-05 03:42:04,503 EDITOR.train INFO: Validation Results - Epoch: 45
+2024-04-05 03:42:04,503 EDITOR.train INFO: mAP: 77.09%
+2024-04-05 03:42:04,503 EDITOR.train INFO: CMC curve, Rank-1  :91.09%
+2024-04-05 03:42:04,503 EDITOR.train INFO: CMC curve, Rank-5  :96.94%
+2024-04-05 03:42:04,503 EDITOR.train INFO: CMC curve, Rank-10 :98.25%
+2024-04-05 03:42:05,373 EDITOR.train INFO: Best Multi-Modal mAP: 77.09%
+2024-04-05 03:42:05,373 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.09%
+2024-04-05 03:42:05,373 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.94%
+2024-04-05 03:42:05,373 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.25%
+2024-04-05 03:42:24,544 EDITOR.train INFO: Epoch[46] Iteration[10/106] Loss: 10.790, Acc: 0.973, Base Lr: 2.64e-04
+2024-04-05 03:42:35,794 EDITOR.train INFO: Epoch[46] Iteration[20/106] Loss: 10.649, Acc: 0.971, Base Lr: 2.64e-04
+2024-04-05 03:42:47,295 EDITOR.train INFO: Epoch[46] Iteration[30/106] Loss: 10.647, Acc: 0.970, Base Lr: 2.64e-04
+2024-04-05 03:42:58,175 EDITOR.train INFO: Epoch[46] Iteration[40/106] Loss: 10.652, Acc: 0.973, Base Lr: 2.64e-04
+2024-04-05 03:43:08,988 EDITOR.train INFO: Epoch[46] Iteration[50/106] Loss: 10.700, Acc: 0.972, Base Lr: 2.64e-04
+2024-04-05 03:43:19,105 EDITOR.train INFO: Epoch[46] Iteration[60/106] Loss: 10.759, Acc: 0.970, Base Lr: 2.64e-04
+2024-04-05 03:43:30,892 EDITOR.train INFO: Epoch[46] Iteration[70/106] Loss: 10.828, Acc: 0.971, Base Lr: 2.64e-04
+2024-04-05 03:43:41,423 EDITOR.train INFO: Epoch[46] Iteration[80/106] Loss: 10.781, Acc: 0.973, Base Lr: 2.64e-04
+2024-04-05 03:43:51,532 EDITOR.train INFO: Epoch[46] Iteration[90/106] Loss: 10.765, Acc: 0.972, Base Lr: 2.64e-04
+2024-04-05 03:44:01,571 EDITOR.train INFO: Epoch[46] Iteration[100/106] Loss: 10.741, Acc: 0.973, Base Lr: 2.64e-04
+2024-04-05 03:44:06,527 EDITOR.train INFO: Epoch 46 done. Time per batch: 1.153[s] Speed: 111.0[samples/s]
+2024-04-05 03:45:23,346 EDITOR.train INFO: Validation Results - Epoch: 46
+2024-04-05 03:45:23,346 EDITOR.train INFO: mAP: 77.09%
+2024-04-05 03:45:23,346 EDITOR.train INFO: CMC curve, Rank-1  :91.39%
+2024-04-05 03:45:23,346 EDITOR.train INFO: CMC curve, Rank-5  :96.97%
+2024-04-05 03:45:23,346 EDITOR.train INFO: CMC curve, Rank-10 :98.46%
+2024-04-05 03:45:23,347 EDITOR.train INFO: Best Multi-Modal mAP: 77.09%
+2024-04-05 03:45:23,347 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.09%
+2024-04-05 03:45:23,347 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.94%
+2024-04-05 03:45:23,347 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.25%
+2024-04-05 03:45:41,636 EDITOR.train INFO: Epoch[47] Iteration[10/106] Loss: 10.522, Acc: 0.973, Base Lr: 2.44e-04
+2024-04-05 03:45:52,586 EDITOR.train INFO: Epoch[47] Iteration[20/106] Loss: 10.878, Acc: 0.971, Base Lr: 2.44e-04
+2024-04-05 03:46:04,188 EDITOR.train INFO: Epoch[47] Iteration[30/106] Loss: 10.845, Acc: 0.973, Base Lr: 2.44e-04
+2024-04-05 03:46:14,836 EDITOR.train INFO: Epoch[47] Iteration[40/106] Loss: 10.848, Acc: 0.969, Base Lr: 2.44e-04
+2024-04-05 03:46:26,191 EDITOR.train INFO: Epoch[47] Iteration[50/106] Loss: 10.761, Acc: 0.971, Base Lr: 2.44e-04
+2024-04-05 03:46:36,888 EDITOR.train INFO: Epoch[47] Iteration[60/106] Loss: 10.751, Acc: 0.971, Base Lr: 2.44e-04
+2024-04-05 03:46:46,915 EDITOR.train INFO: Epoch[47] Iteration[70/106] Loss: 10.745, Acc: 0.972, Base Lr: 2.44e-04
+2024-04-05 03:46:57,488 EDITOR.train INFO: Epoch[47] Iteration[80/106] Loss: 10.746, Acc: 0.971, Base Lr: 2.44e-04
+2024-04-05 03:47:07,774 EDITOR.train INFO: Epoch[47] Iteration[90/106] Loss: 10.741, Acc: 0.972, Base Lr: 2.44e-04
+2024-04-05 03:47:17,729 EDITOR.train INFO: Epoch[47] Iteration[100/106] Loss: 10.756, Acc: 0.972, Base Lr: 2.44e-04
+2024-04-05 03:47:22,989 EDITOR.train INFO: Epoch 47 done. Time per batch: 1.138[s] Speed: 112.4[samples/s]
+2024-04-05 03:48:43,454 EDITOR.train INFO: Validation Results - Epoch: 47
+2024-04-05 03:48:43,454 EDITOR.train INFO: mAP: 76.71%
+2024-04-05 03:48:43,454 EDITOR.train INFO: CMC curve, Rank-1  :91.45%
+2024-04-05 03:48:43,455 EDITOR.train INFO: CMC curve, Rank-5  :96.94%
+2024-04-05 03:48:43,455 EDITOR.train INFO: CMC curve, Rank-10 :98.37%
+2024-04-05 03:48:43,455 EDITOR.train INFO: Best Multi-Modal mAP: 77.09%
+2024-04-05 03:48:43,456 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.09%
+2024-04-05 03:48:43,456 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.94%
+2024-04-05 03:48:43,456 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.25%
+2024-04-05 03:49:01,590 EDITOR.train INFO: Epoch[48] Iteration[10/106] Loss: 10.798, Acc: 0.971, Base Lr: 2.25e-04
+2024-04-05 03:49:11,708 EDITOR.train INFO: Epoch[48] Iteration[20/106] Loss: 10.841, Acc: 0.974, Base Lr: 2.25e-04
+2024-04-05 03:49:23,077 EDITOR.train INFO: Epoch[48] Iteration[30/106] Loss: 10.878, Acc: 0.973, Base Lr: 2.25e-04
+2024-04-05 03:49:33,380 EDITOR.train INFO: Epoch[48] Iteration[40/106] Loss: 10.922, Acc: 0.971, Base Lr: 2.25e-04
+2024-04-05 03:49:44,478 EDITOR.train INFO: Epoch[48] Iteration[50/106] Loss: 10.867, Acc: 0.972, Base Lr: 2.25e-04
+2024-04-05 03:49:55,320 EDITOR.train INFO: Epoch[48] Iteration[60/106] Loss: 10.809, Acc: 0.974, Base Lr: 2.25e-04
+2024-04-05 03:50:04,885 EDITOR.train INFO: Epoch[48] Iteration[70/106] Loss: 10.763, Acc: 0.975, Base Lr: 2.25e-04
+2024-04-05 03:50:15,340 EDITOR.train INFO: Epoch[48] Iteration[80/106] Loss: 10.706, Acc: 0.977, Base Lr: 2.25e-04
+2024-04-05 03:50:26,042 EDITOR.train INFO: Epoch[48] Iteration[90/106] Loss: 10.718, Acc: 0.976, Base Lr: 2.25e-04
+2024-04-05 03:50:36,279 EDITOR.train INFO: Epoch[48] Iteration[100/106] Loss: 10.726, Acc: 0.975, Base Lr: 2.25e-04
+2024-04-05 03:50:41,972 EDITOR.train INFO: Epoch 48 done. Time per batch: 1.128[s] Speed: 113.5[samples/s]
+2024-04-05 03:51:58,151 EDITOR.train INFO: Validation Results - Epoch: 48
+2024-04-05 03:51:58,152 EDITOR.train INFO: mAP: 77.00%
+2024-04-05 03:51:58,152 EDITOR.train INFO: CMC curve, Rank-1  :91.42%
+2024-04-05 03:51:58,152 EDITOR.train INFO: CMC curve, Rank-5  :96.85%
+2024-04-05 03:51:58,152 EDITOR.train INFO: CMC curve, Rank-10 :98.28%
+2024-04-05 03:51:58,152 EDITOR.train INFO: Best Multi-Modal mAP: 77.09%
+2024-04-05 03:51:58,153 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.09%
+2024-04-05 03:51:58,153 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.94%
+2024-04-05 03:51:58,153 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.25%
+2024-04-05 03:52:15,628 EDITOR.train INFO: Epoch[49] Iteration[10/106] Loss: 10.665, Acc: 0.961, Base Lr: 2.07e-04
+2024-04-05 03:52:26,164 EDITOR.train INFO: Epoch[49] Iteration[20/106] Loss: 10.564, Acc: 0.972, Base Lr: 2.07e-04
+2024-04-05 03:52:37,690 EDITOR.train INFO: Epoch[49] Iteration[30/106] Loss: 10.655, Acc: 0.974, Base Lr: 2.07e-04
+2024-04-05 03:52:48,821 EDITOR.train INFO: Epoch[49] Iteration[40/106] Loss: 10.703, Acc: 0.975, Base Lr: 2.07e-04
+2024-04-05 03:52:59,188 EDITOR.train INFO: Epoch[49] Iteration[50/106] Loss: 10.687, Acc: 0.974, Base Lr: 2.07e-04
+2024-04-05 03:53:09,689 EDITOR.train INFO: Epoch[49] Iteration[60/106] Loss: 10.632, Acc: 0.975, Base Lr: 2.07e-04
+2024-04-05 03:53:19,960 EDITOR.train INFO: Epoch[49] Iteration[70/106] Loss: 10.639, Acc: 0.976, Base Lr: 2.07e-04
+2024-04-05 03:53:30,257 EDITOR.train INFO: Epoch[49] Iteration[80/106] Loss: 10.651, Acc: 0.975, Base Lr: 2.07e-04
+2024-04-05 03:53:39,961 EDITOR.train INFO: Epoch[49] Iteration[90/106] Loss: 10.647, Acc: 0.975, Base Lr: 2.07e-04
+2024-04-05 03:53:50,549 EDITOR.train INFO: Epoch[49] Iteration[100/106] Loss: 10.642, Acc: 0.975, Base Lr: 2.07e-04
+2024-04-05 03:53:55,696 EDITOR.train INFO: Epoch 49 done. Time per batch: 1.118[s] Speed: 114.4[samples/s]
+2024-04-05 03:55:12,883 EDITOR.train INFO: Validation Results - Epoch: 49
+2024-04-05 03:55:12,884 EDITOR.train INFO: mAP: 77.36%
+2024-04-05 03:55:12,884 EDITOR.train INFO: CMC curve, Rank-1  :91.36%
+2024-04-05 03:55:12,884 EDITOR.train INFO: CMC curve, Rank-5  :96.97%
+2024-04-05 03:55:12,884 EDITOR.train INFO: CMC curve, Rank-10 :98.37%
+2024-04-05 03:55:13,906 EDITOR.train INFO: Best Multi-Modal mAP: 77.36%
+2024-04-05 03:55:13,906 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.36%
+2024-04-05 03:55:13,907 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.97%
+2024-04-05 03:55:13,907 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.37%
+2024-04-05 03:55:32,597 EDITOR.train INFO: Epoch[50] Iteration[10/106] Loss: 10.660, Acc: 0.983, Base Lr: 1.89e-04
+2024-04-05 03:55:43,802 EDITOR.train INFO: Epoch[50] Iteration[20/106] Loss: 10.792, Acc: 0.978, Base Lr: 1.89e-04
+2024-04-05 03:55:55,279 EDITOR.train INFO: Epoch[50] Iteration[30/106] Loss: 10.641, Acc: 0.975, Base Lr: 1.89e-04
+2024-04-05 03:56:05,813 EDITOR.train INFO: Epoch[50] Iteration[40/106] Loss: 10.689, Acc: 0.974, Base Lr: 1.89e-04
+2024-04-05 03:56:16,125 EDITOR.train INFO: Epoch[50] Iteration[50/106] Loss: 10.740, Acc: 0.974, Base Lr: 1.89e-04
+2024-04-05 03:56:26,410 EDITOR.train INFO: Epoch[50] Iteration[60/106] Loss: 10.671, Acc: 0.976, Base Lr: 1.89e-04
+2024-04-05 03:56:37,007 EDITOR.train INFO: Epoch[50] Iteration[70/106] Loss: 10.660, Acc: 0.976, Base Lr: 1.89e-04
+2024-04-05 03:56:47,160 EDITOR.train INFO: Epoch[50] Iteration[80/106] Loss: 10.639, Acc: 0.976, Base Lr: 1.89e-04
+2024-04-05 03:56:56,793 EDITOR.train INFO: Epoch[50] Iteration[90/106] Loss: 10.671, Acc: 0.975, Base Lr: 1.89e-04
+2024-04-05 03:57:07,082 EDITOR.train INFO: Epoch[50] Iteration[100/106] Loss: 10.646, Acc: 0.975, Base Lr: 1.89e-04
+2024-04-05 03:57:12,642 EDITOR.train INFO: Epoch 50 done. Time per batch: 1.127[s] Speed: 113.5[samples/s]
+2024-04-05 03:58:35,485 EDITOR.train INFO: Validation Results - Epoch: 50
+2024-04-05 03:58:35,486 EDITOR.train INFO: mAP: 76.92%
+2024-04-05 03:58:35,486 EDITOR.train INFO: CMC curve, Rank-1  :91.09%
+2024-04-05 03:58:35,486 EDITOR.train INFO: CMC curve, Rank-5  :96.88%
+2024-04-05 03:58:35,486 EDITOR.train INFO: CMC curve, Rank-10 :98.31%
+2024-04-05 03:58:35,487 EDITOR.train INFO: Best Multi-Modal mAP: 77.36%
+2024-04-05 03:58:35,487 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.36%
+2024-04-05 03:58:35,487 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.97%
+2024-04-05 03:58:35,487 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.37%
+2024-04-05 03:58:53,518 EDITOR.train INFO: Epoch[51] Iteration[10/106] Loss: 10.656, Acc: 0.976, Base Lr: 1.72e-04
+2024-04-05 03:59:04,213 EDITOR.train INFO: Epoch[51] Iteration[20/106] Loss: 10.540, Acc: 0.976, Base Lr: 1.72e-04
+2024-04-05 03:59:14,607 EDITOR.train INFO: Epoch[51] Iteration[30/106] Loss: 10.521, Acc: 0.976, Base Lr: 1.72e-04
+2024-04-05 03:59:25,605 EDITOR.train INFO: Epoch[51] Iteration[40/106] Loss: 10.554, Acc: 0.977, Base Lr: 1.72e-04
+2024-04-05 03:59:36,540 EDITOR.train INFO: Epoch[51] Iteration[50/106] Loss: 10.564, Acc: 0.978, Base Lr: 1.72e-04
+2024-04-05 03:59:47,996 EDITOR.train INFO: Epoch[51] Iteration[60/106] Loss: 10.544, Acc: 0.979, Base Lr: 1.72e-04
+2024-04-05 03:59:58,448 EDITOR.train INFO: Epoch[51] Iteration[70/106] Loss: 10.594, Acc: 0.978, Base Lr: 1.72e-04
+2024-04-05 04:00:09,109 EDITOR.train INFO: Epoch[51] Iteration[80/106] Loss: 10.613, Acc: 0.977, Base Lr: 1.72e-04
+2024-04-05 04:00:19,626 EDITOR.train INFO: Epoch[51] Iteration[90/106] Loss: 10.641, Acc: 0.976, Base Lr: 1.72e-04
+2024-04-05 04:00:30,537 EDITOR.train INFO: Epoch[51] Iteration[100/106] Loss: 10.665, Acc: 0.976, Base Lr: 1.72e-04
+2024-04-05 04:00:36,642 EDITOR.train INFO: Epoch 51 done. Time per batch: 1.153[s] Speed: 111.0[samples/s]
+2024-04-05 04:02:01,342 EDITOR.train INFO: Validation Results - Epoch: 51
+2024-04-05 04:02:01,342 EDITOR.train INFO: mAP: 77.06%
+2024-04-05 04:02:01,342 EDITOR.train INFO: CMC curve, Rank-1  :91.21%
+2024-04-05 04:02:01,342 EDITOR.train INFO: CMC curve, Rank-5  :97.03%
+2024-04-05 04:02:01,342 EDITOR.train INFO: CMC curve, Rank-10 :98.49%
+2024-04-05 04:02:01,343 EDITOR.train INFO: Best Multi-Modal mAP: 77.36%
+2024-04-05 04:02:01,343 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.36%
+2024-04-05 04:02:01,343 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.97%
+2024-04-05 04:02:01,343 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.37%
+2024-04-05 04:02:19,550 EDITOR.train INFO: Epoch[52] Iteration[10/106] Loss: 10.400, Acc: 0.983, Base Lr: 1.55e-04
+2024-04-05 04:02:30,346 EDITOR.train INFO: Epoch[52] Iteration[20/106] Loss: 10.469, Acc: 0.979, Base Lr: 1.55e-04
+2024-04-05 04:02:40,312 EDITOR.train INFO: Epoch[52] Iteration[30/106] Loss: 10.627, Acc: 0.974, Base Lr: 1.55e-04
+2024-04-05 04:02:51,023 EDITOR.train INFO: Epoch[52] Iteration[40/106] Loss: 10.654, Acc: 0.975, Base Lr: 1.55e-04
+2024-04-05 04:03:01,043 EDITOR.train INFO: Epoch[52] Iteration[50/106] Loss: 10.714, Acc: 0.974, Base Lr: 1.55e-04
+2024-04-05 04:03:11,395 EDITOR.train INFO: Epoch[52] Iteration[60/106] Loss: 10.607, Acc: 0.976, Base Lr: 1.55e-04
+2024-04-05 04:03:22,199 EDITOR.train INFO: Epoch[52] Iteration[70/106] Loss: 10.587, Acc: 0.975, Base Lr: 1.55e-04
+2024-04-05 04:03:33,674 EDITOR.train INFO: Epoch[52] Iteration[80/106] Loss: 10.556, Acc: 0.976, Base Lr: 1.55e-04
+2024-04-05 04:03:44,185 EDITOR.train INFO: Epoch[52] Iteration[90/106] Loss: 10.505, Acc: 0.977, Base Lr: 1.55e-04
+2024-04-05 04:03:54,428 EDITOR.train INFO: Epoch[52] Iteration[100/106] Loss: 10.507, Acc: 0.977, Base Lr: 1.55e-04
+2024-04-05 04:03:59,717 EDITOR.train INFO: Epoch 52 done. Time per batch: 1.119[s] Speed: 114.4[samples/s]
+2024-04-05 04:05:23,974 EDITOR.train INFO: Validation Results - Epoch: 52
+2024-04-05 04:05:23,974 EDITOR.train INFO: mAP: 77.32%
+2024-04-05 04:05:23,974 EDITOR.train INFO: CMC curve, Rank-1  :91.21%
+2024-04-05 04:05:23,975 EDITOR.train INFO: CMC curve, Rank-5  :97.06%
+2024-04-05 04:05:23,975 EDITOR.train INFO: CMC curve, Rank-10 :98.46%
+2024-04-05 04:05:23,975 EDITOR.train INFO: Best Multi-Modal mAP: 77.36%
+2024-04-05 04:05:23,975 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.36%
+2024-04-05 04:05:23,976 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.97%
+2024-04-05 04:05:23,976 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.37%
+2024-04-05 04:05:42,496 EDITOR.train INFO: Epoch[53] Iteration[10/106] Loss: 10.458, Acc: 0.976, Base Lr: 1.39e-04
+2024-04-05 04:05:53,431 EDITOR.train INFO: Epoch[53] Iteration[20/106] Loss: 10.686, Acc: 0.974, Base Lr: 1.39e-04
+2024-04-05 04:06:03,325 EDITOR.train INFO: Epoch[53] Iteration[30/106] Loss: 10.610, Acc: 0.976, Base Lr: 1.39e-04
+2024-04-05 04:06:14,606 EDITOR.train INFO: Epoch[53] Iteration[40/106] Loss: 10.591, Acc: 0.977, Base Lr: 1.39e-04
+2024-04-05 04:06:25,397 EDITOR.train INFO: Epoch[53] Iteration[50/106] Loss: 10.547, Acc: 0.977, Base Lr: 1.39e-04
+2024-04-05 04:06:35,873 EDITOR.train INFO: Epoch[53] Iteration[60/106] Loss: 10.578, Acc: 0.976, Base Lr: 1.39e-04
+2024-04-05 04:06:46,099 EDITOR.train INFO: Epoch[53] Iteration[70/106] Loss: 10.544, Acc: 0.977, Base Lr: 1.39e-04
+2024-04-05 04:06:56,356 EDITOR.train INFO: Epoch[53] Iteration[80/106] Loss: 10.545, Acc: 0.977, Base Lr: 1.39e-04
+2024-04-05 04:07:06,256 EDITOR.train INFO: Epoch[53] Iteration[90/106] Loss: 10.532, Acc: 0.977, Base Lr: 1.39e-04
+2024-04-05 04:07:15,892 EDITOR.train INFO: Epoch[53] Iteration[100/106] Loss: 10.516, Acc: 0.977, Base Lr: 1.39e-04
+2024-04-05 04:07:21,359 EDITOR.train INFO: Epoch 53 done. Time per batch: 1.117[s] Speed: 114.6[samples/s]
+2024-04-05 04:08:42,740 EDITOR.train INFO: Validation Results - Epoch: 53
+2024-04-05 04:08:42,741 EDITOR.train INFO: mAP: 77.42%
+2024-04-05 04:08:42,741 EDITOR.train INFO: CMC curve, Rank-1  :91.24%
+2024-04-05 04:08:42,741 EDITOR.train INFO: CMC curve, Rank-5  :96.88%
+2024-04-05 04:08:42,741 EDITOR.train INFO: CMC curve, Rank-10 :98.28%
+2024-04-05 04:08:43,636 EDITOR.train INFO: Best Multi-Modal mAP: 77.42%
+2024-04-05 04:08:43,637 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.24%
+2024-04-05 04:08:43,637 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.88%
+2024-04-05 04:08:43,637 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.28%
+2024-04-05 04:08:59,818 EDITOR.train INFO: Epoch[54] Iteration[10/106] Loss: 10.522, Acc: 0.977, Base Lr: 1.24e-04
+2024-04-05 04:09:10,869 EDITOR.train INFO: Epoch[54] Iteration[20/106] Loss: 10.375, Acc: 0.976, Base Lr: 1.24e-04
+2024-04-05 04:09:21,338 EDITOR.train INFO: Epoch[54] Iteration[30/106] Loss: 10.562, Acc: 0.974, Base Lr: 1.24e-04
+2024-04-05 04:09:32,093 EDITOR.train INFO: Epoch[54] Iteration[40/106] Loss: 10.527, Acc: 0.975, Base Lr: 1.24e-04
+2024-04-05 04:09:42,267 EDITOR.train INFO: Epoch[54] Iteration[50/106] Loss: 10.532, Acc: 0.976, Base Lr: 1.24e-04
+2024-04-05 04:09:52,871 EDITOR.train INFO: Epoch[54] Iteration[60/106] Loss: 10.532, Acc: 0.978, Base Lr: 1.24e-04
+2024-04-05 04:10:03,573 EDITOR.train INFO: Epoch[54] Iteration[70/106] Loss: 10.535, Acc: 0.977, Base Lr: 1.24e-04
+2024-04-05 04:10:14,622 EDITOR.train INFO: Epoch[54] Iteration[80/106] Loss: 10.508, Acc: 0.978, Base Lr: 1.24e-04
+2024-04-05 04:10:24,642 EDITOR.train INFO: Epoch[54] Iteration[90/106] Loss: 10.514, Acc: 0.977, Base Lr: 1.24e-04
+2024-04-05 04:10:35,195 EDITOR.train INFO: Epoch[54] Iteration[100/106] Loss: 10.474, Acc: 0.978, Base Lr: 1.24e-04
+2024-04-05 04:10:40,683 EDITOR.train INFO: Epoch 54 done. Time per batch: 1.111[s] Speed: 115.3[samples/s]
+2024-04-05 04:12:04,299 EDITOR.train INFO: Validation Results - Epoch: 54
+2024-04-05 04:12:04,299 EDITOR.train INFO: mAP: 77.34%
+2024-04-05 04:12:04,299 EDITOR.train INFO: CMC curve, Rank-1  :91.15%
+2024-04-05 04:12:04,299 EDITOR.train INFO: CMC curve, Rank-5  :97.00%
+2024-04-05 04:12:04,299 EDITOR.train INFO: CMC curve, Rank-10 :98.34%
+2024-04-05 04:12:04,300 EDITOR.train INFO: Best Multi-Modal mAP: 77.42%
+2024-04-05 04:12:04,300 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.24%
+2024-04-05 04:12:04,300 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.88%
+2024-04-05 04:12:04,301 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.28%
+2024-04-05 04:12:21,401 EDITOR.train INFO: Epoch[55] Iteration[10/106] Loss: 10.273, Acc: 0.980, Base Lr: 1.10e-04
+2024-04-05 04:12:32,239 EDITOR.train INFO: Epoch[55] Iteration[20/106] Loss: 10.433, Acc: 0.977, Base Lr: 1.10e-04
+2024-04-05 04:12:42,504 EDITOR.train INFO: Epoch[55] Iteration[30/106] Loss: 10.523, Acc: 0.974, Base Lr: 1.10e-04
+2024-04-05 04:12:52,850 EDITOR.train INFO: Epoch[55] Iteration[40/106] Loss: 10.501, Acc: 0.974, Base Lr: 1.10e-04
+2024-04-05 04:13:03,230 EDITOR.train INFO: Epoch[55] Iteration[50/106] Loss: 10.568, Acc: 0.973, Base Lr: 1.10e-04
+2024-04-05 04:13:13,903 EDITOR.train INFO: Epoch[55] Iteration[60/106] Loss: 10.536, Acc: 0.975, Base Lr: 1.10e-04
+2024-04-05 04:13:24,738 EDITOR.train INFO: Epoch[55] Iteration[70/106] Loss: 10.531, Acc: 0.976, Base Lr: 1.10e-04
+2024-04-05 04:13:34,933 EDITOR.train INFO: Epoch[55] Iteration[80/106] Loss: 10.551, Acc: 0.975, Base Lr: 1.10e-04
+2024-04-05 04:13:45,565 EDITOR.train INFO: Epoch[55] Iteration[90/106] Loss: 10.496, Acc: 0.975, Base Lr: 1.10e-04
+2024-04-05 04:13:55,302 EDITOR.train INFO: Epoch[55] Iteration[100/106] Loss: 10.489, Acc: 0.975, Base Lr: 1.10e-04
+2024-04-05 04:14:00,562 EDITOR.train INFO: Epoch 55 done. Time per batch: 1.106[s] Speed: 115.7[samples/s]
+2024-04-05 04:15:18,954 EDITOR.train INFO: Validation Results - Epoch: 55
+2024-04-05 04:15:18,954 EDITOR.train INFO: mAP: 77.35%
+2024-04-05 04:15:18,955 EDITOR.train INFO: CMC curve, Rank-1  :91.27%
+2024-04-05 04:15:18,955 EDITOR.train INFO: CMC curve, Rank-5  :97.03%
+2024-04-05 04:15:18,955 EDITOR.train INFO: CMC curve, Rank-10 :98.40%
+2024-04-05 04:15:18,955 EDITOR.train INFO: Best Multi-Modal mAP: 77.42%
+2024-04-05 04:15:18,956 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.24%
+2024-04-05 04:15:18,956 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.88%
+2024-04-05 04:15:18,956 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.28%
+2024-04-05 04:15:35,118 EDITOR.train INFO: Epoch[56] Iteration[10/106] Loss: 10.690, Acc: 0.976, Base Lr: 9.64e-05
+2024-04-05 04:15:46,065 EDITOR.train INFO: Epoch[56] Iteration[20/106] Loss: 10.588, Acc: 0.980, Base Lr: 9.64e-05
+2024-04-05 04:15:56,557 EDITOR.train INFO: Epoch[56] Iteration[30/106] Loss: 10.549, Acc: 0.979, Base Lr: 9.64e-05
+2024-04-05 04:16:06,894 EDITOR.train INFO: Epoch[56] Iteration[40/106] Loss: 10.523, Acc: 0.979, Base Lr: 9.64e-05
+2024-04-05 04:16:17,590 EDITOR.train INFO: Epoch[56] Iteration[50/106] Loss: 10.538, Acc: 0.980, Base Lr: 9.64e-05
+2024-04-05 04:16:28,123 EDITOR.train INFO: Epoch[56] Iteration[60/106] Loss: 10.532, Acc: 0.980, Base Lr: 9.64e-05
+2024-04-05 04:16:38,606 EDITOR.train INFO: Epoch[56] Iteration[70/106] Loss: 10.492, Acc: 0.980, Base Lr: 9.64e-05
+2024-04-05 04:16:49,208 EDITOR.train INFO: Epoch[56] Iteration[80/106] Loss: 10.441, Acc: 0.980, Base Lr: 9.64e-05
+2024-04-05 04:16:59,193 EDITOR.train INFO: Epoch[56] Iteration[90/106] Loss: 10.433, Acc: 0.981, Base Lr: 9.64e-05
+2024-04-05 04:17:08,874 EDITOR.train INFO: Epoch[56] Iteration[100/106] Loss: 10.400, Acc: 0.980, Base Lr: 9.64e-05
+2024-04-05 04:17:13,918 EDITOR.train INFO: Epoch 56 done. Time per batch: 1.094[s] Speed: 117.0[samples/s]
+2024-04-05 04:18:35,162 EDITOR.train INFO: Validation Results - Epoch: 56
+2024-04-05 04:18:35,162 EDITOR.train INFO: mAP: 77.50%
+2024-04-05 04:18:35,162 EDITOR.train INFO: CMC curve, Rank-1  :91.39%
+2024-04-05 04:18:35,162 EDITOR.train INFO: CMC curve, Rank-5  :97.06%
+2024-04-05 04:18:35,162 EDITOR.train INFO: CMC curve, Rank-10 :98.46%
+2024-04-05 04:18:36,061 EDITOR.train INFO: Best Multi-Modal mAP: 77.50%
+2024-04-05 04:18:36,061 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.39%
+2024-04-05 04:18:36,061 EDITOR.train INFO: Best Multi-Modal Rank-5: 97.06%
+2024-04-05 04:18:36,061 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.46%
+2024-04-05 04:18:53,824 EDITOR.train INFO: Epoch[57] Iteration[10/106] Loss: 10.474, Acc: 0.980, Base Lr: 8.36e-05
+2024-04-05 04:19:04,301 EDITOR.train INFO: Epoch[57] Iteration[20/106] Loss: 10.517, Acc: 0.982, Base Lr: 8.36e-05
+2024-04-05 04:19:14,498 EDITOR.train INFO: Epoch[57] Iteration[30/106] Loss: 10.470, Acc: 0.982, Base Lr: 8.36e-05
+2024-04-05 04:19:24,937 EDITOR.train INFO: Epoch[57] Iteration[40/106] Loss: 10.456, Acc: 0.983, Base Lr: 8.36e-05
+2024-04-05 04:19:34,910 EDITOR.train INFO: Epoch[57] Iteration[50/106] Loss: 10.480, Acc: 0.983, Base Lr: 8.36e-05
+2024-04-05 04:19:45,228 EDITOR.train INFO: Epoch[57] Iteration[60/106] Loss: 10.495, Acc: 0.981, Base Lr: 8.36e-05
+2024-04-05 04:19:55,196 EDITOR.train INFO: Epoch[57] Iteration[70/106] Loss: 10.478, Acc: 0.979, Base Lr: 8.36e-05
+2024-04-05 04:20:05,758 EDITOR.train INFO: Epoch[57] Iteration[80/106] Loss: 10.466, Acc: 0.978, Base Lr: 8.36e-05
+2024-04-05 04:20:15,451 EDITOR.train INFO: Epoch[57] Iteration[90/106] Loss: 10.451, Acc: 0.978, Base Lr: 8.36e-05
+2024-04-05 04:20:25,399 EDITOR.train INFO: Epoch[57] Iteration[100/106] Loss: 10.455, Acc: 0.978, Base Lr: 8.36e-05
+2024-04-05 04:20:30,508 EDITOR.train INFO: Epoch 57 done. Time per batch: 1.089[s] Speed: 117.6[samples/s]
+2024-04-05 04:21:48,069 EDITOR.train INFO: Validation Results - Epoch: 57
+2024-04-05 04:21:48,070 EDITOR.train INFO: mAP: 77.39%
+2024-04-05 04:21:48,070 EDITOR.train INFO: CMC curve, Rank-1  :91.36%
+2024-04-05 04:21:48,070 EDITOR.train INFO: CMC curve, Rank-5  :96.97%
+2024-04-05 04:21:48,070 EDITOR.train INFO: CMC curve, Rank-10 :98.37%
+2024-04-05 04:21:48,070 EDITOR.train INFO: Best Multi-Modal mAP: 77.50%
+2024-04-05 04:21:48,071 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.39%
+2024-04-05 04:21:48,071 EDITOR.train INFO: Best Multi-Modal Rank-5: 97.06%
+2024-04-05 04:21:48,072 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.46%
+2024-04-05 04:22:06,623 EDITOR.train INFO: Epoch[58] Iteration[10/106] Loss: 10.336, Acc: 0.981, Base Lr: 7.17e-05
+2024-04-05 04:22:17,807 EDITOR.train INFO: Epoch[58] Iteration[20/106] Loss: 10.577, Acc: 0.982, Base Lr: 7.17e-05
+2024-04-05 04:22:28,724 EDITOR.train INFO: Epoch[58] Iteration[30/106] Loss: 10.613, Acc: 0.982, Base Lr: 7.17e-05
+2024-04-05 04:22:39,143 EDITOR.train INFO: Epoch[58] Iteration[40/106] Loss: 10.596, Acc: 0.982, Base Lr: 7.17e-05
+2024-04-05 04:22:49,327 EDITOR.train INFO: Epoch[58] Iteration[50/106] Loss: 10.516, Acc: 0.981, Base Lr: 7.17e-05
+2024-04-05 04:22:59,899 EDITOR.train INFO: Epoch[58] Iteration[60/106] Loss: 10.483, Acc: 0.981, Base Lr: 7.17e-05
+2024-04-05 04:23:11,342 EDITOR.train INFO: Epoch[58] Iteration[70/106] Loss: 10.535, Acc: 0.979, Base Lr: 7.17e-05
+2024-04-05 04:23:22,157 EDITOR.train INFO: Epoch[58] Iteration[80/106] Loss: 10.485, Acc: 0.978, Base Lr: 7.17e-05
+2024-04-05 04:23:31,541 EDITOR.train INFO: Epoch[58] Iteration[90/106] Loss: 10.498, Acc: 0.978, Base Lr: 7.17e-05
+2024-04-05 04:23:41,175 EDITOR.train INFO: Epoch[58] Iteration[100/106] Loss: 10.520, Acc: 0.978, Base Lr: 7.17e-05
+2024-04-05 04:23:46,046 EDITOR.train INFO: Epoch 58 done. Time per batch: 1.122[s] Speed: 114.1[samples/s]
+2024-04-05 04:25:04,489 EDITOR.train INFO: Validation Results - Epoch: 58
+2024-04-05 04:25:04,489 EDITOR.train INFO: mAP: 77.41%
+2024-04-05 04:25:04,489 EDITOR.train INFO: CMC curve, Rank-1  :91.27%
+2024-04-05 04:25:04,489 EDITOR.train INFO: CMC curve, Rank-5  :96.85%
+2024-04-05 04:25:04,489 EDITOR.train INFO: CMC curve, Rank-10 :98.49%
+2024-04-05 04:25:04,490 EDITOR.train INFO: Best Multi-Modal mAP: 77.50%
+2024-04-05 04:25:04,490 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.39%
+2024-04-05 04:25:04,491 EDITOR.train INFO: Best Multi-Modal Rank-5: 97.06%
+2024-04-05 04:25:04,491 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.46%
+2024-04-05 04:25:21,700 EDITOR.train INFO: Epoch[59] Iteration[10/106] Loss: 10.353, Acc: 0.984, Base Lr: 6.06e-05
+2024-04-05 04:25:32,005 EDITOR.train INFO: Epoch[59] Iteration[20/106] Loss: 10.467, Acc: 0.983, Base Lr: 6.06e-05
+2024-04-05 04:25:42,043 EDITOR.train INFO: Epoch[59] Iteration[30/106] Loss: 10.394, Acc: 0.983, Base Lr: 6.06e-05
+2024-04-05 04:25:52,826 EDITOR.train INFO: Epoch[59] Iteration[40/106] Loss: 10.406, Acc: 0.981, Base Lr: 6.06e-05
+2024-04-05 04:26:03,807 EDITOR.train INFO: Epoch[59] Iteration[50/106] Loss: 10.378, Acc: 0.981, Base Lr: 6.06e-05
+2024-04-05 04:26:14,025 EDITOR.train INFO: Epoch[59] Iteration[60/106] Loss: 10.346, Acc: 0.981, Base Lr: 6.06e-05
+2024-04-05 04:26:24,641 EDITOR.train INFO: Epoch[59] Iteration[70/106] Loss: 10.332, Acc: 0.981, Base Lr: 6.06e-05
+2024-04-05 04:26:34,890 EDITOR.train INFO: Epoch[59] Iteration[80/106] Loss: 10.381, Acc: 0.980, Base Lr: 6.06e-05
+2024-04-05 04:26:44,274 EDITOR.train INFO: Epoch[59] Iteration[90/106] Loss: 10.402, Acc: 0.979, Base Lr: 6.06e-05
+2024-04-05 04:26:54,398 EDITOR.train INFO: Epoch[59] Iteration[100/106] Loss: 10.411, Acc: 0.979, Base Lr: 6.06e-05
+2024-04-05 04:26:59,738 EDITOR.train INFO: Epoch 59 done. Time per batch: 1.096[s] Speed: 116.8[samples/s]
+2024-04-05 04:28:20,240 EDITOR.train INFO: Validation Results - Epoch: 59
+2024-04-05 04:28:20,240 EDITOR.train INFO: mAP: 77.54%
+2024-04-05 04:28:20,240 EDITOR.train INFO: CMC curve, Rank-1  :91.30%
+2024-04-05 04:28:20,240 EDITOR.train INFO: CMC curve, Rank-5  :96.91%
+2024-04-05 04:28:20,240 EDITOR.train INFO: CMC curve, Rank-10 :98.43%
+2024-04-05 04:28:21,120 EDITOR.train INFO: Best Multi-Modal mAP: 77.54%
+2024-04-05 04:28:21,120 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.30%
+2024-04-05 04:28:21,120 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.91%
+2024-04-05 04:28:21,120 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.43%
+2024-04-05 04:28:38,591 EDITOR.train INFO: Epoch[60] Iteration[10/106] Loss: 10.513, Acc: 0.977, Base Lr: 5.05e-05
+2024-04-05 04:28:49,226 EDITOR.train INFO: Epoch[60] Iteration[20/106] Loss: 10.256, Acc: 0.979, Base Lr: 5.05e-05
+2024-04-05 04:28:59,762 EDITOR.train INFO: Epoch[60] Iteration[30/106] Loss: 10.403, Acc: 0.979, Base Lr: 5.05e-05
+2024-04-05 04:29:10,533 EDITOR.train INFO: Epoch[60] Iteration[40/106] Loss: 10.366, Acc: 0.980, Base Lr: 5.05e-05
+2024-04-05 04:29:20,988 EDITOR.train INFO: Epoch[60] Iteration[50/106] Loss: 10.311, Acc: 0.981, Base Lr: 5.05e-05
+2024-04-05 04:29:31,782 EDITOR.train INFO: Epoch[60] Iteration[60/106] Loss: 10.364, Acc: 0.980, Base Lr: 5.05e-05
+2024-04-05 04:29:42,306 EDITOR.train INFO: Epoch[60] Iteration[70/106] Loss: 10.385, Acc: 0.979, Base Lr: 5.05e-05
+2024-04-05 04:29:53,856 EDITOR.train INFO: Epoch[60] Iteration[80/106] Loss: 10.402, Acc: 0.979, Base Lr: 5.05e-05
+2024-04-05 04:30:03,902 EDITOR.train INFO: Epoch[60] Iteration[90/106] Loss: 10.380, Acc: 0.980, Base Lr: 5.05e-05
+2024-04-05 04:30:13,594 EDITOR.train INFO: Epoch[60] Iteration[100/106] Loss: 10.365, Acc: 0.980, Base Lr: 5.05e-05
+2024-04-05 04:30:18,725 EDITOR.train INFO: Epoch 60 done. Time per batch: 1.118[s] Speed: 114.5[samples/s]
+2024-04-05 04:31:35,695 EDITOR.train INFO: Validation Results - Epoch: 60
+2024-04-05 04:31:35,695 EDITOR.train INFO: mAP: 77.56%
+2024-04-05 04:31:35,695 EDITOR.train INFO: CMC curve, Rank-1  :91.24%
+2024-04-05 04:31:35,695 EDITOR.train INFO: CMC curve, Rank-5  :96.97%
+2024-04-05 04:31:35,695 EDITOR.train INFO: CMC curve, Rank-10 :98.40%
+2024-04-05 04:31:36,478 EDITOR.train INFO: Best Multi-Modal mAP: 77.56%
+2024-04-05 04:31:36,478 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.24%
+2024-04-05 04:31:36,478 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.97%
+2024-04-05 04:31:36,478 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.40%
+2024-04-05 04:31:52,806 EDITOR.train INFO: Epoch[61] Iteration[10/106] Loss: 10.368, Acc: 0.969, Base Lr: 4.12e-05
+2024-04-05 04:32:02,696 EDITOR.train INFO: Epoch[61] Iteration[20/106] Loss: 10.314, Acc: 0.977, Base Lr: 4.12e-05
+2024-04-05 04:32:12,698 EDITOR.train INFO: Epoch[61] Iteration[30/106] Loss: 10.494, Acc: 0.973, Base Lr: 4.12e-05
+2024-04-05 04:32:23,998 EDITOR.train INFO: Epoch[61] Iteration[40/106] Loss: 10.400, Acc: 0.975, Base Lr: 4.12e-05
+2024-04-05 04:32:34,719 EDITOR.train INFO: Epoch[61] Iteration[50/106] Loss: 10.464, Acc: 0.975, Base Lr: 4.12e-05
+2024-04-05 04:32:45,725 EDITOR.train INFO: Epoch[61] Iteration[60/106] Loss: 10.387, Acc: 0.976, Base Lr: 4.12e-05
+2024-04-05 04:32:56,117 EDITOR.train INFO: Epoch[61] Iteration[70/106] Loss: 10.413, Acc: 0.975, Base Lr: 4.12e-05
+2024-04-05 04:33:06,220 EDITOR.train INFO: Epoch[61] Iteration[80/106] Loss: 10.392, Acc: 0.975, Base Lr: 4.12e-05
+2024-04-05 04:33:15,801 EDITOR.train INFO: Epoch[61] Iteration[90/106] Loss: 10.372, Acc: 0.976, Base Lr: 4.12e-05
+2024-04-05 04:33:25,696 EDITOR.train INFO: Epoch[61] Iteration[100/106] Loss: 10.371, Acc: 0.976, Base Lr: 4.12e-05
+2024-04-05 04:33:31,075 EDITOR.train INFO: Epoch 61 done. Time per batch: 1.087[s] Speed: 117.7[samples/s]
+2024-04-05 04:34:49,172 EDITOR.train INFO: Validation Results - Epoch: 61
+2024-04-05 04:34:49,172 EDITOR.train INFO: mAP: 77.53%
+2024-04-05 04:34:49,172 EDITOR.train INFO: CMC curve, Rank-1  :91.30%
+2024-04-05 04:34:49,172 EDITOR.train INFO: CMC curve, Rank-5  :97.03%
+2024-04-05 04:34:49,172 EDITOR.train INFO: CMC curve, Rank-10 :98.43%
+2024-04-05 04:34:49,173 EDITOR.train INFO: Best Multi-Modal mAP: 77.56%
+2024-04-05 04:34:49,173 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.24%
+2024-04-05 04:34:49,174 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.97%
+2024-04-05 04:34:49,174 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.40%
+2024-04-05 04:35:07,221 EDITOR.train INFO: Epoch[62] Iteration[10/106] Loss: 10.312, Acc: 0.984, Base Lr: 3.29e-05
+2024-04-05 04:35:17,829 EDITOR.train INFO: Epoch[62] Iteration[20/106] Loss: 10.393, Acc: 0.982, Base Lr: 3.29e-05
+2024-04-05 04:35:27,910 EDITOR.train INFO: Epoch[62] Iteration[30/106] Loss: 10.356, Acc: 0.978, Base Lr: 3.29e-05
+2024-04-05 04:35:38,403 EDITOR.train INFO: Epoch[62] Iteration[40/106] Loss: 10.343, Acc: 0.979, Base Lr: 3.29e-05
+2024-04-05 04:35:48,418 EDITOR.train INFO: Epoch[62] Iteration[50/106] Loss: 10.348, Acc: 0.978, Base Lr: 3.29e-05
+2024-04-05 04:35:58,982 EDITOR.train INFO: Epoch[62] Iteration[60/106] Loss: 10.363, Acc: 0.978, Base Lr: 3.29e-05
+2024-04-05 04:36:09,495 EDITOR.train INFO: Epoch[62] Iteration[70/106] Loss: 10.419, Acc: 0.977, Base Lr: 3.29e-05
+2024-04-05 04:36:20,079 EDITOR.train INFO: Epoch[62] Iteration[80/106] Loss: 10.353, Acc: 0.978, Base Lr: 3.29e-05
+2024-04-05 04:36:30,204 EDITOR.train INFO: Epoch[62] Iteration[90/106] Loss: 10.359, Acc: 0.979, Base Lr: 3.29e-05
+2024-04-05 04:36:39,927 EDITOR.train INFO: Epoch[62] Iteration[100/106] Loss: 10.338, Acc: 0.979, Base Lr: 3.29e-05
+2024-04-05 04:36:45,374 EDITOR.train INFO: Epoch 62 done. Time per batch: 1.106[s] Speed: 115.8[samples/s]
+2024-04-05 04:38:02,822 EDITOR.train INFO: Validation Results - Epoch: 62
+2024-04-05 04:38:02,822 EDITOR.train INFO: mAP: 77.61%
+2024-04-05 04:38:02,822 EDITOR.train INFO: CMC curve, Rank-1  :91.39%
+2024-04-05 04:38:02,822 EDITOR.train INFO: CMC curve, Rank-5  :96.94%
+2024-04-05 04:38:02,822 EDITOR.train INFO: CMC curve, Rank-10 :98.40%
+2024-04-05 04:38:03,705 EDITOR.train INFO: Best Multi-Modal mAP: 77.61%
+2024-04-05 04:38:03,706 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.39%
+2024-04-05 04:38:03,706 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.94%
+2024-04-05 04:38:03,706 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.40%
+2024-04-05 04:38:19,521 EDITOR.train INFO: Epoch[63] Iteration[10/106] Loss: 10.399, Acc: 0.981, Base Lr: 2.54e-05
+2024-04-05 04:38:30,357 EDITOR.train INFO: Epoch[63] Iteration[20/106] Loss: 10.276, Acc: 0.981, Base Lr: 2.54e-05
+2024-04-05 04:38:41,167 EDITOR.train INFO: Epoch[63] Iteration[30/106] Loss: 10.256, Acc: 0.981, Base Lr: 2.54e-05
+2024-04-05 04:38:52,403 EDITOR.train INFO: Epoch[63] Iteration[40/106] Loss: 10.333, Acc: 0.978, Base Lr: 2.54e-05
+2024-04-05 04:39:03,539 EDITOR.train INFO: Epoch[63] Iteration[50/106] Loss: 10.439, Acc: 0.978, Base Lr: 2.54e-05
+2024-04-05 04:39:14,309 EDITOR.train INFO: Epoch[63] Iteration[60/106] Loss: 10.491, Acc: 0.978, Base Lr: 2.54e-05
+2024-04-05 04:39:25,312 EDITOR.train INFO: Epoch[63] Iteration[70/106] Loss: 10.458, Acc: 0.980, Base Lr: 2.54e-05
+2024-04-05 04:39:35,305 EDITOR.train INFO: Epoch[63] Iteration[80/106] Loss: 10.431, Acc: 0.980, Base Lr: 2.54e-05
+2024-04-05 04:39:44,694 EDITOR.train INFO: Epoch[63] Iteration[90/106] Loss: 10.432, Acc: 0.980, Base Lr: 2.54e-05
+2024-04-05 04:39:54,644 EDITOR.train INFO: Epoch[63] Iteration[100/106] Loss: 10.425, Acc: 0.980, Base Lr: 2.54e-05
+2024-04-05 04:40:00,332 EDITOR.train INFO: Epoch 63 done. Time per batch: 1.109[s] Speed: 115.4[samples/s]
+2024-04-05 04:41:25,791 EDITOR.train INFO: Validation Results - Epoch: 63
+2024-04-05 04:41:25,792 EDITOR.train INFO: mAP: 77.57%
+2024-04-05 04:41:25,792 EDITOR.train INFO: CMC curve, Rank-1  :91.24%
+2024-04-05 04:41:25,792 EDITOR.train INFO: CMC curve, Rank-5  :97.00%
+2024-04-05 04:41:25,792 EDITOR.train INFO: CMC curve, Rank-10 :98.43%
+2024-04-05 04:41:25,793 EDITOR.train INFO: Best Multi-Modal mAP: 77.61%
+2024-04-05 04:41:25,793 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.39%
+2024-04-05 04:41:25,793 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.94%
+2024-04-05 04:41:25,793 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.40%
+2024-04-05 04:41:41,885 EDITOR.train INFO: Epoch[64] Iteration[10/106] Loss: 10.068, Acc: 0.984, Base Lr: 1.90e-05
+2024-04-05 04:41:52,779 EDITOR.train INFO: Epoch[64] Iteration[20/106] Loss: 10.117, Acc: 0.983, Base Lr: 1.90e-05
+2024-04-05 04:42:02,589 EDITOR.train INFO: Epoch[64] Iteration[30/106] Loss: 10.346, Acc: 0.980, Base Lr: 1.90e-05
+2024-04-05 04:42:13,404 EDITOR.train INFO: Epoch[64] Iteration[40/106] Loss: 10.361, Acc: 0.980, Base Lr: 1.90e-05
+2024-04-05 04:42:24,586 EDITOR.train INFO: Epoch[64] Iteration[50/106] Loss: 10.359, Acc: 0.980, Base Lr: 1.90e-05
+2024-04-05 04:42:34,852 EDITOR.train INFO: Epoch[64] Iteration[60/106] Loss: 10.299, Acc: 0.981, Base Lr: 1.90e-05
+2024-04-05 04:42:45,437 EDITOR.train INFO: Epoch[64] Iteration[70/106] Loss: 10.339, Acc: 0.979, Base Lr: 1.90e-05
+2024-04-05 04:42:55,603 EDITOR.train INFO: Epoch[64] Iteration[80/106] Loss: 10.327, Acc: 0.980, Base Lr: 1.90e-05
+2024-04-05 04:43:05,205 EDITOR.train INFO: Epoch[64] Iteration[90/106] Loss: 10.358, Acc: 0.980, Base Lr: 1.90e-05
+2024-04-05 04:43:15,179 EDITOR.train INFO: Epoch[64] Iteration[100/106] Loss: 10.352, Acc: 0.979, Base Lr: 1.90e-05
+2024-04-05 04:43:20,091 EDITOR.train INFO: Epoch 64 done. Time per batch: 1.087[s] Speed: 117.7[samples/s]
+2024-04-05 04:44:36,955 EDITOR.train INFO: Validation Results - Epoch: 64
+2024-04-05 04:44:36,956 EDITOR.train INFO: mAP: 77.61%
+2024-04-05 04:44:36,956 EDITOR.train INFO: CMC curve, Rank-1  :91.24%
+2024-04-05 04:44:36,956 EDITOR.train INFO: CMC curve, Rank-5  :97.00%
+2024-04-05 04:44:36,956 EDITOR.train INFO: CMC curve, Rank-10 :98.40%
+2024-04-05 04:44:36,956 EDITOR.train INFO: Best Multi-Modal mAP: 77.61%
+2024-04-05 04:44:36,957 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.39%
+2024-04-05 04:44:36,957 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.94%
+2024-04-05 04:44:36,957 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.40%
+2024-04-05 04:44:55,856 EDITOR.train INFO: Epoch[65] Iteration[10/106] Loss: 10.321, Acc: 0.980, Base Lr: 1.35e-05
+2024-04-05 04:45:06,892 EDITOR.train INFO: Epoch[65] Iteration[20/106] Loss: 10.488, Acc: 0.981, Base Lr: 1.35e-05
+2024-04-05 04:45:17,419 EDITOR.train INFO: Epoch[65] Iteration[30/106] Loss: 10.542, Acc: 0.981, Base Lr: 1.35e-05
+2024-04-05 04:45:27,896 EDITOR.train INFO: Epoch[65] Iteration[40/106] Loss: 10.474, Acc: 0.981, Base Lr: 1.35e-05
+2024-04-05 04:45:38,995 EDITOR.train INFO: Epoch[65] Iteration[50/106] Loss: 10.455, Acc: 0.982, Base Lr: 1.35e-05
+2024-04-05 04:45:50,694 EDITOR.train INFO: Epoch[65] Iteration[60/106] Loss: 10.499, Acc: 0.981, Base Lr: 1.35e-05
+2024-04-05 04:46:01,345 EDITOR.train INFO: Epoch[65] Iteration[70/106] Loss: 10.468, Acc: 0.980, Base Lr: 1.35e-05
+2024-04-05 04:46:11,608 EDITOR.train INFO: Epoch[65] Iteration[80/106] Loss: 10.467, Acc: 0.979, Base Lr: 1.35e-05
+2024-04-05 04:46:20,988 EDITOR.train INFO: Epoch[65] Iteration[90/106] Loss: 10.451, Acc: 0.979, Base Lr: 1.35e-05
+2024-04-05 04:46:31,023 EDITOR.train INFO: Epoch[65] Iteration[100/106] Loss: 10.455, Acc: 0.979, Base Lr: 1.35e-05
+2024-04-05 04:46:36,302 EDITOR.train INFO: Epoch 65 done. Time per batch: 1.136[s] Speed: 112.7[samples/s]
+2024-04-05 04:47:55,180 EDITOR.train INFO: Validation Results - Epoch: 65
+2024-04-05 04:47:55,181 EDITOR.train INFO: mAP: 77.57%
+2024-04-05 04:47:55,181 EDITOR.train INFO: CMC curve, Rank-1  :91.33%
+2024-04-05 04:47:55,181 EDITOR.train INFO: CMC curve, Rank-5  :97.06%
+2024-04-05 04:47:55,181 EDITOR.train INFO: CMC curve, Rank-10 :98.43%
+2024-04-05 04:47:55,181 EDITOR.train INFO: Best Multi-Modal mAP: 77.61%
+2024-04-05 04:47:55,182 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.39%
+2024-04-05 04:47:55,182 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.94%
+2024-04-05 04:47:55,182 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.40%
+2024-04-05 04:48:12,593 EDITOR.train INFO: Epoch[66] Iteration[10/106] Loss: 10.301, Acc: 0.976, Base Lr: 9.03e-06
+2024-04-05 04:48:23,243 EDITOR.train INFO: Epoch[66] Iteration[20/106] Loss: 10.275, Acc: 0.977, Base Lr: 9.03e-06
+2024-04-05 04:48:33,737 EDITOR.train INFO: Epoch[66] Iteration[30/106] Loss: 10.463, Acc: 0.979, Base Lr: 9.03e-06
+2024-04-05 04:48:43,842 EDITOR.train INFO: Epoch[66] Iteration[40/106] Loss: 10.457, Acc: 0.978, Base Lr: 9.03e-06
+2024-04-05 04:48:53,989 EDITOR.train INFO: Epoch[66] Iteration[50/106] Loss: 10.453, Acc: 0.978, Base Lr: 9.03e-06
+2024-04-05 04:49:03,995 EDITOR.train INFO: Epoch[66] Iteration[60/106] Loss: 10.466, Acc: 0.978, Base Lr: 9.03e-06
+2024-04-05 04:49:13,539 EDITOR.train INFO: Epoch[66] Iteration[70/106] Loss: 10.420, Acc: 0.978, Base Lr: 9.03e-06
+2024-04-05 04:49:23,107 EDITOR.train INFO: Epoch[66] Iteration[80/106] Loss: 10.394, Acc: 0.979, Base Lr: 9.03e-06
+2024-04-05 04:49:33,078 EDITOR.train INFO: Epoch[66] Iteration[90/106] Loss: 10.364, Acc: 0.980, Base Lr: 9.03e-06
+2024-04-05 04:49:43,330 EDITOR.train INFO: Epoch[66] Iteration[100/106] Loss: 10.336, Acc: 0.980, Base Lr: 9.03e-06
+2024-04-05 04:49:48,490 EDITOR.train INFO: Epoch 66 done. Time per batch: 1.071[s] Speed: 119.5[samples/s]
+2024-04-05 04:51:06,869 EDITOR.train INFO: Validation Results - Epoch: 66
+2024-04-05 04:51:06,870 EDITOR.train INFO: mAP: 77.60%
+2024-04-05 04:51:06,870 EDITOR.train INFO: CMC curve, Rank-1  :91.33%
+2024-04-05 04:51:06,870 EDITOR.train INFO: CMC curve, Rank-5  :97.00%
+2024-04-05 04:51:06,870 EDITOR.train INFO: CMC curve, Rank-10 :98.46%
+2024-04-05 04:51:06,870 EDITOR.train INFO: Best Multi-Modal mAP: 77.61%
+2024-04-05 04:51:06,871 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.39%
+2024-04-05 04:51:06,871 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.94%
+2024-04-05 04:51:06,871 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.40%
+2024-04-05 04:51:24,523 EDITOR.train INFO: Epoch[67] Iteration[10/106] Loss: 10.229, Acc: 0.989, Base Lr: 5.52e-06
+2024-04-05 04:51:35,117 EDITOR.train INFO: Epoch[67] Iteration[20/106] Loss: 10.195, Acc: 0.987, Base Lr: 5.52e-06
+2024-04-05 04:51:45,599 EDITOR.train INFO: Epoch[67] Iteration[30/106] Loss: 10.180, Acc: 0.985, Base Lr: 5.52e-06
+2024-04-05 04:51:56,241 EDITOR.train INFO: Epoch[67] Iteration[40/106] Loss: 10.307, Acc: 0.979, Base Lr: 5.52e-06
+2024-04-05 04:52:07,098 EDITOR.train INFO: Epoch[67] Iteration[50/106] Loss: 10.341, Acc: 0.979, Base Lr: 5.52e-06
+2024-04-05 04:52:17,504 EDITOR.train INFO: Epoch[67] Iteration[60/106] Loss: 10.382, Acc: 0.980, Base Lr: 5.52e-06
+2024-04-05 04:52:29,517 EDITOR.train INFO: Epoch[67] Iteration[70/106] Loss: 10.414, Acc: 0.980, Base Lr: 5.52e-06
+2024-04-05 04:52:40,086 EDITOR.train INFO: Epoch[67] Iteration[80/106] Loss: 10.409, Acc: 0.980, Base Lr: 5.52e-06
+2024-04-05 04:52:50,304 EDITOR.train INFO: Epoch[67] Iteration[90/106] Loss: 10.369, Acc: 0.980, Base Lr: 5.52e-06
+2024-04-05 04:53:00,312 EDITOR.train INFO: Epoch[67] Iteration[100/106] Loss: 10.366, Acc: 0.980, Base Lr: 5.52e-06
+2024-04-05 04:53:04,978 EDITOR.train INFO: Epoch 67 done. Time per batch: 1.124[s] Speed: 113.9[samples/s]
+2024-04-05 04:54:23,879 EDITOR.train INFO: Validation Results - Epoch: 67
+2024-04-05 04:54:23,880 EDITOR.train INFO: mAP: 77.58%
+2024-04-05 04:54:23,880 EDITOR.train INFO: CMC curve, Rank-1  :91.18%
+2024-04-05 04:54:23,880 EDITOR.train INFO: CMC curve, Rank-5  :97.03%
+2024-04-05 04:54:23,880 EDITOR.train INFO: CMC curve, Rank-10 :98.46%
+2024-04-05 04:54:23,881 EDITOR.train INFO: Best Multi-Modal mAP: 77.61%
+2024-04-05 04:54:23,881 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.39%
+2024-04-05 04:54:23,881 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.94%
+2024-04-05 04:54:23,882 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.40%
+2024-04-05 04:54:43,611 EDITOR.train INFO: Epoch[68] Iteration[10/106] Loss: 10.364, Acc: 0.979, Base Lr: 3.01e-06
+2024-04-05 04:54:53,812 EDITOR.train INFO: Epoch[68] Iteration[20/106] Loss: 10.218, Acc: 0.980, Base Lr: 3.01e-06
+2024-04-05 04:55:04,190 EDITOR.train INFO: Epoch[68] Iteration[30/106] Loss: 10.158, Acc: 0.980, Base Lr: 3.01e-06
+2024-04-05 04:55:15,426 EDITOR.train INFO: Epoch[68] Iteration[40/106] Loss: 10.218, Acc: 0.982, Base Lr: 3.01e-06
+2024-04-05 04:55:26,610 EDITOR.train INFO: Epoch[68] Iteration[50/106] Loss: 10.266, Acc: 0.981, Base Lr: 3.01e-06
+2024-04-05 04:55:37,695 EDITOR.train INFO: Epoch[68] Iteration[60/106] Loss: 10.284, Acc: 0.981, Base Lr: 3.01e-06
+2024-04-05 04:55:48,136 EDITOR.train INFO: Epoch[68] Iteration[70/106] Loss: 10.274, Acc: 0.981, Base Lr: 3.01e-06
+2024-04-05 04:55:58,348 EDITOR.train INFO: Epoch[68] Iteration[80/106] Loss: 10.264, Acc: 0.982, Base Lr: 3.01e-06
+2024-04-05 04:56:09,017 EDITOR.train INFO: Epoch[68] Iteration[90/106] Loss: 10.282, Acc: 0.981, Base Lr: 3.01e-06
+2024-04-05 04:56:18,906 EDITOR.train INFO: Epoch[68] Iteration[100/106] Loss: 10.321, Acc: 0.980, Base Lr: 3.01e-06
+2024-04-05 04:56:24,287 EDITOR.train INFO: Epoch 68 done. Time per batch: 1.146[s] Speed: 111.7[samples/s]
+2024-04-05 04:57:47,304 EDITOR.train INFO: Validation Results - Epoch: 68
+2024-04-05 04:57:47,304 EDITOR.train INFO: mAP: 77.58%
+2024-04-05 04:57:47,304 EDITOR.train INFO: CMC curve, Rank-1  :91.21%
+2024-04-05 04:57:47,304 EDITOR.train INFO: CMC curve, Rank-5  :97.00%
+2024-04-05 04:57:47,304 EDITOR.train INFO: CMC curve, Rank-10 :98.46%
+2024-04-05 04:57:47,305 EDITOR.train INFO: Best Multi-Modal mAP: 77.61%
+2024-04-05 04:57:47,305 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.39%
+2024-04-05 04:57:47,305 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.94%
+2024-04-05 04:57:47,305 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.40%
+2024-04-05 04:58:05,060 EDITOR.train INFO: Epoch[69] Iteration[10/106] Loss: 10.387, Acc: 0.974, Base Lr: 1.50e-06
+2024-04-05 04:58:15,587 EDITOR.train INFO: Epoch[69] Iteration[20/106] Loss: 10.303, Acc: 0.978, Base Lr: 1.50e-06
+2024-04-05 04:58:26,260 EDITOR.train INFO: Epoch[69] Iteration[30/106] Loss: 10.366, Acc: 0.978, Base Lr: 1.50e-06
+2024-04-05 04:58:37,308 EDITOR.train INFO: Epoch[69] Iteration[40/106] Loss: 10.394, Acc: 0.978, Base Lr: 1.50e-06
+2024-04-05 04:58:48,522 EDITOR.train INFO: Epoch[69] Iteration[50/106] Loss: 10.376, Acc: 0.979, Base Lr: 1.50e-06
+2024-04-05 04:58:59,235 EDITOR.train INFO: Epoch[69] Iteration[60/106] Loss: 10.347, Acc: 0.978, Base Lr: 1.50e-06
+2024-04-05 04:59:10,434 EDITOR.train INFO: Epoch[69] Iteration[70/106] Loss: 10.343, Acc: 0.979, Base Lr: 1.50e-06
+2024-04-05 04:59:21,521 EDITOR.train INFO: Epoch[69] Iteration[80/106] Loss: 10.359, Acc: 0.979, Base Lr: 1.50e-06
+2024-04-05 04:59:31,596 EDITOR.train INFO: Epoch[69] Iteration[90/106] Loss: 10.375, Acc: 0.978, Base Lr: 1.50e-06
+2024-04-05 04:59:42,103 EDITOR.train INFO: Epoch[69] Iteration[100/106] Loss: 10.390, Acc: 0.979, Base Lr: 1.50e-06
+2024-04-05 04:59:47,280 EDITOR.train INFO: Epoch 69 done. Time per batch: 1.138[s] Speed: 112.5[samples/s]
+2024-04-05 05:01:02,765 EDITOR.train INFO: Validation Results - Epoch: 69
+2024-04-05 05:01:02,765 EDITOR.train INFO: mAP: 77.58%
+2024-04-05 05:01:02,765 EDITOR.train INFO: CMC curve, Rank-1  :91.18%
+2024-04-05 05:01:02,765 EDITOR.train INFO: CMC curve, Rank-5  :97.00%
+2024-04-05 05:01:02,765 EDITOR.train INFO: CMC curve, Rank-10 :98.43%
+2024-04-05 05:01:02,766 EDITOR.train INFO: Best Multi-Modal mAP: 77.61%
+2024-04-05 05:01:02,766 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.39%
+2024-04-05 05:01:02,767 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.94%
+2024-04-05 05:01:02,767 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.40%
+2024-04-05 05:01:18,905 EDITOR.train INFO: Epoch[70] Iteration[10/106] Loss: 10.245, Acc: 0.987, Base Lr: 1.00e-06
+2024-04-05 05:01:29,670 EDITOR.train INFO: Epoch[70] Iteration[20/106] Loss: 10.190, Acc: 0.984, Base Lr: 1.00e-06
+2024-04-05 05:01:39,789 EDITOR.train INFO: Epoch[70] Iteration[30/106] Loss: 10.217, Acc: 0.983, Base Lr: 1.00e-06
+2024-04-05 05:01:50,781 EDITOR.train INFO: Epoch[70] Iteration[40/106] Loss: 10.228, Acc: 0.982, Base Lr: 1.00e-06
+2024-04-05 05:02:01,790 EDITOR.train INFO: Epoch[70] Iteration[50/106] Loss: 10.333, Acc: 0.981, Base Lr: 1.00e-06
+2024-04-05 05:02:12,692 EDITOR.train INFO: Epoch[70] Iteration[60/106] Loss: 10.283, Acc: 0.982, Base Lr: 1.00e-06
+2024-04-05 05:02:22,832 EDITOR.train INFO: Epoch[70] Iteration[70/106] Loss: 10.264, Acc: 0.981, Base Lr: 1.00e-06
+2024-04-05 05:02:33,017 EDITOR.train INFO: Epoch[70] Iteration[80/106] Loss: 10.308, Acc: 0.981, Base Lr: 1.00e-06
+2024-04-05 05:02:43,720 EDITOR.train INFO: Epoch[70] Iteration[90/106] Loss: 10.283, Acc: 0.981, Base Lr: 1.00e-06
+2024-04-05 05:02:52,807 EDITOR.train INFO: Epoch[70] Iteration[100/106] Loss: 10.305, Acc: 0.980, Base Lr: 1.00e-06
+2024-04-05 05:02:58,308 EDITOR.train INFO: Epoch 70 done. Time per batch: 1.099[s] Speed: 116.5[samples/s]
+2024-04-05 05:04:17,997 EDITOR.train INFO: Validation Results - Epoch: 70
+2024-04-05 05:04:17,997 EDITOR.train INFO: mAP: 77.57%
+2024-04-05 05:04:17,997 EDITOR.train INFO: CMC curve, Rank-1  :91.18%
+2024-04-05 05:04:17,997 EDITOR.train INFO: CMC curve, Rank-5  :97.03%
+2024-04-05 05:04:17,998 EDITOR.train INFO: CMC curve, Rank-10 :98.43%
+2024-04-05 05:04:17,998 EDITOR.train INFO: Best Multi-Modal mAP: 77.61%
+2024-04-05 05:04:17,999 EDITOR.train INFO: Best Multi-Modal Rank-1: 91.39%
+2024-04-05 05:04:17,999 EDITOR.train INFO: Best Multi-Modal Rank-5: 96.94%
+2024-04-05 05:04:17,999 EDITOR.train INFO: Best Multi-Modal Rank-10: 98.40%
