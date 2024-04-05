@@ -73,7 +73,7 @@ Hence, our method prioritizes the selection of object-centric information, aimin
 |    HTT (AAAI2024) |  67.2 |  81.5 |  95.8 |  97.8 |   -   |
 | EDITOR (CVPR2024) AL| 77.33 | 90.59 | 96.73 | 98.04 | [log.txt](<Results/Market1501_Training_Log_AL.txt>) |
 | EDITOR (CVPR2024) BL| - | - | - | - |
-
+Thank you to the authors of [HTT](<>) for their series of contributions to multimodal object re-identification!
 
 ## Visualizations
 ### T-SNE
