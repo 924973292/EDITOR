@@ -71,10 +71,15 @@ Hence, our method prioritizes the selection of object-centric information, aimin
 |  PFNet (AAAI2021) |  60.9 |  83.6 |  92.8 |  95.5 |   -   |
 |   IEEE (AAAI2022) |  64.3 |  83.9 |  93.0 |  95.7 |   -   |
 |    HTT (AAAI2024) |  67.2 |  81.5 |  95.8 |  97.8 |   -   |
-| TOP-ReID (AAAI2024) AL| 83.1 | 93.3 | 97.9 | 98.8 | [AL_Log.txt](<Results/TOPReID_Market1501_Training_Log_AL.txt>) |
-| TOP-ReID (AAAI2024) BL| 84.2 | 94.1 | 98.3 | 98.9 | [BL_Log.txt](<Results/TOPReID_Market1501_Training_Log_BL.txt>) |
-| EDITOR (CVPR2024) AL| 77.33 | 90.59 | 96.73 | 98.04 | [AL_Log.txt](<Results/Market1501_Training_Log_AL.txt>) |
-| EDITOR (CVPR2024) BL| 77.57 | 91.18 | 97.03 | 98.43 | [BL_Log.txt](<Results/Market1501_Training_Log_BL.txt>) |
+| TOP-ReID (AAAI2024) AL B_32_NI_8| - | - | - | - | - |
+| TOP-ReID (AAAI2024) BL B_32_NI_8| - | - | - | - | - |
+| EDITOR (CVPR2024) AL B_32_NI_8| - | - | - | - | - |
+| EDITOR (CVPR2024) BL B_32_NI_8| - | - | - | - | - |
+| ------------------------------| ----- | ----- | ----- | ----- | ------------------------------------------------------ |
+| TOP-ReID (AAAI2024) AL B_128_NI_16| 83.1 | 93.3 | 97.9 | 98.8 | [AL_Log.txt](<Results/TOPReID_Market1501_Training_Log_AL.txt>) |
+| TOP-ReID (AAAI2024) BL B_128_NI_16| 84.2 | 94.1 | 98.3 | 98.9 | [BL_Log.txt](<Results/TOPReID_Market1501_Training_Log_BL.txt>) |
+| EDITOR (CVPR2024) AL B_128_NI_16| 77.33 | 90.59 | 96.73 | 98.04 | [AL_Log.txt](<Results/Market1501_Training_Log_AL.txt>) |
+| EDITOR (CVPR2024) BL B_128_NI_16| 77.57 | 91.18 | 97.03 | 98.43 | [BL_Log.txt](<Results/Market1501_Training_Log_BL.txt>) |
 
 #### Thank you to the authors of [HTT](<https://github.com/ziwang1121/HTT>) for their contributions to multimodal object re-identification!
 
