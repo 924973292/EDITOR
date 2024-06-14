@@ -109,9 +109,11 @@ python train_net.py --config_file ../RGBNT201/EDITOR.yml
 ## Citation
 If you find EDITOR useful in your research, please consider citing:
 ```bibtex
-@inproceedings{zhang2024magic,
+@InProceedings{Zhang_2024_CVPR,
+    author    = {Zhang, Pingping and Wang, Yuhao and Liu, Yang and Tu, Zhengzheng and Lu, Huchuan},
     title     = {Magic Tokens: Select Diverse Tokens for Multi-modal Object Re-Identification},
-    author    = {Pingping Zhang, Yuhao Wang, Yang Liu, Zhengzheng Tu, Huchuan Lu},
     booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+    month     = {June},
     year      = {2024},
+    pages     = {17117-17126}
 }
