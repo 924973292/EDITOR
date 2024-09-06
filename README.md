@@ -79,7 +79,7 @@ Hence, our method prioritizes the selection of object-centric information, aimin
 RGBNT201    link: https://drive.google.com/drive/folders/1EscBadX-wMAT56_It5lXY-S3-b5nK1wH  
 Market1501-MM link: https://drive.google.com/drive/folders/1EscBadX-wMAT56_It5lXY-S3-b5nK1wH  
 RGBNT100    link: https://pan.baidu.com/s/1xqqh7N4Lctm3RcUdskG0Ug  code：rjin  
-MSVR310     link: https://pan.baidu.com/s/1soWMH10DyGG0krTKL7fsYg  code: p6ch
+MSVR310     link: https://pan.baidu.com/share/init?surl=67TY9fCz5ZjtDdsOIovX1w&pwd=msvr  code: msvr
 ### Pretrained
 ViT-B    link: https://pan.baidu.com/s/1YE-24vSo5pv_wHOF-y4sfA  code: vmfm
 
