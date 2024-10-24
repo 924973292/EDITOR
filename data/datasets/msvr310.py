@@ -24,7 +24,7 @@ class MSVR310(BaseImageDataset):
     # identities: 1501 (+1 for background)
     # images: 12936 (train) + 3368 (query) + 15913 (gallery)
     """
-    dataset_dir = 'msvr310'
+    dataset_dir = 'MSVR310'
 
     def __init__(self, root='/home/haoluo/data', verbose=True, **kwargs):
         super(MSVR310, self).__init__()
